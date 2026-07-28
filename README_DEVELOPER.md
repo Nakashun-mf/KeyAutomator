@@ -60,8 +60,24 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 
 成果物: `publish\KeyAutomator.exe` と依存ファイル一式。
 
+持ち運び用 zip の例:
+
+```powershell
+# アプリを終了してから実行
+$ver = "2.3.2"
+$distName = "KeyAutomator-v$ver-win-x64"
+$distDir = ".\dist\$distName"
+Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path $distDir | Out-Null
+Copy-Item -Recurse -Force .\publish\* $distDir\
+Remove-Item -Force "$distDir\*.pdb" -ErrorAction SilentlyContinue
+Copy-Item -Force .\config.sample.json "$distDir\"
+Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
+```
+
 - `WindowsPackageType=None`（非 MSIX）
 - `WindowsAppSDKSelfContained=true`（ランタイム同梱）
+- `dist/` は `.gitignore` 対象（zip はリポジトリに含めない）
 
 MSIX パッケージ化が必要な場合は `Package.appxmanifest` を利用し、プロジェクトの Package and Publish から作成できます。
 

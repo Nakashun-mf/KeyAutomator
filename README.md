@@ -63,11 +63,23 @@
 
 WinUI 3 は依存 DLL が多いため、**単一 exe ではなく自己完結フォルダ**で配布します。
 
-1. 開発者向け手順で `publish\` を作成
-2. `publish` フォルダ一式をコピーして利用
-3. エントリポイントは `KeyAutomator.exe`
+### 会社などへ持っていく（推奨）
 
-詳細は [README_DEVELOPER.md](README_DEVELOPER.md)。
+ビルド済み zip（約 100MB）:
+
+`dist\KeyAutomator-v2.3.2-win-x64.zip`
+
+1. zip を USB / クラウド等でコピー
+2. 解凍したフォルダごと PC に置く
+3. `KeyAutomator.exe` を起動（フォルダ内の DLL をばらさない）
+
+中に `使い方.txt` と `config.sample.json` があります。
+
+### 開発者向けに自分で作る
+
+1. [README_DEVELOPER.md](README_DEVELOPER.md) の手順で `publish\` を作成
+2. フォルダ一式をコピーして利用
+3. エントリポイントは `KeyAutomator.exe`
 
 ## 注意
 

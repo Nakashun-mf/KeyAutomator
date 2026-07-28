@@ -54,13 +54,42 @@ public static class CliRunner
 
         for (var i = 0; i < args.Length; i++)
         {
+            if ((string.Equals(args[i], "-alias", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(args[i], "-a", StringComparison.OrdinalIgnoreCase))
+                && i + 1 < args.Length)
+            {
+                return ConfigStore.FindByAlias(macros, args[i + 1]);
+            }
+        }
+
+        for (var i = 0; i < args.Length; i++)
+        {
             if (string.Equals(args[i], "-name", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
                 return ConfigStore.FindByName(macros, args[i + 1]);
         }
 
         var first = args[0];
-        if (first.StartsWith('-') && first.Length > 1 && int.TryParse(first[1..], out var shortId))
-            return ConfigStore.FindById(macros, shortId);
+        if (first.StartsWith('-') && first.Length > 1)
+        {
+            var body = first[1..];
+            if (int.TryParse(body, out var shortId))
+                return ConfigStore.FindById(macros, shortId);
+
+            // -login_ok 形式（英数字と _）
+            if (MacroItem.IsValidAlias(body, out _) && !string.IsNullOrWhiteSpace(body))
+            {
+                var byAlias = ConfigStore.FindByAlias(macros, body);
+                if (byAlias is not null)
+                    return byAlias;
+            }
+        }
+        else if (!first.StartsWith('-'))
+        {
+            // 素の引数: login_ok
+            var byAlias = ConfigStore.FindByAlias(macros, first);
+            if (byAlias is not null)
+                return byAlias;
+        }
 
         return null;
     }

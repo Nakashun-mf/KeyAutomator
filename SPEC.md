@@ -42,6 +42,8 @@
 - コマンドパターン:
   - `KeyAutomator.exe -<ID>` （例: `KeyAutomator.exe -1`）
   - `KeyAutomator.exe -id <ID>` （例: `KeyAutomator.exe -id 1`）
+  - `KeyAutomator.exe -alias <alias>` （例: `KeyAutomator.exe -alias login_ok`）
+  - `KeyAutomator.exe -<alias>` （例: `KeyAutomator.exe -login_ok`）
   - `KeyAutomator.exe -name "<登録名>"` （例: `KeyAutomator.exe -name "ログイン処理"`）
 - 動作手順:
   1. 画面を表示せずにバックグラウンドで起動。
@@ -65,6 +67,7 @@
   {
     "id": 1,
     "name": "ログイン&定型データ入力",
+    "alias": "login_ok",
     "delay_sec": 3.0,
     "actions": [
       { "type": "text", "value": "user_admin" },

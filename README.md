@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.2.1  
+**バージョン:** 2.3.0  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8
 
@@ -33,7 +33,13 @@
 |---|---|
 | `KeyAutomator.exe -1` | ID=1 を実行 |
 | `KeyAutomator.exe -id 1` | 同上 |
-| `KeyAutomator.exe -name "全選択＆コピー"` | 名前指定 |
+| `KeyAutomator.exe -alias login_ok` | 引数名（alias）で実行 |
+| `KeyAutomator.exe -login_ok` | 同上（短縮） |
+| `KeyAutomator.exe login_ok` | 同上（素の引数） |
+| `KeyAutomator.exe -name "全選択＆コピー"` | 表示名で実行 |
+
+引数名（alias）は英数字と `_` のみ。表示名とは別です。
+
 
 成功時 Exit Code `0` / 失敗時 `1`（同階層 `error.log`）
 

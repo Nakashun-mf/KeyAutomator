@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private ActionEditItem? _selectedAction;
     [ObservableProperty] private double _editId = 1;
     [ObservableProperty] private string _editName = string.Empty;
+    [ObservableProperty] private string _editAlias = string.Empty;
     [ObservableProperty] private double _editDelaySec;
     [ObservableProperty] private bool _hasSelection;
     [ObservableProperty] private string _statusMessage = "準備完了";
@@ -80,6 +81,7 @@ public partial class MainViewModel : ObservableObject
 
         EditId = value.Id;
         EditName = value.Name;
+        EditAlias = value.Alias;
         EditDelaySec = value.DelaySec;
         Actions.Clear();
         foreach (var a in value.Actions)
@@ -132,6 +134,7 @@ public partial class MainViewModel : ObservableObject
         var copy = SelectedMacro.Clone();
         copy.Id = ConfigStore.NextId(Macros);
         copy.Name = SelectedMacro.Name + " (コピー)";
+        copy.Alias = string.Empty;
         Macros.Add(copy);
         Persist();
         SelectedMacro = copy;
@@ -160,6 +163,13 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        var alias = (EditAlias ?? string.Empty).Trim();
+        if (!MacroItem.IsValidAlias(alias, out var aliasError))
+        {
+            StatusMessage = aliasError;
+            return;
+        }
+
         var originalId = SelectedMacro.Id;
         if (Macros.Any(m => m.Id == (int)EditId && m.Id != originalId))
         {
@@ -167,8 +177,17 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        if (!string.IsNullOrEmpty(alias) &&
+            Macros.Any(m => m.Id != originalId &&
+                            string.Equals(m.Alias, alias, StringComparison.OrdinalIgnoreCase)))
+        {
+            StatusMessage = $"引数名「{alias}」は既に使用されています";
+            return;
+        }
+
         SelectedMacro.Id = (int)EditId;
         SelectedMacro.Name = EditName.Trim();
+        SelectedMacro.Alias = alias;
         SelectedMacro.DelaySec = EditDelaySec;
         SelectedMacro.Actions = Actions.Select(a => a.ToModel()).ToList();
 
@@ -176,7 +195,9 @@ public partial class MainViewModel : ObservableObject
         var saved = SelectedMacro;
         SelectedMacro = null;
         SelectedMacro = saved;
-        StatusMessage = "保存しました";
+        StatusMessage = string.IsNullOrEmpty(alias)
+            ? "保存しました"
+            : $"保存しました（引数: -alias {alias} / -{alias}）";
     }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
@@ -249,6 +270,7 @@ public partial class MainViewModel : ObservableObject
         {
             Id = (int)EditId,
             Name = EditName.Trim(),
+            Alias = (EditAlias ?? string.Empty).Trim(),
             DelaySec = EditDelaySec,
             Actions = Actions.Select(a => a.ToModel()).ToList()
         };
@@ -258,6 +280,7 @@ public partial class MainViewModel : ObservableObject
     {
         EditId = 1;
         EditName = string.Empty;
+        EditAlias = string.Empty;
         EditDelaySec = 0;
         Actions.Clear();
         SelectedAction = null;

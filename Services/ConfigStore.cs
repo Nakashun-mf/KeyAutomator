@@ -43,6 +43,11 @@ public static class ConfigStore
     public static MacroItem? FindByName(IEnumerable<MacroItem> macros, string name) =>
         macros.FirstOrDefault(m => string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase));
 
+    public static MacroItem? FindByAlias(IEnumerable<MacroItem> macros, string alias) =>
+        macros.FirstOrDefault(m =>
+            !string.IsNullOrWhiteSpace(m.Alias) &&
+            string.Equals(m.Alias, alias, StringComparison.OrdinalIgnoreCase));
+
     public static int NextId(IEnumerable<MacroItem> macros) =>
         macros.Any() ? macros.Max(m => m.Id) + 1 : 1;
 }

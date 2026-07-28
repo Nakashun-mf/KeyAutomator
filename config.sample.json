@@ -2,6 +2,7 @@
   {
     "id": 1,
     "name": "ログイン&定型データ入力",
+    "alias": "login_ok",
     "delay_sec": 3.0,
     "actions": [
       { "type": "text", "value": "user_admin" },
@@ -15,6 +16,7 @@
   {
     "id": 2,
     "name": "全選択＆コピー",
+    "alias": "select_copy",
     "delay_sec": 2.0,
     "actions": [
       { "type": "hotkey", "value": "CTRL+A" },

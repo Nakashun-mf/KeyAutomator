@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "name": "ログイン&定型データ入力",
+    "delay_sec": 3.0,
+    "actions": [
+      { "type": "text", "value": "user_admin" },
+      { "type": "key", "value": "TAB" },
+      { "type": "text", "value": "p@ssword123" },
+      { "type": "key", "value": "ENTER" },
+      { "type": "wait", "value": "1.0" },
+      { "type": "hotkey", "value": "CTRL+S" }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "全選択＆コピー",
+    "delay_sec": 2.0,
+    "actions": [
+      { "type": "hotkey", "value": "CTRL+A" },
+      { "type": "hotkey", "value": "CTRL+C" }
+    ]
+  }
+]

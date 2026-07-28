@@ -68,22 +68,12 @@ public static class CliRunner
                 return ConfigStore.FindByName(macros, args[i + 1]);
         }
 
-        var first = args[0];
-        if (first.StartsWith('-') && first.Length > 1)
-        {
-            var body = first[1..];
-            if (int.TryParse(body, out var shortId))
-                return ConfigStore.FindById(macros, shortId);
+        // -1 / -login_ok（スペースなし）または「- 1」「- login_ok」（スペースあり）
+        if (TryResolveShortForm(macros, args, out var shortHit))
+            return shortHit;
 
-            // -login_ok 形式（英数字と _）
-            if (MacroItem.IsValidAlias(body, out _) && !string.IsNullOrWhiteSpace(body))
-            {
-                var byAlias = ConfigStore.FindByAlias(macros, body);
-                if (byAlias is not null)
-                    return byAlias;
-            }
-        }
-        else if (!first.StartsWith('-'))
+        var first = args[0];
+        if (!first.StartsWith('-'))
         {
             // 素の引数: login_ok
             var byAlias = ConfigStore.FindByAlias(macros, first);
@@ -92,5 +82,40 @@ public static class CliRunner
         }
 
         return null;
+    }
+
+    private static bool TryResolveShortForm(List<MacroItem> macros, string[] args, out MacroItem? macro)
+    {
+        macro = null;
+        if (args is not { Length: > 0 })
+            return false;
+
+        string? body = null;
+        var first = args[0];
+        if (first.StartsWith('-') && first.Length > 1)
+        {
+            body = first[1..];
+        }
+        else if (first == "-" && args.Length >= 2)
+        {
+            body = args[1];
+        }
+
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+
+        if (int.TryParse(body, out var shortId))
+        {
+            macro = ConfigStore.FindById(macros, shortId);
+            return true;
+        }
+
+        if (MacroItem.IsValidAlias(body, out _))
+        {
+            macro = ConfigStore.FindByAlias(macros, body);
+            return macro is not null;
+        }
+
+        return false;
     }
 }

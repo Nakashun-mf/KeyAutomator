@@ -192,7 +192,13 @@ public partial class MainViewModel : ObservableObject
         SelectedMacro.Actions = Actions.Select(a => a.ToModel()).ToList();
 
         Persist();
+
+        // ObservableCollection は要素プロパティ変更を通知しないため、差し替えて左一覧を更新する
+        var index = Macros.IndexOf(SelectedMacro);
         var saved = SelectedMacro;
+        if (index >= 0)
+            Macros[index] = saved;
+
         SelectedMacro = null;
         SelectedMacro = saved;
         StatusMessage = string.IsNullOrEmpty(alias)

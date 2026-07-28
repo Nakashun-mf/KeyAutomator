@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.4.0
+**バージョン:** 2.4.1
 
 ## 開発環境
 
@@ -57,16 +57,20 @@ WinUI 3（非パッケージ）は `PublishSingleFile` + `IncludeAllContentForSe
 
 ```powershell
 # 実行中の KeyAutomator を終了してから
+# ※ 出力先は空のフォルダにする（古い exe が残っているとバンドル肥大化の原因）
 Get-Process KeyAutomator -ErrorAction SilentlyContinue | Stop-Process -Force
+Remove-Item -Recurse -Force .\publish-sf -ErrorAction SilentlyContinue
 dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\publish-sf
 ```
 
-成果物: `publish-sf\KeyAutomator.exe`（配布はこの 1 ファイルで可。`.pdb` は不要）
+成果物: `publish-sf\KeyAutomator.exe`（配布はこの 1 ファイルで可）
+
+Windows App SDK は csproj でバージョン固定（`*` は巨大な新メジャーを拾うことがあるため）。
 
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.4.0"
+$ver = "2.4.1"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue

@@ -1,27 +1,33 @@
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KeyAutomator.Models;
 
-public sealed class MacroItem
+public sealed partial class MacroItem : ObservableObject
 {
     private static readonly Regex AliasPattern = new("^[A-Za-z0-9_]+$", RegexOptions.Compiled);
 
-    [JsonPropertyName("id")]
-    public int Id { get; set; }
+    [ObservableProperty]
+    [property: JsonPropertyName("id")]
+    private int _id;
 
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: JsonPropertyName("name")]
+    private string _name = string.Empty;
 
     /// <summary>CLI 引数用（英数字と _ のみ）。空なら未設定。</summary>
-    [JsonPropertyName("alias")]
-    public string Alias { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: JsonPropertyName("alias")]
+    private string _alias = string.Empty;
 
-    [JsonPropertyName("delay_sec")]
-    public double DelaySec { get; set; }
+    [ObservableProperty]
+    [property: JsonPropertyName("delay_sec")]
+    private double _delaySec;
 
-    [JsonPropertyName("actions")]
-    public List<ActionItem> Actions { get; set; } = [];
+    [ObservableProperty]
+    [property: JsonPropertyName("actions")]
+    private List<ActionItem> _actions = [];
 
     [JsonIgnore]
     public string DelayLabel => $"開始まで {DelaySec:0.##} 秒";
@@ -32,6 +38,12 @@ public sealed class MacroItem
     [JsonIgnore]
     public string AliasLabel =>
         string.IsNullOrWhiteSpace(Alias) ? "引数名なし" : $"引数: {Alias}";
+
+    partial void OnDelaySecChanged(double value) => OnPropertyChanged(nameof(DelayLabel));
+
+    partial void OnAliasChanged(string value) => OnPropertyChanged(nameof(AliasLabel));
+
+    partial void OnActionsChanged(List<ActionItem> value) => OnPropertyChanged(nameof(ActionCountLabel));
 
     public MacroItem Clone() => new()
     {

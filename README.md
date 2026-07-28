@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.4.0  
+**バージョン:** 2.4.1  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8
 
@@ -32,9 +32,11 @@
 | コマンド | 意味 |
 |---|---|
 | `KeyAutomator.exe -1` | ID=1 を実行 |
+| `KeyAutomator.exe - 1` | 同上（`-` のあとに空白可） |
 | `KeyAutomator.exe -id 1` | 同上 |
 | `KeyAutomator.exe -alias login_ok` | 引数名（alias）で実行 |
 | `KeyAutomator.exe -login_ok` | 同上（短縮） |
+| `KeyAutomator.exe - login_ok` | 同上（`-` のあとに空白可） |
 | `KeyAutomator.exe login_ok` | 同上（素の引数） |
 | `KeyAutomator.exe -name "全選択＆コピー"` | 表示名で実行 |
 
@@ -67,7 +69,7 @@
 
 ビルド済み zip:
 
-`dist\KeyAutomator-v2.4.0-win-x64-single.zip`
+`dist\KeyAutomator-v2.4.1-win-x64-single.zip`
 
 1. zip を USB / クラウド等でコピー
 2. 解凍し、`KeyAutomator.exe` を任意のフォルダへ置く

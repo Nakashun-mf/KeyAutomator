@@ -4,7 +4,20 @@
 
 **バージョン:** 2.4.2  
 **UI:** WinUI 3（Fluent / Mica）  
-**言語:** C# / .NET 8
+**言語:** C# / .NET 8  
+**ライセンス:** [MIT](LICENSE)
+
+## ダウンロード（推奨）
+
+ビルド済みの単一 exe は **GitHub Releases** から入手できます。
+
+→ [最新リリース](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
+
+1. `KeyAutomator-v*-win-x64-single.zip` をダウンロード
+2. 解凍し、`KeyAutomator.exe` を任意のフォルダへ置く
+3. 起動する（`config.json` / `settings.json` は exe と同じ場所に自動作成）
+
+追加のランタイムインストールは不要です。初回起動時のみ、内部リソース展開で数秒かかることがあります。
 
 ## できること
 
@@ -15,7 +28,7 @@
 ## 動作環境
 
 - Windows 10 バージョン 1809 以降 / Windows 11（64bit 推奨）
-- **単一 exe** に .NET ランタイムと Windows App SDK を同梱（追加インストール不要）
+- **単一 exe** に .NET ランタイムと Windows App SDK を同梱
 
 ## 使い方（利用者向け）
 
@@ -60,30 +73,19 @@
 マウスクリック（左／右／中／左ダブル）は **現在のカーソル位置** に対して実行されます。  
 マクロ一覧・実行手順は **ドラッグ＆ドロップで並べ替え** できます。
 
-## 配布物の入手
+## 開発者向け
 
-**単一の `KeyAutomator.exe` だけで動作します。**  
-（初回起動時、内部リソースを一時フォルダへ展開します。数秒かかることがあります。）
+ソースから自分で発行する場合は [README_DEVELOPER.md](README_DEVELOPER.md) を参照してください。
 
-### 会社などへ持っていく（推奨）
-
-ビルド済み zip:
-
-`dist\KeyAutomator-v2.4.2-win-x64-single.zip`
-
-1. zip を USB / クラウド等でコピー
-2. 解凍し、`KeyAutomator.exe` を任意のフォルダへ置く
-3. 起動する（`config.json` / `settings.json` は exe と同じ場所に自動作成）
-
-中に `使い方.txt` と `config.sample.json` があります。
-
-### 開発者向けに自分で作る
-
-1. [README_DEVELOPER.md](README_DEVELOPER.md) の単一 exe 発行手順を実行
-2. 出力の `KeyAutomator.exe` だけを配布
+```powershell
+git clone https://github.com/Nakashun-mf/KeyAutomator.git
+cd KeyAutomator
+dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\publish-sf
+```
 
 ## 注意
 
 - 入力は「その時点のアクティブウィンドウ」へ送られます
 - 管理者権限が必要なアプリへ送る場合は、本アプリも管理者起動してください
 - パスワード等を `config.json` に平文保存する場合は取り扱いに注意してください
+- 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です

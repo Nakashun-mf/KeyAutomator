@@ -16,6 +16,12 @@ public sealed class MacroItem
     [JsonPropertyName("actions")]
     public List<ActionItem> Actions { get; set; } = [];
 
+    [JsonIgnore]
+    public string DelayLabel => $"開始まで {DelaySec:0.##} 秒";
+
+    [JsonIgnore]
+    public string ActionCountLabel => Actions.Count == 0 ? "手順なし" : $"{Actions.Count} 手順";
+
     public MacroItem Clone() => new()
     {
         Id = Id,

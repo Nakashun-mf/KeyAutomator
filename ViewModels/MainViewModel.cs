@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KeyAutomator.Models;
@@ -6,23 +7,9 @@ using KeyAutomator.Services;
 
 namespace KeyAutomator.ViewModels;
 
-public partial class ActionEditItem : ObservableObject
-{
-    [ObservableProperty] private string _type = "text";
-    [ObservableProperty] private string _value = string.Empty;
-
-    public ActionItem ToModel() => new() { Type = Type, Value = Value };
-
-    public static ActionEditItem FromModel(ActionItem a) => new()
-    {
-        Type = a.Type,
-        Value = a.Value
-    };
-}
-
 public partial class MainViewModel : ObservableObject
 {
-    public static IReadOnlyList<string> ActionTypes { get; } = ["text", "key", "hotkey", "wait"];
+    public IReadOnlyList<ActionTypeOption> ActionTypeOptions { get; } = ActionTypeCatalog.All;
 
     public ObservableCollection<MacroItem> Macros { get; } = [];
     public ObservableCollection<ActionEditItem> Actions { get; } = [];
@@ -35,10 +22,31 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _hasSelection;
     [ObservableProperty] private string _statusMessage = "準備完了";
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private string _actionSummary = "手順はまだありません";
 
     public MainViewModel()
     {
+        Actions.CollectionChanged += OnActionsChanged;
         Reload();
+    }
+
+    private void OnActionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        RenumberSteps();
+        UpdateActionSummary();
+    }
+
+    private void RenumberSteps()
+    {
+        for (var i = 0; i < Actions.Count; i++)
+            Actions[i].Step = i + 1;
+    }
+
+    private void UpdateActionSummary()
+    {
+        ActionSummary = Actions.Count == 0
+            ? "手順はまだありません。下のボタンから追加してください。"
+            : $"上から順に {Actions.Count} 手順を実行します";
     }
 
     partial void OnSelectedMacroChanged(MacroItem? value)
@@ -56,6 +64,7 @@ public partial class MainViewModel : ObservableObject
         Actions.Clear();
         foreach (var a in value.Actions)
             Actions.Add(ActionEditItem.FromModel(a));
+        UpdateActionSummary();
     }
 
     [RelayCommand]
@@ -144,7 +153,6 @@ public partial class MainViewModel : ObservableObject
         SelectedMacro.Actions = Actions.Select(a => a.ToModel()).ToList();
 
         Persist();
-        // UI 更新のため再選択
         var saved = SelectedMacro;
         SelectedMacro = null;
         SelectedMacro = saved;
@@ -204,6 +212,7 @@ public partial class MainViewModel : ObservableObject
         var newIdx = idx + delta;
         if (idx < 0 || newIdx < 0 || newIdx >= Actions.Count) return;
         Actions.Move(idx, newIdx);
+        RenumberSteps();
     }
 
     public MacroItem? BuildCurrentMacroForRun()
@@ -225,6 +234,7 @@ public partial class MainViewModel : ObservableObject
         EditDelaySec = 0;
         Actions.Clear();
         SelectedAction = null;
+        UpdateActionSummary();
     }
 
     private void Persist()

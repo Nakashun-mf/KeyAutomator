@@ -3,6 +3,7 @@
     x:Class="KeyAutomator.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="using:KeyAutomator.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:KeyAutomator"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,10 +16,17 @@
 
     <Grid x:Name="RootGrid">
         <Grid.Resources>
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisInvert" Invert="True" />
             <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Setter Property="FontSize" Value="12" />
                 <Setter Property="Margin" Value="0,0,0,6" />
+            </Style>
+            <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,0,0,8" />
             </Style>
         </Grid.Resources>
 
@@ -43,6 +51,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!-- 左: マクロ一覧 -->
             <Border
                 Padding="16"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -57,10 +66,10 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Spacing="2">
-                        <TextBlock FontSize="22" FontWeight="SemiBold" Text="Macros" />
+                        <TextBlock FontSize="22" FontWeight="SemiBold" Text="マクロ一覧" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="登録済みのキー入力シーケンス" />
+                            Text="選ぶと右で編集できます" />
                     </StackPanel>
 
                     <ListView
@@ -96,7 +105,11 @@
                                         <TextBlock
                                             FontSize="12"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{Binding DelaySec}" />
+                                            Text="{Binding DelayLabel}" />
+                                        <TextBlock
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="{Binding ActionCountLabel}" />
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -124,6 +137,7 @@
                 </Grid>
             </Border>
 
+            <!-- 右: 編集 -->
             <Border
                 Grid.Column="1"
                 Padding="20"
@@ -131,133 +145,246 @@
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="12">
-                <ContentControl HorizontalContentAlignment="Stretch" IsEnabled="{Binding HasSelection}" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Spacing="2">
-                        <TextBlock FontSize="22" FontWeight="SemiBold" Text="Editor" />
+                <Grid>
+                    <!-- 未選択時 -->
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="8"
+                        Visibility="{Binding HasSelection, Converter={StaticResource BoolToVisInvert}}">
+                        <FontIcon
+                            FontSize="40"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            Glyph="&#xE8A5;" />
                         <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Text="マクロを選んでください" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="基本情報とアクションを編集" />
+                            Text="左の一覧から選ぶか、「新規」で作成します" />
                     </StackPanel>
 
-                    <Grid Grid.Row="1" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="160" />
-                        </Grid.ColumnDefinitions>
+                    <!-- 編集本体 -->
+                    <ContentControl
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                        <Grid RowSpacing="14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="ID" />
-                            <NumberBox
-                                AutomationProperties.Name="マクロID"
-                                Minimum="1"
-                                SpinButtonPlacementMode="Inline"
-                                Value="{Binding EditId, Mode=TwoWay}" />
-                        </StackPanel>
+                            <StackPanel Spacing="2">
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="マクロ編集" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="①基本情報 → ②手順を上から順に追加 → ③保存" />
+                            </StackPanel>
 
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="マクロ名" />
-                            <TextBox
-                                AutomationProperties.Name="マクロ名"
-                                PlaceholderText="例: ログイン処理"
-                                Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
+                            <!-- ① 基本情報 -->
+                            <Border
+                                Grid.Row="1"
+                                Padding="14"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="10">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="① 基本情報" />
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="110" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="180" />
+                                        </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="起動前ウェイト (秒)" />
-                            <NumberBox
-                                AutomationProperties.Name="起動前ウェイト秒"
-                                Minimum="0"
-                                SmallChange="0.5"
-                                SpinButtonPlacementMode="Inline"
-                                Value="{Binding EditDelaySec, Mode=TwoWay}" />
-                        </StackPanel>
-                    </Grid>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="ID（番号）" />
+                                            <NumberBox
+                                                AutomationProperties.Name="マクロID"
+                                                Minimum="1"
+                                                SpinButtonPlacementMode="Inline"
+                                                Value="{Binding EditId, Mode=TwoWay}" />
+                                        </StackPanel>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
-                        <Button AutomationProperties.Name="テキスト追加" Click="AddText_Click" Content="+ テキスト" />
-                        <Button AutomationProperties.Name="特殊キー追加" Click="AddKey_Click" Content="+ 特殊キー" />
-                        <Button AutomationProperties.Name="ショートカット追加" Click="AddHotkey_Click" Content="+ ショートカット" />
-                        <Button AutomationProperties.Name="ウェイト追加" Click="AddWait_Click" Content="+ ウェイト" />
-                        <Border
-                            Width="1"
-                            Margin="4,4"
-                            Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <Button AutomationProperties.Name="上へ" Click="MoveUp_Click" Content="▲" />
-                        <Button AutomationProperties.Name="下へ" Click="MoveDown_Click" Content="▼" />
-                        <Button AutomationProperties.Name="アクション削除" Click="RemoveAction_Click" Content="削除" />
-                    </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="表示名" />
+                                            <TextBox
+                                                AutomationProperties.Name="マクロ名"
+                                                PlaceholderText="例: ログイン処理"
+                                                Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
 
-                    <ListView
-                        Grid.Row="3"
-                        AutomationProperties.Name="アクション一覧"
-                        ItemsSource="{Binding Actions}"
-                        SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
-                        SelectionMode="Single">
-                        <ListView.Header>
-                            <Grid Padding="12,4" ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock FontWeight="SemiBold" Text="種別" />
-                                <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="設定値" />
-                            </Grid>
-                        </ListView.Header>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="0,4" ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="140" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <ComboBox
-                                        MinWidth="120"
-                                        AutomationProperties.Name="アクション種別"
-                                        SelectedItem="{Binding Type, Mode=TwoWay}">
-                                        <x:String>text</x:String>
-                                        <x:String>key</x:String>
-                                        <x:String>hotkey</x:String>
-                                        <x:String>wait</x:String>
-                                    </ComboBox>
-                                    <TextBox
-                                        Grid.Column="1"
-                                        AutomationProperties.Name="アクション設定値"
-                                        PlaceholderText="値を入力"
-                                        Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Style="{StaticResource SectionLabelStyle}" Text="開始までの待ち（秒）" />
+                                            <NumberBox
+                                                AutomationProperties.Name="起動前ウェイト秒"
+                                                Minimum="0"
+                                                SmallChange="0.5"
+                                                SpinButtonPlacementMode="Inline"
+                                                Value="{Binding EditDelaySec, Mode=TwoWay}" />
+                                            <TextBlock
+                                                Margin="0,4,0,0"
+                                                FontSize="11"
+                                                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                Text="この秒数のあいだに入力先へ切替" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ② 手順ヘッダー -->
+                            <StackPanel Grid.Row="2" Spacing="8">
+                                <Grid>
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="② 実行手順" />
+                                    <TextBlock
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{Binding ActionSummary}" />
                                 </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
 
-                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="8">
-                        <Button
-                            AccessKey="S"
-                            AutomationProperties.Name="保存"
-                            Click="SaveButton_Click"
-                            Content="保存"
-                            Style="{StaticResource AccentButtonStyle}" />
-                        <Button
-                            AutomationProperties.Name="キャンセル"
-                            Click="CancelButton_Click"
-                            Content="編集を破棄" />
-                        <Button
-                            x:Name="TestButton"
-                            AutomationProperties.Name="テスト実行"
-                            Click="TestButton_Click"
-                            Content="テスト実行" />
-                    </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button
+                                        AutomationProperties.Name="テキスト追加"
+                                        Click="AddText_Click"
+                                        Content="テキストを入力" />
+                                    <Button
+                                        AutomationProperties.Name="特殊キー追加"
+                                        Click="AddKey_Click"
+                                        Content="キーを押す" />
+                                    <Button
+                                        AutomationProperties.Name="ショートカット追加"
+                                        Click="AddHotkey_Click"
+                                        Content="ショートカット" />
+                                    <Button
+                                        AutomationProperties.Name="ウェイト追加"
+                                        Click="AddWait_Click"
+                                        Content="待つ" />
+                                    <Border
+                                        Width="1"
+                                        Margin="4,4"
+                                        Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                    <Button AutomationProperties.Name="上へ" Click="MoveUp_Click" Content="上へ" ToolTipService.ToolTip="選択中の手順を1つ上へ" />
+                                    <Button AutomationProperties.Name="下へ" Click="MoveDown_Click" Content="下へ" ToolTipService.ToolTip="選択中の手順を1つ下へ" />
+                                    <Button AutomationProperties.Name="アクション削除" Click="RemoveAction_Click" Content="手順を削除" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 手順リスト -->
+                            <ListView
+                                Grid.Row="3"
+                                AutomationProperties.Name="アクション一覧"
+                                ItemsSource="{Binding Actions}"
+                                SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
+                                SelectionMode="Single">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Margin="0,4"
+                                            Padding="12"
+                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="10">
+                                            <Grid ColumnSpacing="12" RowSpacing="6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="44" />
+                                                    <ColumnDefinition Width="168" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <Border
+                                                    Width="36"
+                                                    Height="36"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    CornerRadius="18">
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        FontWeight="Bold"
+                                                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                        Text="{Binding Step}" />
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1" Spacing="4">
+                                                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="操作の種類" />
+                                                    <ComboBox
+                                                        MinWidth="160"
+                                                        AutomationProperties.Name="アクション種別"
+                                                        DisplayMemberPath="Label"
+                                                        ItemsSource="{Binding TypeOptions}"
+                                                        SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="2" Spacing="4">
+                                                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="内容" />
+                                                    <TextBox
+                                                        AutomationProperties.Name="アクション設定値"
+                                                        PlaceholderText="{Binding Placeholder}"
+                                                        Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </StackPanel>
+
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="1"
+                                                    Grid.ColumnSpan="2"
+                                                    FontSize="12"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="{Binding Hint}"
+                                                    TextWrapping="WrapWholeWords" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <!-- ③ 操作 -->
+                            <Border
+                                Grid.Row="4"
+                                Padding="12"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,8,0"
+                                            FontWeight="SemiBold"
+                                            Text="③" />
+                                        <Button
+                                            AccessKey="S"
+                                            AutomationProperties.Name="保存"
+                                            Click="SaveButton_Click"
+                                            Content="保存する"
+                                            Style="{StaticResource AccentButtonStyle}" />
+                                        <Button
+                                            AutomationProperties.Name="キャンセル"
+                                            Click="CancelButton_Click"
+                                            Content="変更を破棄" />
+                                        <Button
+                                            x:Name="TestButton"
+                                            AutomationProperties.Name="テスト実行"
+                                            Click="TestButton_Click"
+                                            Content="テスト実行"
+                                            ToolTipService.ToolTip="待ち時間のあいだに入力先ウィンドウへ切り替えてください" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </ContentControl>
                 </Grid>
-                </ContentControl>
             </Border>
         </Grid>
 
@@ -276,7 +403,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.0" />
+                    Text="v2.0.1" />
             </Grid>
         </Border>
 

@@ -405,12 +405,24 @@
                                                     ItemsSource="{Binding TypeOptions}"
                                                     SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
 
+                                                <!-- 特殊キー: プルダウン -->
+                                                <ComboBox
+                                                    Grid.Column="2"
+                                                    VerticalAlignment="Center"
+                                                    AutomationProperties.Name="特殊キー選択"
+                                                    DisplayMemberPath="Label"
+                                                    ItemsSource="{Binding SpecialKeyOptions}"
+                                                    SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
+                                                    Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
+
+                                                <!-- それ以外: 自由入力 -->
                                                 <TextBox
                                                     Grid.Column="2"
                                                     VerticalAlignment="Center"
                                                     AutomationProperties.Name="アクション設定値"
                                                     PlaceholderText="{Binding Placeholder}"
-                                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVisInvert}}" />
                                             </Grid>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
@@ -462,7 +474,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.3" />
+                    Text="v2.0.4" />
             </Grid>
         </Border>
 

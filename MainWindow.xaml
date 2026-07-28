@@ -96,6 +96,7 @@
                         Grid.Row="1"
                         AutomationProperties.Name="マクロ一覧"
                         ItemsSource="{Binding Macros}"
+                        KeyDown="MacroList_KeyDown"
                         SelectedItem="{Binding SelectedMacro, Mode=TwoWay}"
                         SelectionMode="Single">
                         <ListView.ItemTemplate>
@@ -373,10 +374,12 @@
                                 BorderThickness="1,0,1,1"
                                 CornerRadius="0,0,8,8">
                                 <ListView
+                                    x:Name="ActionList"
                                     Padding="6,4"
                                     AutomationProperties.Name="アクション一覧"
                                     ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                     ItemsSource="{Binding Actions}"
+                                    KeyDown="ActionList_KeyDown"
                                     SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
                                     SelectionMode="Single">
                                     <ListView.ItemTemplate>
@@ -474,17 +477,34 @@
             Padding="20,10"
             BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
-            <Grid>
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{Binding StatusMessage}" />
+
+                <ToggleSwitch
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="削除前に確認"
+                    Header="削除前に確認"
+                    IsOn="{Binding ConfirmBeforeDelete, Mode=TwoWay}"
+                    OffContent="OFF"
+                    OnContent="ON"
+                    ToolTipService.ToolTip="オフにすると、マクロ／手順の削除確認を出さずに削除します" />
+
                 <TextBlock
                     x:Name="VersionText"
-                    HorizontalAlignment="Right"
+                    Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.6" />
+                    Text="v2.0.7" />
             </Grid>
         </Border>
 

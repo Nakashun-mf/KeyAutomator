@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.0.6
+**バージョン:** 2.0.7
 
 ## 開発環境
 
@@ -22,7 +22,7 @@ vb_auto-key/
 ├── MainWindow.xaml(.cs)       # Fluent UI 管理画面
 ├── ViewModels/MainViewModel.cs
 ├── Models/MacroModels.cs
-├── Services/                  # Config / SendInput / CLI / Log
+├── Services/                  # Config / Settings / SendInput / CLI / Log
 ├── Assets/
 ├── SPEC.md
 ├── config.sample.json

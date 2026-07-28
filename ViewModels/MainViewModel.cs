@@ -23,11 +23,22 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "準備完了";
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string _actionSummary = "手順はまだありません";
+    [ObservableProperty] private bool _confirmBeforeDelete = true;
+
+    private AppSettings _settings = new();
 
     public MainViewModel()
     {
         Actions.CollectionChanged += OnActionsChanged;
+        _settings = SettingsStore.Load();
+        ConfirmBeforeDelete = _settings.ConfirmBeforeDelete;
         Reload();
+    }
+
+    partial void OnConfirmBeforeDeleteChanged(bool value)
+    {
+        _settings.ConfirmBeforeDelete = value;
+        SettingsStore.Save(_settings);
     }
 
     private void OnActionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -207,6 +218,13 @@ public partial class MainViewModel : ObservableObject
         Actions.Remove(SelectedAction);
         SelectedAction = Actions.LastOrDefault();
     }
+
+    /// <summary>確認なしで手順を削除（UI側で確認済みのとき呼ぶ）</summary>
+    public void RemoveSelectedAction() => RemoveAction();
+
+    /// <summary>確認なしでマクロ削除（UI側で確認済みのとき呼ぶ）</summary>
+    public void DeleteSelectedMacro() => DeleteMacro();
+
 
     [RelayCommand]
     private void MoveActionUp() => MoveAction(-1);

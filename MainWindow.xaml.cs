@@ -26,6 +26,10 @@ public sealed partial class MainWindow : Window
 
         RootGrid.DataContext = _vm;
         VersionText.Text = $"v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "2.0.0"}";
+
+        // ComboBox 等にフォーカスがあっても Delete を拾う
+        ActionList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(ActionList_KeyDown), handledEventsToo: true);
+        MacroList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(MacroList_KeyDown), handledEventsToo: true);
     }
 
     private void TryResize(int width, int height)
@@ -43,6 +47,24 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async Task<bool> ConfirmDeleteAsync(string title, string message)
+    {
+        if (!_vm.ConfirmBeforeDelete)
+            return true;
+
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "削除",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
     private void NewButton_Click(object sender, RoutedEventArgs e) => _vm.NewMacroCommand.Execute(null);
 
     private void CloneButton_Click(object sender, RoutedEventArgs e)
@@ -51,22 +73,28 @@ public sealed partial class MainWindow : Window
         _vm.CloneMacroCommand.Execute(null);
     }
 
-    private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+    private async void DeleteButton_Click(object sender, RoutedEventArgs e) => await TryDeleteMacroAsync();
+
+    private async Task TryDeleteMacroAsync()
     {
         if (_vm.SelectedMacro is null) return;
 
-        var dialog = new ContentDialog
-        {
-            Title = "マクロを削除",
-            Content = $"ID {_vm.SelectedMacro.Id}「{_vm.SelectedMacro.Name}」を削除しますか？",
-            PrimaryButtonText = "削除",
-            CloseButtonText = "キャンセル",
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = Content.XamlRoot
-        };
+        var ok = await ConfirmDeleteAsync(
+            "マクロを削除",
+            $"ID {_vm.SelectedMacro.Id}「{_vm.SelectedMacro.Name}」を削除しますか？");
+        if (ok)
+            _vm.DeleteSelectedMacro();
+    }
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
-            _vm.DeleteMacroCommand.Execute(null);
+    private async void MacroList_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key != VirtualKey.Delete)
+            return;
+        if (FocusManager.GetFocusedElement(Content.XamlRoot) is TextBox)
+            return;
+
+        e.Handled = true;
+        await TryDeleteMacroAsync();
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e) => _vm.SaveMacroCommand.Execute(null);
@@ -76,9 +104,35 @@ public sealed partial class MainWindow : Window
     private void AddText_Click(object sender, RoutedEventArgs e) => _vm.AddTextActionCommand.Execute(null);
     private void AddKey_Click(object sender, RoutedEventArgs e) => _vm.AddKeyActionCommand.Execute(null);
     private void AddWait_Click(object sender, RoutedEventArgs e) => _vm.AddWaitActionCommand.Execute(null);
-    private void RemoveAction_Click(object sender, RoutedEventArgs e) => _vm.RemoveActionCommand.Execute(null);
+    private async void RemoveAction_Click(object sender, RoutedEventArgs e) => await TryRemoveActionAsync();
     private void MoveUp_Click(object sender, RoutedEventArgs e) => _vm.MoveActionUpCommand.Execute(null);
     private void MoveDown_Click(object sender, RoutedEventArgs e) => _vm.MoveActionDownCommand.Execute(null);
+
+    private async Task TryRemoveActionAsync()
+    {
+        if (_vm.SelectedAction is null) return;
+
+        var step = _vm.SelectedAction.Step;
+        var label = _vm.SelectedAction.TypeLabel;
+        var ok = await ConfirmDeleteAsync(
+            "手順を削除",
+            $"手順 {step}（{label}）を削除しますか？");
+        if (ok)
+            _vm.RemoveSelectedAction();
+    }
+
+    private async void ActionList_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key != VirtualKey.Delete)
+            return;
+
+        // テキスト入力中の Delete は文字削除のまま
+        if (FocusManager.GetFocusedElement(Content.XamlRoot) is TextBox)
+            return;
+
+        e.Handled = true;
+        await TryRemoveActionAsync();
+    }
 
     private async void AddHotkey_Click(object sender, RoutedEventArgs e)
     {

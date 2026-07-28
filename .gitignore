@@ -26,6 +26,7 @@ Desktop.ini
 
 ## App runtime / local
 config.json
+settings.json
 error.log
 *.log
 

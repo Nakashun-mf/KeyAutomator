@@ -382,40 +382,23 @@
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
-                                                Height="36"
+                                                Height="47"
                                                 Padding="0"
                                                 ColumnSpacing="0"
                                                 ToolTipService.ToolTip="{Binding Hint}">
                                                 <Border
-                                                    Background="{ThemeResource AccentFillColorSecondaryBrush}"
-                                                    CornerRadius="6"
-                                                    Opacity="0.35"
-                                                    Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
-                                                <Border
-                                                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                                                    BorderThickness="2"
+                                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                     CornerRadius="6"
                                                     Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
 
-                                                <Grid
-                                                    Padding="6,0,8,0"
-                                                    ColumnSpacing="8">
+                                                <Grid Padding="8,0,8,0" ColumnSpacing="8">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="4" />
                                                         <ColumnDefinition Width="28" />
                                                         <ColumnDefinition Width="148" />
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <Border
-                                                        Width="3"
-                                                        Margin="0,6"
-                                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                                        CornerRadius="2"
-                                                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
-
                                                     <TextBlock
-                                                        Grid.Column="1"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
                                                         FontSize="12"
@@ -424,16 +407,15 @@
                                                         Text="{Binding Step}" />
 
                                                     <ComboBox
-                                                        Grid.Column="2"
+                                                        Grid.Column="1"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="アクション種別"
                                                         DisplayMemberPath="Label"
                                                         ItemsSource="{Binding TypeOptions}"
                                                         SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
 
-                                                    <!-- 特殊キー: プルダウン（候補多め） -->
                                                     <ComboBox
-                                                        Grid.Column="3"
+                                                        Grid.Column="2"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="特殊キー選択"
                                                         DisplayMemberPath="Label"
@@ -443,9 +425,8 @@
                                                         SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
                                                         Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
 
-                                                    <!-- それ以外: 自由入力 -->
                                                     <TextBox
-                                                        Grid.Column="3"
+                                                        Grid.Column="2"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="アクション設定値"
                                                         PlaceholderText="{Binding Placeholder}"
@@ -503,7 +484,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.5" />
+                    Text="v2.0.6" />
             </Grid>
         </Border>
 

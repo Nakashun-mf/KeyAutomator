@@ -88,17 +88,22 @@
                         <TextBlock FontSize="22" FontWeight="SemiBold" Text="マクロ一覧" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="選ぶと右で編集できます" />
+                            Text="選ぶと右で編集 / ドラッグで並べ替え" />
                     </StackPanel>
 
                     <ListView
                         x:Name="MacroList"
                         Grid.Row="1"
+                        AllowDrop="True"
                         AutomationProperties.Name="マクロ一覧"
+                        CanDragItems="True"
+                        CanReorderItems="True"
+                        DragItemsCompleted="MacroList_DragItemsCompleted"
                         ItemsSource="{Binding Macros}"
                         KeyDown="MacroList_KeyDown"
                         SelectedItem="{Binding SelectedMacro, Mode=TwoWay}"
-                        SelectionMode="Single">
+                        SelectionMode="Single"
+                        ToolTipService.ToolTip="ドラッグで並べ替えできます">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Padding="4,8" ColumnSpacing="12">
@@ -107,12 +112,14 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Border
-                                        MinWidth="36"
-                                        Padding="8,4"
+                                        Width="36"
+                                        Height="36"
+                                        VerticalAlignment="Center"
                                         Background="{ThemeResource AccentFillColorDefaultBrush}"
                                         CornerRadius="8">
                                         <TextBlock
                                             HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
                                             FontWeight="SemiBold"
                                             Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                             Text="{Binding Id}" />
@@ -381,12 +388,17 @@
                                 <ListView
                                     x:Name="ActionList"
                                     Padding="6,4"
+                                    AllowDrop="True"
                                     AutomationProperties.Name="アクション一覧"
+                                    CanDragItems="True"
+                                    CanReorderItems="True"
+                                    DragItemsCompleted="ActionList_DragItemsCompleted"
                                     ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                     ItemsSource="{Binding Actions}"
                                     KeyDown="ActionList_KeyDown"
                                     SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
-                                    SelectionMode="Single">
+                                    SelectionMode="Single"
+                                    ToolTipService.ToolTip="ドラッグで手順を並べ替えできます">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
@@ -406,13 +418,19 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBlock
-                                                        HorizontalAlignment="Center"
+                                                    <Border
+                                                        Width="28"
+                                                        Height="28"
                                                         VerticalAlignment="Center"
-                                                        FontSize="12"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{Binding Step}" />
+                                                        Background="Transparent">
+                                                        <TextBlock
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Text="{Binding Step}" />
+                                                    </Border>
 
                                                     <ComboBox
                                                         Grid.Column="1"
@@ -571,7 +589,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.2.0" />
+                    Text="v2.2.1" />
             </Grid>
         </Border>
     </Grid>

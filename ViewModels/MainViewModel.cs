@@ -92,7 +92,7 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
-            var list = ConfigStore.Load().OrderBy(m => m.Id).ToList();
+            var list = ConfigStore.Load();
             Macros.Clear();
             foreach (var m in list)
                 Macros.Add(m);
@@ -262,6 +262,21 @@ public partial class MainViewModel : ObservableObject
         Actions.Clear();
         SelectedAction = null;
         UpdateActionSummary();
+    }
+
+    /// <summary>マクロ一覧の DnD 後に順序を保存</summary>
+    public void PersistMacroOrder()
+    {
+        Persist();
+        StatusMessage = "マクロの順序を保存しました";
+    }
+
+    /// <summary>手順 DnD 後に番号を振り直す</summary>
+    public void OnActionsReordered()
+    {
+        // CollectionChanged で番号更新済みの想定。状態表示のみ。
+        UpdateActionSummary();
+        StatusMessage = "手順の順序を変更しました（保存で確定）";
     }
 
     private void Persist()

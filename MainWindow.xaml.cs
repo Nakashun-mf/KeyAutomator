@@ -94,6 +94,12 @@ public sealed partial class MainWindow : Window
         await TryDeleteMacroAsync();
     }
 
+    private void MacroList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args) =>
+        _vm.PersistMacroOrder();
+
+    private void ActionList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args) =>
+        _vm.OnActionsReordered();
+
     private void SaveButton_Click(object sender, RoutedEventArgs e) => _vm.SaveMacroCommand.Execute(null);
 
     private void CancelButton_Click(object sender, RoutedEventArgs e) => _vm.CancelEditCommand.Execute(null);

@@ -15,12 +15,12 @@
 
 | 項目 | 仕様 |
 | :--- | :--- |
-| **開発言語** | Visual Basic .NET (VB.NET) |
-| **ターゲットフレームワーク** | .NET 8.0 Windows (または .NET Framework 4.8) |
-| **UIフレームワーク** | Windows Forms (WinForms) |
-| **対応OS** | Windows 10 / 11 (64bit) |
-| **外部ライブラリ** | `System.Text.Json` (JSON処理) |
-| **キー送信方式** | Win32 API `SendInput` (安定性向上のため `SendKeys` は非推奨/補完用途) |
+| **開発言語** | C#（WinUI 3）※旧案: Visual Basic .NET |
+| **ターゲットフレームワーク** | .NET 8.0 Windows（Windows App SDK） |
+| **UIフレームワーク** | WinUI 3（Fluent Design / Mica） |
+| **対応OS** | Windows 10 (1809+) / 11 (64bit 推奨) |
+| **外部ライブラリ** | `System.Text.Json`, CommunityToolkit.Mvvm |
+| **キー送信方式** | Win32 API `SendInput` |
 
 ---
 

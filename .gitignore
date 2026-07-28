@@ -9,6 +9,9 @@ publish/
 *.suo
 *.userosscache
 *.sln.docstates
+AppPackages/
+BundleArtifacts/
+*_wpftmp.csproj
 
 ## IDE
 .vs/

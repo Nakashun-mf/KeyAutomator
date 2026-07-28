@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KeyAutomator (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "KeyAutomator (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

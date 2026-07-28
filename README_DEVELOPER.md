@@ -2,39 +2,32 @@
 
 ## 概要
 
-VB.NET / .NET 8 / WinForms 製のキー入力自動化ツールです。  
+C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 1.0.0
+**バージョン:** 2.0.0
 
 ## 開発環境
 
 - Windows 10 / 11
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 または Cursor / VS Code + .NET SDK
-
-仮想環境相当として、SDK のローカルビルドと自己完結 publish を利用します（ランタイム同梱の単体 exe）。
+- Visual Studio 2022（推奨）または Cursor + .NET SDK
 
 ## プロジェクト構成
 
 ```
 vb_auto-key/
-├── Program.vb                 # GUI / CLI 分岐
-├── Forms/
-│   ├── MainForm.vb            # 管理画面
-│   └── HotkeyCaptureForm.vb   # ショートカット記録
-├── Models/
-│   ├── MacroModels.vb         # データモデル
-│   └── ConfigStore.vb         # config.json I/O
-├── Services/
-│   ├── NativeMethods.vb       # SendInput P/Invoke
-│   ├── KeySender.vb           # アクション実行
-│   ├── CliRunner.vb           # CLI 解釈
-│   └── ErrorLogger.vb         # error.log
-├── SPEC.md                    # 基本設計仕様
-├── config.sample.json         # 設定サンプル
-├── README.md                  # 利用者向け
-└── README_DEVELOPER.md        # 本ファイル
+├── Program.cs                 # CLI / GUI 分岐（カスタム Main）
+├── App.xaml(.cs)
+├── MainWindow.xaml(.cs)       # Fluent UI 管理画面
+├── ViewModels/MainViewModel.cs
+├── Models/MacroModels.cs
+├── Services/                  # Config / SendInput / CLI / Log
+├── Assets/
+├── SPEC.md
+├── config.sample.json
+├── README.md
+└── README_DEVELOPER.md
 ```
 
 ## ビルド
@@ -42,58 +35,41 @@ vb_auto-key/
 ```powershell
 cd C:\00_coding\vb_auto-key
 dotnet restore
-dotnet build -c Release
+dotnet build -c Release -p:Platform=x64
 ```
 
-デバッグ実行:
+実行:
 
 ```powershell
-dotnet run -c Debug
+dotnet run -c Release -p:Platform=x64
 ```
 
-CLI テスト例:
+CLI:
 
 ```powershell
-dotnet run -c Release -- -1
+dotnet run -c Release -p:Platform=x64 -- -1
 ```
 
-## 単体 exe の公開（配布用）
+## 配布用 publish（自己完結フォルダ）
 
-exe 1 ファイルで配布できる自己完結・単一ファイル公開:
+WinUI は単一ファイル化が難しいため、**フォルダ配布**を正式手段とします。
 
 ```powershell
-dotnet publish -c Release -r win-x64 --self-contained true `
-  -p:PublishSingleFile=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true `
-  -p:EnableCompressionInSingleFile=true `
-  -o .\publish
+dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\publish
 ```
 
-成果物: `publish\KeyAutomator.exe`
+成果物: `publish\KeyAutomator.exe` と依存ファイル一式。
 
-- .NET ランタイム不要
-- `config.json` は exe と同じディレクトリに配置（初回自動生成可）
+- `WindowsPackageType=None`（非 MSIX）
+- `WindowsAppSDKSelfContained=true`（ランタイム同梱）
 
-フレームワーク依存の軽量版が必要な場合:
+MSIX パッケージ化が必要な場合は `Package.appxmanifest` を利用し、プロジェクトの Package and Publish から作成できます。
 
-```powershell
-dotnet publish -c Release -r win-x64 --self-contained false `
-  -p:PublishSingleFile=true `
-  -o .\publish-fd
-```
+## アーキテクチャ
 
-（この場合は対象マシンに .NET 8 Desktop Runtime が必要）
-
-## 設定スキーマ
-
-`SPEC.md` および `config.sample.json` を参照。アクション種別:
-
-| type | value 例 |
-|---|---|
-| text | `Hello` |
-| key | `ENTER`, `TAB` |
-| hotkey | `CTRL+S`, `CTRL+SHIFT+A` |
-| wait | `0.5`（秒） |
+- UI: WinUI 3 + MVVM（CommunityToolkit.Mvvm）
+- 設定: `config.json`（スキーマは SPEC.md）
+- CLI: `Program.Main` で引数がある場合はウィンドウを出さず実行
 
 ## Git
 
@@ -102,4 +78,4 @@ dotnet publish -c Release -r win-x64 --self-contained false `
 
 ## バージョン更新
 
-`KeyAutomator.vbproj` の `Version` / `AssemblyVersion` / `FileVersion` / `InformationalVersion` を揃えて更新し、README のバージョン表記も合わせてください。
+`KeyAutomator.csproj` の Version 系と README の表記を揃えて更新してください。

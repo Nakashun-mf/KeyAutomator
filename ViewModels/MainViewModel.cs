@@ -34,6 +34,15 @@ public partial class MainViewModel : ObservableObject
     {
         RenumberSteps();
         UpdateActionSummary();
+        SyncActionSelectionHighlight();
+    }
+
+    partial void OnSelectedActionChanged(ActionEditItem? value) => SyncActionSelectionHighlight();
+
+    private void SyncActionSelectionHighlight()
+    {
+        foreach (var action in Actions)
+            action.IsSelected = ReferenceEquals(action, SelectedAction);
     }
 
     private void RenumberSteps()

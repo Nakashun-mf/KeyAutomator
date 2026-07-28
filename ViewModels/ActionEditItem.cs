@@ -62,58 +62,149 @@ public static class ActionTypeCatalog
 
 public static class SpecialKeyCatalog
 {
-    public static IReadOnlyList<SpecialKeyOption> All { get; } =
-    [
-        new() { Code = "ENTER", Label = "Enter（確定）" },
-        new() { Code = "TAB", Label = "Tab（次へ）" },
-        new() { Code = "ESC", Label = "Esc（取消）" },
-        new() { Code = "SPACE", Label = "Space（空白）" },
-        new() { Code = "BACKSPACE", Label = "Backspace（削除）" },
-        new() { Code = "DELETE", Label = "Delete" },
-        new() { Code = "INSERT", Label = "Insert" },
-        new() { Code = "HOME", Label = "Home" },
-        new() { Code = "END", Label = "End" },
-        new() { Code = "PAGEUP", Label = "Page Up" },
-        new() { Code = "PAGEDOWN", Label = "Page Down" },
-        new() { Code = "UP", Label = "↑ 上" },
-        new() { Code = "DOWN", Label = "↓ 下" },
-        new() { Code = "LEFT", Label = "← 左" },
-        new() { Code = "RIGHT", Label = "→ 右" },
-        new() { Code = "F1", Label = "F1" },
-        new() { Code = "F2", Label = "F2" },
-        new() { Code = "F3", Label = "F3" },
-        new() { Code = "F4", Label = "F4" },
-        new() { Code = "F5", Label = "F5" },
-        new() { Code = "F6", Label = "F6" },
-        new() { Code = "F7", Label = "F7" },
-        new() { Code = "F8", Label = "F8" },
-        new() { Code = "F9", Label = "F9" },
-        new() { Code = "F10", Label = "F10" },
-        new() { Code = "F11", Label = "F11" },
-        new() { Code = "F12", Label = "F12" }
-    ];
+    public static IReadOnlyList<SpecialKeyOption> All { get; } = Build();
+
+    private static IReadOnlyList<SpecialKeyOption> Build()
+    {
+        var list = new List<SpecialKeyOption>();
+
+        void Add(string code, string label) => list.Add(new SpecialKeyOption { Code = code, Label = label });
+
+        // 編集・移動
+        Add("ENTER", "Enter（確定）");
+        Add("TAB", "Tab（次へ）");
+        Add("ESC", "Esc（取消）");
+        Add("SPACE", "Space（空白）");
+        Add("BACKSPACE", "Backspace（1文字削除）");
+        Add("DELETE", "Delete（削除）");
+        Add("INSERT", "Insert");
+        Add("HOME", "Home");
+        Add("END", "End");
+        Add("PAGEUP", "Page Up");
+        Add("PAGEDOWN", "Page Down");
+        Add("UP", "↑ 上");
+        Add("DOWN", "↓ 下");
+        Add("LEFT", "← 左");
+        Add("RIGHT", "→ 右");
+
+        // 修飾キー単体
+        Add("CTRL", "Ctrl");
+        Add("SHIFT", "Shift");
+        Add("ALT", "Alt");
+        Add("LWIN", "Windows（左）");
+        Add("RWIN", "Windows（右）");
+        Add("APPS", "Menu（アプリケーション）");
+        Add("CAPITAL", "Caps Lock");
+        Add("NUMLOCK", "Num Lock");
+        Add("SCROLL", "Scroll Lock");
+        Add("SNAPSHOT", "Print Screen");
+        Add("PAUSE", "Pause");
+
+        // 文字 A-Z
+        for (var c = 'A'; c <= 'Z'; c++)
+            Add(c.ToString(), $"{c}");
+
+        // 数字 0-9
+        for (var d = 0; d <= 9; d++)
+            Add(d.ToString(), $"{d}");
+
+        // ファンクション
+        for (var f = 1; f <= 24; f++)
+            Add($"F{f}", $"F{f}");
+
+        // テンキー
+        for (var n = 0; n <= 9; n++)
+            Add($"NUMPAD{n}", $"テンキー {n}");
+        Add("MULTIPLY", "テンキー *");
+        Add("ADD", "テンキー +");
+        Add("SUBTRACT", "テンキー -");
+        Add("DECIMAL", "テンキー .");
+        Add("DIVIDE", "テンキー /");
+        Add("SEPARATOR", "テンキー Separator");
+
+        // 記号（OEM）
+        Add("OEM_PLUS", "= +");
+        Add("OEM_COMMA", ", <");
+        Add("OEM_MINUS", "- _");
+        Add("OEM_PERIOD", ". >");
+        Add("OEM_1", "; :");
+        Add("OEM_2", "/ ?");
+        Add("OEM_3", "` ~");
+        Add("OEM_4", "[ {");
+        Add("OEM_5", "\\ |");
+        Add("OEM_6", "] }");
+        Add("OEM_7", "' \"");
+        Add("OEM_102", "OEM 102（\\ | など）");
+
+        // ブラウザ / メディア
+        Add("BROWSER_BACK", "ブラウザ 戻る");
+        Add("BROWSER_FORWARD", "ブラウザ 進む");
+        Add("BROWSER_REFRESH", "ブラウザ 更新");
+        Add("BROWSER_STOP", "ブラウザ 停止");
+        Add("BROWSER_SEARCH", "ブラウザ 検索");
+        Add("BROWSER_FAVORITES", "ブラウザ お気に入り");
+        Add("BROWSER_HOME", "ブラウザ ホーム");
+        Add("VOLUME_MUTE", "音量ミュート");
+        Add("VOLUME_DOWN", "音量ダウン");
+        Add("VOLUME_UP", "音量アップ");
+        Add("MEDIA_NEXT_TRACK", "次の曲");
+        Add("MEDIA_PREV_TRACK", "前の曲");
+        Add("MEDIA_STOP", "メディア停止");
+        Add("MEDIA_PLAY_PAUSE", "再生/一時停止");
+        Add("LAUNCH_MAIL", "メール起動");
+        Add("LAUNCH_MEDIA_SELECT", "メディア選択");
+        Add("LAUNCH_APP1", "アプリ1");
+        Add("LAUNCH_APP2", "アプリ2");
+
+        return list;
+    }
+
+    private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["RETURN"] = "ENTER",
+        ["ESCAPE"] = "ESC",
+        ["BS"] = "BACKSPACE",
+        ["DEL"] = "DELETE",
+        ["INS"] = "INSERT",
+        ["PGUP"] = "PAGEUP",
+        ["PGDN"] = "PAGEDOWN",
+        ["CONTROL"] = "CTRL",
+        ["CTL"] = "CTRL",
+        ["WINDOWS"] = "LWIN",
+        ["WIN"] = "LWIN",
+        ["CAPSLOCK"] = "CAPITAL",
+        ["CAPS"] = "CAPITAL",
+        ["SCROLLLOCK"] = "SCROLL",
+        ["PRINTSCREEN"] = "SNAPSHOT",
+        ["PRTSC"] = "SNAPSHOT",
+        ["MULTIPLY_KEY"] = "MULTIPLY",
+        ["ADD_KEY"] = "ADD",
+        ["SUBTRACT_KEY"] = "SUBTRACT",
+        ["DECIMAL_KEY"] = "DECIMAL",
+        ["DIVIDE_KEY"] = "DIVIDE"
+    };
 
     public static SpecialKeyOption Get(string? code)
     {
-        var found = All.FirstOrDefault(x => string.Equals(x.Code, code, StringComparison.OrdinalIgnoreCase));
-        if (found is not null) return found;
+        if (string.IsNullOrWhiteSpace(code))
+            return All[0];
 
-        // 別名の吸収
-        return (code ?? string.Empty).Trim().ToUpperInvariant() switch
-        {
-            "RETURN" => All[0],
-            "ESCAPE" => All.First(x => x.Code == "ESC"),
-            "BS" => All.First(x => x.Code == "BACKSPACE"),
-            "DEL" => All.First(x => x.Code == "DELETE"),
-            "INS" => All.First(x => x.Code == "INSERT"),
-            "PGUP" => All.First(x => x.Code == "PAGEUP"),
-            "PGDN" => All.First(x => x.Code == "PAGEDOWN"),
-            _ => All[0]
-        };
+        var normalized = code.Trim();
+        if (Aliases.TryGetValue(normalized, out var alias))
+            normalized = alias;
+
+        return All.FirstOrDefault(x => string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase))
+               ?? All[0];
     }
 
-    public static bool Contains(string? code) =>
-        All.Any(x => string.Equals(x.Code, code, StringComparison.OrdinalIgnoreCase));
+    public static bool Contains(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return false;
+        var normalized = code.Trim();
+        if (Aliases.TryGetValue(normalized, out var alias))
+            normalized = alias;
+        return All.Any(x => string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase));
+    }
 }
 
 public partial class ActionEditItem : ObservableObject
@@ -121,6 +212,7 @@ public partial class ActionEditItem : ObservableObject
     [ObservableProperty] private int _step = 1;
     [ObservableProperty] private string _type = "text";
     [ObservableProperty] private string _value = string.Empty;
+    [ObservableProperty] private bool _isSelected;
 
     public IReadOnlyList<ActionTypeOption> TypeOptions => ActionTypeCatalog.All;
     public IReadOnlyList<SpecialKeyOption> SpecialKeyOptions => SpecialKeyCatalog.All;
@@ -157,7 +249,6 @@ public partial class ActionEditItem : ObservableObject
     {
         if (string.Equals(value, "key", StringComparison.OrdinalIgnoreCase))
         {
-            // 未設定・不正値は Enter に正規化
             if (!SpecialKeyCatalog.Contains(Value))
                 Value = "ENTER";
         }

@@ -38,6 +38,9 @@
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Margin" Value="0,1" />
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
             </Style>
             <Style x:Key="SlimButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                 <Setter Property="Padding" Value="10,4" />
@@ -379,50 +382,76 @@
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
-                                                Height="34"
-                                                Padding="2,0"
-                                                ColumnSpacing="8"
+                                                Height="36"
+                                                Padding="0"
+                                                ColumnSpacing="0"
                                                 ToolTipService.ToolTip="{Binding Hint}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="28" />
-                                                    <ColumnDefinition Width="148" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
+                                                <Border
+                                                    Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                                    CornerRadius="6"
+                                                    Opacity="0.35"
+                                                    Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
+                                                <Border
+                                                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="6"
+                                                    Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
 
-                                                <TextBlock
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    FontSize="12"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                    Text="{Binding Step}" />
+                                                <Grid
+                                                    Padding="6,0,8,0"
+                                                    ColumnSpacing="8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="4" />
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="148" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
 
-                                                <ComboBox
-                                                    Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    AutomationProperties.Name="アクション種別"
-                                                    DisplayMemberPath="Label"
-                                                    ItemsSource="{Binding TypeOptions}"
-                                                    SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
+                                                    <Border
+                                                        Width="3"
+                                                        Margin="0,6"
+                                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                        CornerRadius="2"
+                                                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
 
-                                                <!-- 特殊キー: プルダウン -->
-                                                <ComboBox
-                                                    Grid.Column="2"
-                                                    VerticalAlignment="Center"
-                                                    AutomationProperties.Name="特殊キー選択"
-                                                    DisplayMemberPath="Label"
-                                                    ItemsSource="{Binding SpecialKeyOptions}"
-                                                    SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
-                                                    Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        FontSize="12"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{Binding Step}" />
 
-                                                <!-- それ以外: 自由入力 -->
-                                                <TextBox
-                                                    Grid.Column="2"
-                                                    VerticalAlignment="Center"
-                                                    AutomationProperties.Name="アクション設定値"
-                                                    PlaceholderText="{Binding Placeholder}"
-                                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVisInvert}}" />
+                                                    <ComboBox
+                                                        Grid.Column="2"
+                                                        VerticalAlignment="Center"
+                                                        AutomationProperties.Name="アクション種別"
+                                                        DisplayMemberPath="Label"
+                                                        ItemsSource="{Binding TypeOptions}"
+                                                        SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
+
+                                                    <!-- 特殊キー: プルダウン（候補多め） -->
+                                                    <ComboBox
+                                                        Grid.Column="3"
+                                                        VerticalAlignment="Center"
+                                                        AutomationProperties.Name="特殊キー選択"
+                                                        DisplayMemberPath="Label"
+                                                        IsTextSearchEnabled="True"
+                                                        ItemsSource="{Binding SpecialKeyOptions}"
+                                                        MaxDropDownHeight="420"
+                                                        SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
+                                                        Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
+
+                                                    <!-- それ以外: 自由入力 -->
+                                                    <TextBox
+                                                        Grid.Column="3"
+                                                        VerticalAlignment="Center"
+                                                        AutomationProperties.Name="アクション設定値"
+                                                        PlaceholderText="{Binding Placeholder}"
+                                                        Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVisInvert}}" />
+                                                </Grid>
                                             </Grid>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
@@ -474,7 +503,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.4" />
+                    Text="v2.0.5" />
             </Grid>
         </Border>
 

@@ -4,7 +4,7 @@ namespace KeyAutomator.Services;
 
 public static class ErrorLogger
 {
-    private static string LogPath => Path.Combine(AppContext.BaseDirectory, "error.log");
+    private static string LogPath => AppPaths.ErrorLogPath;
 
     public static void Write(Exception ex, string? context = null)
     {

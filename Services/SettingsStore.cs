@@ -18,8 +18,7 @@ public static class SettingsStore
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public static string SettingsPath =>
-        Path.Combine(AppContext.BaseDirectory, "settings.json");
+    public static string SettingsPath => AppPaths.SettingsPath;
 
     public static AppSettings Load()
     {

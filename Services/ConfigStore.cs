@@ -12,8 +12,7 @@ public static class ConfigStore
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public static string ConfigPath =>
-        Path.Combine(AppContext.BaseDirectory, "config.json");
+    public static string ConfigPath => AppPaths.ConfigPath;
 
     public static List<MacroItem> Load()
     {

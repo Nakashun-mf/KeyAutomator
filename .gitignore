@@ -3,6 +3,8 @@ bin/
 obj/
 out/
 publish/
+publish-sf/
+publish-single/
 [Dd]ebug/
 [Rr]elease/
 *.user

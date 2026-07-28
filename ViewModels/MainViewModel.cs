@@ -199,6 +199,9 @@ public partial class MainViewModel : ObservableObject
     private void AddHotkeyAction() => AddAction("hotkey", "CTRL+S");
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void AddMouseAction() => AddAction("mouse", "RIGHT");
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private void AddWaitAction() => AddAction("wait", "0.5");
 
     private void AddAction(string type, string value)
@@ -283,6 +286,7 @@ public partial class MainViewModel : ObservableObject
         AddTextActionCommand.NotifyCanExecuteChanged();
         AddKeyActionCommand.NotifyCanExecuteChanged();
         AddHotkeyActionCommand.NotifyCanExecuteChanged();
+        AddMouseActionCommand.NotifyCanExecuteChanged();
         AddWaitActionCommand.NotifyCanExecuteChanged();
     }
 }

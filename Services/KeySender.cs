@@ -133,6 +133,9 @@ public static class KeySender
             case "hotkey":
                 SendHotkey(action.Value ?? string.Empty);
                 break;
+            case "mouse":
+                SendMouse(action.Value ?? string.Empty);
+                break;
             case "wait":
                 if (double.TryParse(action.Value, System.Globalization.NumberStyles.Float,
                         System.Globalization.CultureInfo.InvariantCulture, out var sec) ||
@@ -266,6 +269,61 @@ public static class KeySender
         return Enum.TryParse<VirtualKey>(n, ignoreCase: true, out var parsed)
             ? parsed
             : VirtualKey.None;
+    }
+
+    public static void SendMouse(string action)
+    {
+        switch ((action ?? string.Empty).Trim().ToUpperInvariant())
+        {
+            case "LEFT":
+                Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
+                break;
+            case "RIGHT":
+                Click(NativeMethods.MOUSEEVENTF_RIGHTDOWN, NativeMethods.MOUSEEVENTF_RIGHTUP);
+                break;
+            case "MIDDLE":
+                Click(NativeMethods.MOUSEEVENTF_MIDDLEDOWN, NativeMethods.MOUSEEVENTF_MIDDLEUP);
+                break;
+            case "LEFT_DOUBLE":
+            case "DOUBLE":
+            case "DBLCLICK":
+                Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
+                Thread.Sleep(40);
+                Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
+                break;
+            default:
+                ErrorLogger.Write($"未対応のマウス操作: {action}");
+                break;
+        }
+    }
+
+    private static void Click(uint downFlag, uint upFlag)
+    {
+        SendMouseFlag(downFlag);
+        Thread.Sleep(30);
+        SendMouseFlag(upFlag);
+        Thread.Sleep(10);
+    }
+
+    private static void SendMouseFlag(uint flags)
+    {
+        var input = new NativeMethods.INPUT
+        {
+            type = NativeMethods.INPUT_MOUSE,
+            U = new NativeMethods.InputUnion
+            {
+                mi = new NativeMethods.MOUSEINPUT
+                {
+                    dx = 0,
+                    dy = 0,
+                    mouseData = 0,
+                    dwFlags = flags,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
+                }
+            }
+        };
+        Send(input);
     }
 
     private static void SendUnicodeChar(char ch, bool keyDown)

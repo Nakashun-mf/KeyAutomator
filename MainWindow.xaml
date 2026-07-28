@@ -305,6 +305,11 @@
                                         Content="ショートカット"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
+                                        AutomationProperties.Name="マウスクリック追加"
+                                        Click="AddMouse_Click"
+                                        Content="マウス"
+                                        Style="{StaticResource SlimButtonStyle}" />
+                                    <Button
                                         AutomationProperties.Name="ウェイト追加"
                                         Click="AddWait_Click"
                                         Content="待つ"
@@ -428,6 +433,16 @@
                                                         MaxDropDownHeight="420"
                                                         SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
                                                         Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
+
+                                                    <!-- マウスクリック -->
+                                                    <ComboBox
+                                                        Grid.Column="2"
+                                                        VerticalAlignment="Center"
+                                                        AutomationProperties.Name="マウス操作選択"
+                                                        DisplayMemberPath="Label"
+                                                        ItemsSource="{Binding MouseActionOptions}"
+                                                        SelectedItem="{Binding SelectedMouseAction, Mode=TwoWay}"
+                                                        Visibility="{Binding IsMouseType, Converter={StaticResource BoolToVis}}" />
 
                                                     <!-- ショートカット: 同時押しキーを複数追加 -->
                                                     <ScrollViewer
@@ -556,7 +571,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.1.0" />
+                    Text="v2.2.0" />
             </Grid>
         </Border>
     </Grid>

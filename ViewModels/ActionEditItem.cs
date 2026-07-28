@@ -24,6 +24,32 @@ public sealed class SpecialKeyOption
     public override string ToString() => Label;
 }
 
+public sealed class MouseActionOption
+{
+    public required string Code { get; init; }
+    public required string Label { get; init; }
+
+    public override string ToString() => Label;
+}
+
+public static class MouseActionCatalog
+{
+    public static IReadOnlyList<MouseActionOption> All { get; } =
+    [
+        new() { Code = "LEFT", Label = "左クリック" },
+        new() { Code = "RIGHT", Label = "右クリック" },
+        new() { Code = "MIDDLE", Label = "中クリック" },
+        new() { Code = "LEFT_DOUBLE", Label = "左ダブルクリック" }
+    ];
+
+    public static MouseActionOption Get(string? code) =>
+        All.FirstOrDefault(x => string.Equals(x.Code, code, StringComparison.OrdinalIgnoreCase))
+        ?? All[0];
+
+    public static bool Contains(string? code) =>
+        All.Any(x => string.Equals(x.Code, code, StringComparison.OrdinalIgnoreCase));
+}
+
 public static class ActionTypeCatalog
 {
     public static IReadOnlyList<ActionTypeOption> All { get; } =
@@ -47,6 +73,13 @@ public static class ActionTypeCatalog
             Code = "hotkey",
             Label = "ショートカット",
             Hint = "同時押しするキーをプルダウンで追加してください",
+            Placeholder = ""
+        },
+        new()
+        {
+            Code = "mouse",
+            Label = "マウスクリック",
+            Hint = "現在のマウス位置でクリックします（右クリックなど）",
             Placeholder = ""
         },
         new()
@@ -214,10 +247,12 @@ public partial class ActionEditItem : ObservableObject
 
     public IReadOnlyList<ActionTypeOption> TypeOptions => ActionTypeCatalog.All;
     public IReadOnlyList<SpecialKeyOption> SpecialKeyOptions => SpecialKeyCatalog.All;
+    public IReadOnlyList<MouseActionOption> MouseActionOptions => MouseActionCatalog.All;
 
     public bool IsKeyType => string.Equals(Type, "key", StringComparison.OrdinalIgnoreCase);
     public bool IsHotkeyType => string.Equals(Type, "hotkey", StringComparison.OrdinalIgnoreCase);
-    public bool IsFreeTextType => !IsKeyType && !IsHotkeyType;
+    public bool IsMouseType => string.Equals(Type, "mouse", StringComparison.OrdinalIgnoreCase);
+    public bool IsFreeTextType => !IsKeyType && !IsHotkeyType && !IsMouseType;
 
     public ActionTypeOption SelectedTypeOption
     {
@@ -241,6 +276,18 @@ public partial class ActionEditItem : ObservableObject
         }
     }
 
+    public MouseActionOption SelectedMouseAction
+    {
+        get => MouseActionCatalog.Get(Value);
+        set
+        {
+            if (value is null) return;
+            if (string.Equals(Value, value.Code, StringComparison.OrdinalIgnoreCase)) return;
+            Value = value.Code;
+            OnPropertyChanged(nameof(SelectedMouseAction));
+        }
+    }
+
     public string TypeLabel => ActionTypeCatalog.Get(Type).Label;
     public string Hint => ActionTypeCatalog.Get(Type).Hint;
     public string Placeholder => ActionTypeCatalog.Get(Type).Placeholder;
@@ -257,6 +304,8 @@ public partial class ActionEditItem : ObservableObject
     {
         if (IsKeyType)
             OnPropertyChanged(nameof(SelectedSpecialKey));
+        if (IsMouseType)
+            OnPropertyChanged(nameof(SelectedMouseAction));
     }
 
     public void SyncHotkeyValueFromParts()
@@ -308,12 +357,19 @@ public partial class ActionEditItem : ObservableObject
             else
                 SyncHotkeyValueFromParts();
         }
+        else if (string.Equals(value, "mouse", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!MouseActionCatalog.Contains(Value))
+                Value = "RIGHT";
+        }
 
         OnPropertyChanged(nameof(SelectedTypeOption));
         OnPropertyChanged(nameof(IsKeyType));
         OnPropertyChanged(nameof(IsHotkeyType));
+        OnPropertyChanged(nameof(IsMouseType));
         OnPropertyChanged(nameof(IsFreeTextType));
         OnPropertyChanged(nameof(SelectedSpecialKey));
+        OnPropertyChanged(nameof(SelectedMouseAction));
         OnPropertyChanged(nameof(TypeLabel));
         OnPropertyChanged(nameof(Hint));
         OnPropertyChanged(nameof(Placeholder));
@@ -354,6 +410,11 @@ public partial class ActionEditItem : ObservableObject
         {
             item.LoadHotkeyPartsFromValue(string.IsNullOrWhiteSpace(value) ? "CTRL+S" : value);
             item.Type = "hotkey";
+        }
+        else if (string.Equals(type, "mouse", StringComparison.OrdinalIgnoreCase))
+        {
+            item.Type = "mouse";
+            item.Value = MouseActionCatalog.Get(value).Code;
         }
         else
         {

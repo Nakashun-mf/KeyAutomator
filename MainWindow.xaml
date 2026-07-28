@@ -213,66 +213,69 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <!-- タイトル + 基本情報 -->
-                            <Grid RowSpacing="8">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
+                            <!-- タイトル + 基本情報（1枠） -->
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontSize="18"
-                                        FontWeight="SemiBold"
-                                        Text="編集" />
+                                <TextBlock
+                                    VerticalAlignment="Top"
+                                    Margin="0,8,0,0"
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    Text="編集" />
 
-                                    <Border
-                                        Grid.Column="1"
-                                        Padding="10,6"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        CornerRadius="8">
-                                        <Grid ColumnSpacing="10">
+                                <Border
+                                    Grid.Column="1"
+                                    Padding="12,10"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    CornerRadius="8">
+                                    <Grid ColumnSpacing="12" RowSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="88" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 1行目: ID / 名前 -->
+                                        <TextBlock Style="{StaticResource InlineLabelStyle}" Text="ID" />
+                                        <NumberBox
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="マクロID"
+                                            Minimum="1"
+                                            SpinButtonPlacementMode="Compact"
+                                            Value="{Binding EditId, Mode=TwoWay}" />
+
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Style="{StaticResource InlineLabelStyle}"
+                                            Text="名前" />
+                                        <TextBox
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="マクロ名"
+                                            PlaceholderText="表示名"
+                                            Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <!-- 2行目: 待ち / 引数名 -->
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Style="{StaticResource InlineLabelStyle}"
+                                            Text="待ち" />
+                                        <Grid Grid.Row="1" Grid.Column="1" ColumnSpacing="6">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="72" />
-                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="88" />
-                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-
-                                            <TextBlock Style="{StaticResource InlineLabelStyle}" Text="ID" />
                                             <NumberBox
-                                                Grid.Column="1"
-                                                VerticalAlignment="Center"
-                                                AutomationProperties.Name="マクロID"
-                                                Minimum="1"
-                                                SpinButtonPlacementMode="Compact"
-                                                Value="{Binding EditId, Mode=TwoWay}" />
-
-                                            <TextBlock
-                                                Grid.Column="2"
-                                                Style="{StaticResource InlineLabelStyle}"
-                                                Text="名前" />
-                                            <TextBox
-                                                Grid.Column="3"
-                                                VerticalAlignment="Center"
-                                                AutomationProperties.Name="マクロ名"
-                                                PlaceholderText="表示名"
-                                                Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                                            <TextBlock
-                                                Grid.Column="4"
-                                                Style="{StaticResource InlineLabelStyle}"
-                                                Text="待ち" />
-                                            <NumberBox
-                                                Grid.Column="5"
                                                 VerticalAlignment="Center"
                                                 AutomationProperties.Name="起動前ウェイト秒"
                                                 Minimum="0"
@@ -281,42 +284,27 @@
                                                 ToolTipService.ToolTip="開始までの秒数。このあいだに入力先ウィンドウへ切り替えてください"
                                                 Value="{Binding EditDelaySec, Mode=TwoWay}" />
                                             <TextBlock
-                                                Grid.Column="6"
+                                                Grid.Column="1"
                                                 Style="{StaticResource InlineLabelStyle}"
+                                                Margin="0"
                                                 Text="秒" />
                                         </Grid>
-                                    </Border>
-                                </Grid>
 
-                                <Border
-                                    Grid.Row="1"
-                                    Padding="10,6"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    CornerRadius="8">
-                                    <Grid ColumnSpacing="10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="220" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
                                         <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="2"
                                             Style="{StaticResource InlineLabelStyle}"
                                             Text="引数名"
                                             ToolTipService.ToolTip="CLI用。英数字と _ のみ。例: login_ok" />
                                         <TextBox
-                                            Grid.Column="1"
+                                            Grid.Row="1"
+                                            Grid.Column="3"
                                             VerticalAlignment="Center"
                                             AutomationProperties.Name="引数名エイリアス"
                                             FontFamily="Consolas"
-                                            PlaceholderText="login_ok"
+                                            PlaceholderText="login_ok（英数字と _ ）"
                                             Text="{Binding EditAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             ToolTipService.ToolTip="KeyAutomator.exe -alias login_ok や -login_ok で実行" />
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            VerticalAlignment="Center"
-                                            FontSize="11"
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                            Text="英数字と _ のみ（任意）" />
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -632,7 +620,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.3.0" />
+                    Text="v2.3.1" />
             </Grid>
         </Border>
     </Grid>

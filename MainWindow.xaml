@@ -18,6 +18,7 @@
         <Grid.Resources>
             <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
             <conv:BoolToVisibilityConverter x:Key="BoolToVisInvert" Invert="True" />
+            <conv:HexToBrushConverter x:Key="HexToBrush" />
             <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Setter Property="FontSize" Value="12" />
@@ -27,6 +28,12 @@
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Margin" Value="0,0,0,8" />
+            </Style>
+            <Style x:Key="CompactActionItemStyle" TargetType="ListViewItem">
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,2" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             </Style>
         </Grid.Resources>
 
@@ -276,74 +283,82 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- 手順リスト -->
+                            <!-- 手順リスト（1行コンパクト） -->
                             <ListView
                                 Grid.Row="3"
                                 AutomationProperties.Name="アクション一覧"
+                                ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                 ItemsSource="{Binding Actions}"
                                 SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
                                 SelectionMode="Single">
+                                <ListView.Header>
+                                    <Grid Padding="10,0,10,4" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="28" />
+                                            <ColumnDefinition Width="148" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="#" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="種類" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="内容（ヒントは行にマウスオーバー）" />
+                                    </Grid>
+                                </ListView.Header>
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Border
-                                            Margin="0,4"
-                                            Padding="12"
+                                            Padding="0"
                                             Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="10">
-                                            <Grid ColumnSpacing="12" RowSpacing="6">
+                                            CornerRadius="6"
+                                            ToolTipService.ToolTip="{Binding Hint}">
+                                            <Grid Height="36" ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="44" />
-                                                    <ColumnDefinition Width="168" />
+                                                    <ColumnDefinition Width="4" />
+                                                    <ColumnDefinition Width="28" />
+                                                    <ColumnDefinition Width="148" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
 
                                                 <Border
-                                                    Width="36"
-                                                    Height="36"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Top"
-                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                                    CornerRadius="18">
-                                                    <TextBlock
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        FontWeight="Bold"
-                                                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                        Text="{Binding Step}" />
-                                                </Border>
-
-                                                <StackPanel Grid.Column="1" Spacing="4">
-                                                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="操作の種類" />
-                                                    <ComboBox
-                                                        MinWidth="160"
-                                                        AutomationProperties.Name="アクション種別"
-                                                        DisplayMemberPath="Label"
-                                                        ItemsSource="{Binding TypeOptions}"
-                                                        SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="2" Spacing="4">
-                                                    <TextBlock Style="{StaticResource SectionLabelStyle}" Text="内容" />
-                                                    <TextBox
-                                                        AutomationProperties.Name="アクション設定値"
-                                                        PlaceholderText="{Binding Placeholder}"
-                                                        Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                </StackPanel>
+                                                    Background="{Binding AccentHex, Converter={StaticResource HexToBrush}}"
+                                                    CornerRadius="6,0,0,6" />
 
                                                 <TextBlock
-                                                    Grid.Row="1"
                                                     Grid.Column="1"
-                                                    Grid.ColumnSpan="2"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
                                                     FontSize="12"
-                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                    Text="{Binding Hint}"
-                                                    TextWrapping="WrapWholeWords" />
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{Binding AccentHex, Converter={StaticResource HexToBrush}}"
+                                                    Text="{Binding Step}" />
+
+                                                <ComboBox
+                                                    Grid.Column="2"
+                                                    VerticalAlignment="Center"
+                                                    AutomationProperties.Name="アクション種別"
+                                                    DisplayMemberPath="Label"
+                                                    ItemsSource="{Binding TypeOptions}"
+                                                    SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
+
+                                                <TextBox
+                                                    Grid.Column="3"
+                                                    Margin="0,0,8,0"
+                                                    VerticalAlignment="Center"
+                                                    AutomationProperties.Name="アクション設定値"
+                                                    PlaceholderText="{Binding Placeholder}"
+                                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -403,7 +418,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.1" />
+                    Text="v2.0.2" />
             </Grid>
         </Border>
 

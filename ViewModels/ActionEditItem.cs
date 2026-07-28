@@ -74,12 +74,23 @@ public partial class ActionEditItem : ObservableObject
     public string Hint => ActionTypeCatalog.Get(Type).Hint;
     public string Placeholder => ActionTypeCatalog.Get(Type).Placeholder;
 
+    /// <summary>行の左アクセント色（種別ごと）</summary>
+    public string AccentHex => Type.ToLowerInvariant() switch
+    {
+        "text" => "#0078D4",
+        "key" => "#0F7B0F",
+        "hotkey" => "#038387",
+        "wait" => "#C2390B",
+        _ => "#5D5A58"
+    };
+
     partial void OnTypeChanged(string value)
     {
         OnPropertyChanged(nameof(SelectedTypeOption));
         OnPropertyChanged(nameof(TypeLabel));
         OnPropertyChanged(nameof(Hint));
         OnPropertyChanged(nameof(Placeholder));
+        OnPropertyChanged(nameof(AccentHex));
     }
 
     public ActionItem ToModel() => new() { Type = Type, Value = Value };

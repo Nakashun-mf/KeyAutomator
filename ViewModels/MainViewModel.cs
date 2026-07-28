@@ -196,17 +196,14 @@ public partial class MainViewModel : ObservableObject
     private void AddKeyAction() => AddAction("key", "ENTER");
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void AddWaitAction() => AddAction("wait", "0.5");
+    private void AddHotkeyAction() => AddAction("hotkey", "CTRL+S");
 
-    public void AddHotkeyAction(string hotkey)
-    {
-        if (!HasSelection || string.IsNullOrWhiteSpace(hotkey)) return;
-        AddAction("hotkey", hotkey);
-    }
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void AddWaitAction() => AddAction("wait", "0.5");
 
     private void AddAction(string type, string value)
     {
-        var item = new ActionEditItem { Type = type, Value = value };
+        var item = ActionEditItem.FromModel(new ActionItem { Type = type, Value = value });
         Actions.Add(item);
         SelectedAction = item;
     }
@@ -285,6 +282,7 @@ public partial class MainViewModel : ObservableObject
         CancelEditCommand.NotifyCanExecuteChanged();
         AddTextActionCommand.NotifyCanExecuteChanged();
         AddKeyActionCommand.NotifyCanExecuteChanged();
+        AddHotkeyActionCommand.NotifyCanExecuteChanged();
         AddWaitActionCommand.NotifyCanExecuteChanged();
     }
 }

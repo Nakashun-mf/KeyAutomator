@@ -15,10 +15,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>2.0.7</Version>
-    <AssemblyVersion>2.0.7.0</AssemblyVersion>
-    <FileVersion>2.0.7.0</FileVersion>
-    <InformationalVersion>2.0.7</InformationalVersion>
+    <Version>2.1.0</Version>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
+    <InformationalVersion>2.1.0</InformationalVersion>
     <Description>キー入力自動化アプリケーション (WinUI 3)</Description>
     <!-- ポータブル配布向け: 非パッケージ + Runtime 同梱 -->
     <WindowsPackageType>None</WindowsPackageType>

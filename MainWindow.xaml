@@ -385,7 +385,7 @@
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
-                                                Height="47"
+                                                MinHeight="47"
                                                 Padding="0"
                                                 ColumnSpacing="0"
                                                 ToolTipService.ToolTip="{Binding Hint}">
@@ -394,7 +394,7 @@
                                                     CornerRadius="6"
                                                     Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
 
-                                                <Grid Padding="8,0,8,0" ColumnSpacing="8">
+                                                <Grid Padding="8,4,8,4" ColumnSpacing="8">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="28" />
                                                         <ColumnDefinition Width="148" />
@@ -417,6 +417,7 @@
                                                         ItemsSource="{Binding TypeOptions}"
                                                         SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
 
+                                                    <!-- 特殊キー -->
                                                     <ComboBox
                                                         Grid.Column="2"
                                                         VerticalAlignment="Center"
@@ -428,13 +429,64 @@
                                                         SelectedItem="{Binding SelectedSpecialKey, Mode=TwoWay}"
                                                         Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVis}}" />
 
+                                                    <!-- ショートカット: 同時押しキーを複数追加 -->
+                                                    <ScrollViewer
+                                                        Grid.Column="2"
+                                                        HorizontalScrollBarVisibility="Auto"
+                                                        HorizontalScrollMode="Enabled"
+                                                        VerticalScrollBarVisibility="Disabled"
+                                                        VerticalScrollMode="Disabled"
+                                                        Visibility="{Binding IsHotkeyType, Converter={StaticResource BoolToVis}}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                            <ItemsControl ItemsSource="{Binding HotkeyParts}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                                                            <ComboBox
+                                                                                MinWidth="100"
+                                                                                VerticalAlignment="Center"
+                                                                                AutomationProperties.Name="同時押しキー"
+                                                                                DisplayMemberPath="Label"
+                                                                                IsTextSearchEnabled="True"
+                                                                                ItemsSource="{Binding KeyOptions}"
+                                                                                MaxDropDownHeight="360"
+                                                                                SelectedItem="{Binding SelectedOption, Mode=TwoWay}" />
+                                                                            <Button
+                                                                                Padding="6,2"
+                                                                                VerticalAlignment="Center"
+                                                                                AutomationProperties.Name="キーを外す"
+                                                                                Command="{Binding RemoveCommand}"
+                                                                                Content="×"
+                                                                                FontSize="12"
+                                                                                ToolTipService.ToolTip="このキーを外す" />
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                            <Button
+                                                                Padding="8,2"
+                                                                VerticalAlignment="Center"
+                                                                AutomationProperties.Name="キーを追加"
+                                                                Command="{Binding AddHotkeyPartCommand}"
+                                                                Content="＋"
+                                                                FontSize="12"
+                                                                ToolTipService.ToolTip="同時押しするキーを追加" />
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+
+                                                    <!-- テキスト / 待機 -->
                                                     <TextBox
                                                         Grid.Column="2"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="アクション設定値"
                                                         PlaceholderText="{Binding Placeholder}"
                                                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                        Visibility="{Binding IsKeyType, Converter={StaticResource BoolToVisInvert}}" />
+                                                        Visibility="{Binding IsFreeTextType, Converter={StaticResource BoolToVis}}" />
                                                 </Grid>
                                             </Grid>
                                         </DataTemplate>
@@ -504,35 +556,8 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.0.7" />
+                    Text="v2.1.0" />
             </Grid>
         </Border>
-
-        <ContentDialog
-            x:Name="HotkeyDialog"
-            Title="ショートカットを記録"
-            CloseButtonText="キャンセル"
-            DefaultButton="Primary"
-            PrimaryButtonClick="HotkeyDialog_PrimaryButtonClick"
-            PrimaryButtonText="追加">
-            <StackPanel Spacing="12">
-                <TextBlock
-                    Text="キーボードで組み合わせを押してください（例: Ctrl+Shift+S）"
-                    TextWrapping="WrapWholeWords" />
-                <Border
-                    Padding="16"
-                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                    CornerRadius="8"
-                    IsTabStop="True"
-                    KeyDown="HotkeyCaptureArea_KeyDown">
-                    <TextBlock
-                        x:Name="HotkeyResultText"
-                        FontFamily="Consolas"
-                        FontSize="20"
-                        FontWeight="SemiBold"
-                        Text="キーを押してください…" />
-                </Border>
-            </StackPanel>
-        </ContentDialog>
     </Grid>
 </Window>

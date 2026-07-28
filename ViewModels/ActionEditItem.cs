@@ -1,4 +1,7 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KeyAutomator.Models;
 
 namespace KeyAutomator.ViewModels;
@@ -36,15 +39,15 @@ public static class ActionTypeCatalog
         {
             Code = "key",
             Label = "特殊キー",
-            Hint = "一覧からキーを選んでください",
+            Hint = "一覧からキーを1つ選んでください",
             Placeholder = ""
         },
         new()
         {
             Code = "hotkey",
             Label = "ショートカット",
-            Hint = "Ctrl+S のような組み合わせキーです（+ でつなぐ）",
-            Placeholder = "例: CTRL+S / CTRL+SHIFT+A"
+            Hint = "同時押しするキーをプルダウンで追加してください",
+            Placeholder = ""
         },
         new()
         {
@@ -60,6 +63,7 @@ public static class ActionTypeCatalog
         ?? All[0];
 }
 
+/// <summary>実用的なキー候補（特殊キー／ショートカット共通）</summary>
 public static class SpecialKeyCatalog
 {
     public static IReadOnlyList<SpecialKeyOption> All { get; } = Build();
@@ -67,52 +71,38 @@ public static class SpecialKeyCatalog
     private static IReadOnlyList<SpecialKeyOption> Build()
     {
         var list = new List<SpecialKeyOption>();
-
         void Add(string code, string label) => list.Add(new SpecialKeyOption { Code = code, Label = label });
 
-        // 編集・移動
-        Add("ENTER", "Enter（確定）");
-        Add("TAB", "Tab（次へ）");
-        Add("ESC", "Esc（取消）");
-        Add("SPACE", "Space（空白）");
-        Add("BACKSPACE", "Backspace（1文字削除）");
-        Add("DELETE", "Delete（削除）");
+        Add("CTRL", "Ctrl");
+        Add("SHIFT", "Shift");
+        Add("ALT", "Alt");
+        Add("LWIN", "Windows");
+
+        Add("ENTER", "Enter");
+        Add("TAB", "Tab");
+        Add("ESC", "Esc");
+        Add("SPACE", "Space");
+        Add("BACKSPACE", "Backspace");
+        Add("DELETE", "Delete");
         Add("INSERT", "Insert");
         Add("HOME", "Home");
         Add("END", "End");
         Add("PAGEUP", "Page Up");
         Add("PAGEDOWN", "Page Down");
-        Add("UP", "↑ 上");
-        Add("DOWN", "↓ 下");
-        Add("LEFT", "← 左");
-        Add("RIGHT", "→ 右");
+        Add("UP", "↑");
+        Add("DOWN", "↓");
+        Add("LEFT", "←");
+        Add("RIGHT", "→");
 
-        // 修飾キー単体
-        Add("CTRL", "Ctrl");
-        Add("SHIFT", "Shift");
-        Add("ALT", "Alt");
-        Add("LWIN", "Windows（左）");
-        Add("RWIN", "Windows（右）");
-        Add("APPS", "Menu（アプリケーション）");
-        Add("CAPITAL", "Caps Lock");
-        Add("NUMLOCK", "Num Lock");
-        Add("SCROLL", "Scroll Lock");
-        Add("SNAPSHOT", "Print Screen");
-        Add("PAUSE", "Pause");
-
-        // 文字 A-Z
         for (var c = 'A'; c <= 'Z'; c++)
-            Add(c.ToString(), $"{c}");
+            Add(c.ToString(), c.ToString());
 
-        // 数字 0-9
         for (var d = 0; d <= 9; d++)
-            Add(d.ToString(), $"{d}");
+            Add(d.ToString(), d.ToString());
 
-        // ファンクション
-        for (var f = 1; f <= 24; f++)
+        for (var f = 1; f <= 12; f++)
             Add($"F{f}", $"F{f}");
 
-        // テンキー
         for (var n = 0; n <= 9; n++)
             Add($"NUMPAD{n}", $"テンキー {n}");
         Add("MULTIPLY", "テンキー *");
@@ -120,13 +110,11 @@ public static class SpecialKeyCatalog
         Add("SUBTRACT", "テンキー -");
         Add("DECIMAL", "テンキー .");
         Add("DIVIDE", "テンキー /");
-        Add("SEPARATOR", "テンキー Separator");
 
-        // 記号（OEM）
         Add("OEM_PLUS", "= +");
-        Add("OEM_COMMA", ", <");
         Add("OEM_MINUS", "- _");
-        Add("OEM_PERIOD", ". >");
+        Add("OEM_COMMA", ",");
+        Add("OEM_PERIOD", ".");
         Add("OEM_1", "; :");
         Add("OEM_2", "/ ?");
         Add("OEM_3", "` ~");
@@ -134,27 +122,6 @@ public static class SpecialKeyCatalog
         Add("OEM_5", "\\ |");
         Add("OEM_6", "] }");
         Add("OEM_7", "' \"");
-        Add("OEM_102", "OEM 102（\\ | など）");
-
-        // ブラウザ / メディア
-        Add("BROWSER_BACK", "ブラウザ 戻る");
-        Add("BROWSER_FORWARD", "ブラウザ 進む");
-        Add("BROWSER_REFRESH", "ブラウザ 更新");
-        Add("BROWSER_STOP", "ブラウザ 停止");
-        Add("BROWSER_SEARCH", "ブラウザ 検索");
-        Add("BROWSER_FAVORITES", "ブラウザ お気に入り");
-        Add("BROWSER_HOME", "ブラウザ ホーム");
-        Add("VOLUME_MUTE", "音量ミュート");
-        Add("VOLUME_DOWN", "音量ダウン");
-        Add("VOLUME_UP", "音量アップ");
-        Add("MEDIA_NEXT_TRACK", "次の曲");
-        Add("MEDIA_PREV_TRACK", "前の曲");
-        Add("MEDIA_STOP", "メディア停止");
-        Add("MEDIA_PLAY_PAUSE", "再生/一時停止");
-        Add("LAUNCH_MAIL", "メール起動");
-        Add("LAUNCH_MEDIA_SELECT", "メディア選択");
-        Add("LAUNCH_APP1", "アプリ1");
-        Add("LAUNCH_APP2", "アプリ2");
 
         return list;
     }
@@ -172,16 +139,7 @@ public static class SpecialKeyCatalog
         ["CTL"] = "CTRL",
         ["WINDOWS"] = "LWIN",
         ["WIN"] = "LWIN",
-        ["CAPSLOCK"] = "CAPITAL",
-        ["CAPS"] = "CAPITAL",
-        ["SCROLLLOCK"] = "SCROLL",
-        ["PRINTSCREEN"] = "SNAPSHOT",
-        ["PRTSC"] = "SNAPSHOT",
-        ["MULTIPLY_KEY"] = "MULTIPLY",
-        ["ADD_KEY"] = "ADD",
-        ["SUBTRACT_KEY"] = "SUBTRACT",
-        ["DECIMAL_KEY"] = "DECIMAL",
-        ["DIVIDE_KEY"] = "DIVIDE"
+        ["RWIN"] = "LWIN"
     };
 
     public static SpecialKeyOption Get(string? code)
@@ -189,35 +147,77 @@ public static class SpecialKeyCatalog
         if (string.IsNullOrWhiteSpace(code))
             return All[0];
 
-        var normalized = code.Trim();
-        if (Aliases.TryGetValue(normalized, out var alias))
-            normalized = alias;
-
+        var normalized = Normalize(code);
         return All.FirstOrDefault(x => string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase))
-               ?? All[0];
+               ?? All.First(x => x.Code == "ENTER");
     }
 
     public static bool Contains(string? code)
     {
         if (string.IsNullOrWhiteSpace(code)) return false;
-        var normalized = code.Trim();
-        if (Aliases.TryGetValue(normalized, out var alias))
-            normalized = alias;
+        var normalized = Normalize(code);
         return All.Any(x => string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase));
     }
+
+    public static string Normalize(string code)
+    {
+        var normalized = code.Trim();
+        return Aliases.TryGetValue(normalized, out var alias) ? alias : normalized.ToUpperInvariant();
+    }
+}
+
+public partial class HotkeyPartEditItem : ObservableObject
+{
+    private readonly ActionEditItem _owner;
+
+    public HotkeyPartEditItem(ActionEditItem owner, string code)
+    {
+        _owner = owner;
+        _code = SpecialKeyCatalog.Normalize(code);
+    }
+
+    [ObservableProperty] private string _code = "CTRL";
+
+    public IReadOnlyList<SpecialKeyOption> KeyOptions => SpecialKeyCatalog.All;
+
+    public SpecialKeyOption SelectedOption
+    {
+        get => SpecialKeyCatalog.Get(Code);
+        set
+        {
+            if (value is null) return;
+            if (string.Equals(Code, value.Code, StringComparison.OrdinalIgnoreCase)) return;
+            Code = value.Code;
+        }
+    }
+
+    partial void OnCodeChanged(string value)
+    {
+        OnPropertyChanged(nameof(SelectedOption));
+        _owner.SyncHotkeyValueFromParts();
+    }
+
+    [RelayCommand]
+    private void Remove() => _owner.RemoveHotkeyPart(this);
 }
 
 public partial class ActionEditItem : ObservableObject
 {
+    private bool _syncingHotkey;
+
     [ObservableProperty] private int _step = 1;
     [ObservableProperty] private string _type = "text";
     [ObservableProperty] private string _value = string.Empty;
     [ObservableProperty] private bool _isSelected;
 
+    public ObservableCollection<HotkeyPartEditItem> HotkeyParts { get; } = [];
+
     public IReadOnlyList<ActionTypeOption> TypeOptions => ActionTypeCatalog.All;
     public IReadOnlyList<SpecialKeyOption> SpecialKeyOptions => SpecialKeyCatalog.All;
 
     public bool IsKeyType => string.Equals(Type, "key", StringComparison.OrdinalIgnoreCase);
+    public bool IsHotkeyType => string.Equals(Type, "hotkey", StringComparison.OrdinalIgnoreCase);
+    public bool IsFreeTextType => !IsKeyType && !IsHotkeyType;
 
     public ActionTypeOption SelectedTypeOption
     {
@@ -245,21 +245,13 @@ public partial class ActionEditItem : ObservableObject
     public string Hint => ActionTypeCatalog.Get(Type).Hint;
     public string Placeholder => ActionTypeCatalog.Get(Type).Placeholder;
 
-    partial void OnTypeChanged(string value)
+    public ActionEditItem()
     {
-        if (string.Equals(value, "key", StringComparison.OrdinalIgnoreCase))
-        {
-            if (!SpecialKeyCatalog.Contains(Value))
-                Value = "ENTER";
-        }
-
-        OnPropertyChanged(nameof(SelectedTypeOption));
-        OnPropertyChanged(nameof(IsKeyType));
-        OnPropertyChanged(nameof(SelectedSpecialKey));
-        OnPropertyChanged(nameof(TypeLabel));
-        OnPropertyChanged(nameof(Hint));
-        OnPropertyChanged(nameof(Placeholder));
+        HotkeyParts.CollectionChanged += OnHotkeyPartsChanged;
     }
+
+    private void OnHotkeyPartsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        SyncHotkeyValueFromParts();
 
     partial void OnValueChanged(string value)
     {
@@ -267,19 +259,108 @@ public partial class ActionEditItem : ObservableObject
             OnPropertyChanged(nameof(SelectedSpecialKey));
     }
 
-    public ActionItem ToModel() => new() { Type = Type, Value = Value };
+    public void SyncHotkeyValueFromParts()
+    {
+        if (_syncingHotkey) return;
+
+        var codes = HotkeyParts
+            .Select(p => SpecialKeyCatalog.Normalize(p.Code))
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .ToList();
+
+        var joined = codes.Count == 0 ? "CTRL+S" : string.Join("+", codes);
+        if (!string.Equals(Value, joined, StringComparison.Ordinal))
+            Value = joined;
+    }
+
+    public void LoadHotkeyPartsFromValue(string hotkey)
+    {
+        _syncingHotkey = true;
+        try
+        {
+            HotkeyParts.Clear();
+            var parts = hotkey.Split(['+', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length == 0)
+                parts = ["CTRL", "S"];
+
+            foreach (var part in parts)
+                HotkeyParts.Add(new HotkeyPartEditItem(this, part));
+
+            Value = string.Join("+", HotkeyParts.Select(p => SpecialKeyCatalog.Normalize(p.Code)));
+        }
+        finally
+        {
+            _syncingHotkey = false;
+        }
+    }
+
+    partial void OnTypeChanged(string value)
+    {
+        if (string.Equals(value, "key", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!SpecialKeyCatalog.Contains(Value))
+                Value = "ENTER";
+        }
+        else if (string.Equals(value, "hotkey", StringComparison.OrdinalIgnoreCase))
+        {
+            if (HotkeyParts.Count == 0)
+                LoadHotkeyPartsFromValue(string.IsNullOrWhiteSpace(Value) ? "CTRL+S" : Value);
+            else
+                SyncHotkeyValueFromParts();
+        }
+
+        OnPropertyChanged(nameof(SelectedTypeOption));
+        OnPropertyChanged(nameof(IsKeyType));
+        OnPropertyChanged(nameof(IsHotkeyType));
+        OnPropertyChanged(nameof(IsFreeTextType));
+        OnPropertyChanged(nameof(SelectedSpecialKey));
+        OnPropertyChanged(nameof(TypeLabel));
+        OnPropertyChanged(nameof(Hint));
+        OnPropertyChanged(nameof(Placeholder));
+    }
+
+    [RelayCommand]
+    private void AddHotkeyPart()
+    {
+        if (!IsHotkeyType) return;
+        HotkeyParts.Add(new HotkeyPartEditItem(this, "A"));
+    }
+
+    public void RemoveHotkeyPart(HotkeyPartEditItem part)
+    {
+        if (HotkeyParts.Count <= 1) return;
+        HotkeyParts.Remove(part);
+    }
+
+    public ActionItem ToModel()
+    {
+        if (IsHotkeyType)
+            SyncHotkeyValueFromParts();
+        return new ActionItem { Type = Type, Value = Value };
+    }
 
     public static ActionEditItem FromModel(ActionItem a)
     {
         var type = string.IsNullOrWhiteSpace(a.Type) ? "text" : a.Type;
         var value = a.Value ?? string.Empty;
-        if (string.Equals(type, "key", StringComparison.OrdinalIgnoreCase))
-            value = SpecialKeyCatalog.Get(value).Code;
+        var item = new ActionEditItem();
 
-        return new ActionEditItem
+        if (string.Equals(type, "key", StringComparison.OrdinalIgnoreCase))
         {
-            Type = type,
-            Value = value
-        };
+            item.Type = "key";
+            item.Value = SpecialKeyCatalog.Get(value).Code;
+        }
+        else if (string.Equals(type, "hotkey", StringComparison.OrdinalIgnoreCase))
+        {
+            item.LoadHotkeyPartsFromValue(string.IsNullOrWhiteSpace(value) ? "CTRL+S" : value);
+            item.Type = "hotkey";
+        }
+        else
+        {
+            item.Type = type;
+            item.Value = value;
+        }
+
+        return item;
     }
 }

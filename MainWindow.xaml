@@ -605,22 +605,29 @@
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{Binding StatusMessage}" />
 
-                <ToggleSwitch
+                <StackPanel
                     Grid.Column="1"
-                    VerticalAlignment="Center"
-                    AutomationProperties.Name="削除前に確認"
-                    Header="削除前に確認"
-                    IsOn="{Binding ConfirmBeforeDelete, Mode=TwoWay}"
-                    OffContent="OFF"
-                    OnContent="ON"
-                    ToolTipService.ToolTip="オフにすると、マクロ／手順の削除確認を出さずに削除します" />
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="削除前に確認" />
+                    <ToggleSwitch
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="削除前に確認"
+                        IsOn="{Binding ConfirmBeforeDelete, Mode=TwoWay}"
+                        OffContent="OFF"
+                        OnContent="ON"
+                        ToolTipService.ToolTip="オフにすると、マクロ／手順の削除確認を出さずに削除します" />
+                </StackPanel>
 
                 <TextBlock
                     x:Name="VersionText"
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.3.1" />
+                    Text="v2.3.2" />
             </Grid>
         </Border>
     </Grid>

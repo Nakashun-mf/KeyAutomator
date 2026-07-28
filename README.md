@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.4.1  
+**バージョン:** 2.4.2  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8
 
@@ -69,7 +69,7 @@
 
 ビルド済み zip:
 
-`dist\KeyAutomator-v2.4.1-win-x64-single.zip`
+`dist\KeyAutomator-v2.4.2-win-x64-single.zip`
 
 1. zip を USB / クラウド等でコピー
 2. 解凍し、`KeyAutomator.exe` を任意のフォルダへ置く

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using KeyAutomator.Models;
 using KeyAutomator.Services;
 using KeyAutomator.ViewModels;
 using Microsoft.UI.Windowing;

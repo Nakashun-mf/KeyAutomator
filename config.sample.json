@@ -9,6 +9,7 @@
       { "type": "key", "value": "TAB" },
       { "type": "text", "value": "p@ssword123" },
       { "type": "key", "value": "ENTER" },
+      { "type": "dialog", "value": "ログイン完了を確認したら OK を押してください" },
       { "type": "wait", "value": "1.0" },
       { "type": "hotkey", "value": "CTRL+S" }
     ]

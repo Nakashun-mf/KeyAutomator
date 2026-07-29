@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KeyAutomator.Models;
+using KeyAutomator.Services;
 
 namespace KeyAutomator.ViewModels;
 
@@ -88,6 +90,13 @@ public static class ActionTypeCatalog
             Label = "待機",
             Hint = "次の操作まで待ちます（秒・小数可）",
             Placeholder = "例: 0.5"
+        },
+        new()
+        {
+            Code = "dialog",
+            Label = "確認ダイアログ",
+            Hint = "メッセージを表示し、OK を押すまで次へ進みません",
+            Placeholder = "例: 入力先ウィンドウをアクティブにして OK"
         }
     ];
 
@@ -362,6 +371,15 @@ public partial class ActionEditItem : ObservableObject
             if (!MouseActionCatalog.Contains(Value))
                 Value = "RIGHT";
         }
+        else if (string.Equals(value, "dialog", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(Value) ||
+                double.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out _) ||
+                double.TryParse(Value, out _))
+            {
+                Value = UserDialog.DefaultMessage;
+            }
+        }
 
         OnPropertyChanged(nameof(SelectedTypeOption));
         OnPropertyChanged(nameof(IsKeyType));
@@ -415,6 +433,11 @@ public partial class ActionEditItem : ObservableObject
         {
             item.Type = "mouse";
             item.Value = MouseActionCatalog.Get(value).Code;
+        }
+        else if (string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase))
+        {
+            item.Type = "dialog";
+            item.Value = string.IsNullOrWhiteSpace(value) ? UserDialog.DefaultMessage : value;
         }
         else
         {

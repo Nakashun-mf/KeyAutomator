@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.4.2
+**バージョン:** 2.5.0
 
 ## 開発環境
 
@@ -22,7 +22,8 @@ vb_auto-key/
 ├── MainWindow.xaml(.cs)       # Fluent UI 管理画面
 ├── ViewModels/MainViewModel.cs
 ├── Models/MacroModels.cs
-├── Services/                  # Config / Settings / Paths / SendInput / CLI / Log
+├── Services/                  # Config / Settings / Paths / SendInput / CLI / Log / Dialog
+├── KeyAutomator.Tests/        # MSTest ユニットテスト
 ├── Assets/
 ├── SPEC.md
 ├── config.sample.json
@@ -76,7 +77,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.4.2"
+$ver = "2.5.0"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue

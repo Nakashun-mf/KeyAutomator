@@ -6,8 +6,14 @@ namespace KeyAutomator.Services;
 
 public sealed class AppSettings
 {
+    public const double DefaultActionDelaySec = 0.2;
+
     [JsonPropertyName("confirm_before_delete")]
     public bool ConfirmBeforeDelete { get; set; } = true;
+
+    /// <summary>各アクション実行後に挟む待機秒数（最後の手順の後は除く）。</summary>
+    [JsonPropertyName("action_delay_sec")]
+    public double ActionDelaySec { get; set; } = DefaultActionDelaySec;
 }
 
 public static class SettingsStore

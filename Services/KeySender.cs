@@ -144,6 +144,9 @@ public static class KeySender
                     Thread.Sleep((int)(Math.Max(0, sec) * 1000));
                 }
                 break;
+            case "dialog":
+                UserDialog.ShowOk(action.Value);
+                break;
             default:
                 ErrorLogger.Write($"未知のアクション種別: {action.Type}");
                 break;

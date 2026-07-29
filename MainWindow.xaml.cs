@@ -107,6 +107,7 @@ public sealed partial class MainWindow : Window
     private void AddText_Click(object sender, RoutedEventArgs e) => _vm.AddTextActionCommand.Execute(null);
     private void AddKey_Click(object sender, RoutedEventArgs e) => _vm.AddKeyActionCommand.Execute(null);
     private void AddWait_Click(object sender, RoutedEventArgs e) => _vm.AddWaitActionCommand.Execute(null);
+    private void AddDialog_Click(object sender, RoutedEventArgs e) => _vm.AddDialogActionCommand.Execute(null);
     private void AddHotkey_Click(object sender, RoutedEventArgs e) => _vm.AddHotkeyActionCommand.Execute(null);
     private void AddMouse_Click(object sender, RoutedEventArgs e) => _vm.AddMouseActionCommand.Execute(null);
     private async void RemoveAction_Click(object sender, RoutedEventArgs e) => await TryRemoveActionAsync();

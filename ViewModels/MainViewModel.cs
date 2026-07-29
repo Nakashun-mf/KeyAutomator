@@ -231,6 +231,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void AddWaitAction() => AddAction("wait", "0.5");
 
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void AddDialogAction() => AddAction("dialog", UserDialog.DefaultMessage);
+
     private void AddAction(string type, string value)
     {
         var item = ActionEditItem.FromModel(new ActionItem { Type = type, Value = value });
@@ -332,5 +335,6 @@ public partial class MainViewModel : ObservableObject
         AddHotkeyActionCommand.NotifyCanExecuteChanged();
         AddMouseActionCommand.NotifyCanExecuteChanged();
         AddWaitActionCommand.NotifyCanExecuteChanged();
+        AddDialogActionCommand.NotifyCanExecuteChanged();
     }
 }

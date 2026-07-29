@@ -64,4 +64,13 @@ internal static class NativeMethods
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+    public const uint MB_OK = 0x00000000;
+    public const uint MB_ICONINFORMATION = 0x00000040;
+    public const uint MB_SETFOREGROUND = 0x00010000;
+    public const uint MB_TOPMOST = 0x00040000;
+    public const uint MB_TASKMODAL = 0x00002000;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);
 }

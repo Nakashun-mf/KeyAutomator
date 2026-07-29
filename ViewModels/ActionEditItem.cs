@@ -413,6 +413,83 @@ public partial class ActionEditItem : ObservableObject
         return new ActionItem { Type = Type, Value = Value };
     }
 
+    public bool TryValidate(out string error)
+    {
+        error = string.Empty;
+        if (IsHotkeyType)
+        {
+            SyncHotkeyValueFromParts();
+            if (!IsValidHotkey(Value, out error))
+                return false;
+        }
+        else if (string.Equals(Type, "wait", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!double.TryParse(Value, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out _) &&
+                !double.TryParse(Value, out _))
+            {
+                error = "待機秒数は数値で入力してください";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static bool IsValidHotkey(string? hotkey, out string error)
+    {
+        error = string.Empty;
+        if (string.IsNullOrWhiteSpace(hotkey))
+        {
+            error = "ショートカットが空です";
+            return false;
+        }
+
+        var parts = hotkey.Split(['+', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0)
+        {
+            error = "ショートカットが空です";
+            return false;
+        }
+
+        var modifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var hasMain = false;
+        foreach (var part in parts)
+        {
+            var normalized = SpecialKeyCatalog.Normalize(part);
+            if (IsModifier(normalized))
+            {
+                if (!modifiers.Add(normalized))
+                {
+                    error = $"修飾キーが重複しています: {normalized}";
+                    return false;
+                }
+            }
+            else
+            {
+                if (hasMain)
+                {
+                    error = "メインキーは1つだけ指定してください";
+                    return false;
+                }
+
+                hasMain = true;
+            }
+        }
+
+        if (!hasMain)
+        {
+            error = "修飾キー以外のキーを1つ含めてください";
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsModifier(string code) =>
+        code is "CTRL" or "SHIFT" or "ALT" or "LWIN" or "RWIN" or "WIN" or "WINDOWS"
+            or "CONTROL" or "CTL" or "MENU";
+
     public static ActionEditItem FromModel(ActionItem a)
     {
         var type = string.IsNullOrWhiteSpace(a.Type) ? "text" : a.Type;

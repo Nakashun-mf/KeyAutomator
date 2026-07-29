@@ -27,13 +27,14 @@ public static class ConfigStore
         if (string.IsNullOrWhiteSpace(json))
             return [];
 
-        return JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions) ?? [];
+        return JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions)
+               ?? throw new InvalidDataException("config.json の内容を解釈できませんでした");
     }
 
     public static void Save(IEnumerable<MacroItem> macros)
     {
         var json = JsonSerializer.Serialize(macros.ToList(), JsonOptions);
-        File.WriteAllText(ConfigPath, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        AtomicFile.WriteAllText(ConfigPath, json);
     }
 
     public static MacroItem? FindById(IEnumerable<MacroItem> macros, int id) =>

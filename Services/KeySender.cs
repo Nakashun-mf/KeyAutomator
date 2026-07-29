@@ -103,23 +103,31 @@ public static class KeySender
     [
         VirtualKey.Up, VirtualKey.Down, VirtualKey.Left, VirtualKey.Right,
         VirtualKey.Home, VirtualKey.End, VirtualKey.PageUp, VirtualKey.PageDown,
-        VirtualKey.Insert, VirtualKey.Delete
+        VirtualKey.Insert, VirtualKey.Delete,
+        VirtualKey.LeftWindows, VirtualKey.RightWindows, VirtualKey.Application,
+        VirtualKey.NumberKeyLock, VirtualKey.Divide,
+        VirtualKey.NumberPad0, VirtualKey.NumberPad1, VirtualKey.NumberPad2, VirtualKey.NumberPad3,
+        VirtualKey.NumberPad4, VirtualKey.NumberPad5, VirtualKey.NumberPad6, VirtualKey.NumberPad7,
+        VirtualKey.NumberPad8, VirtualKey.NumberPad9
     ];
 
-    public static void ExecuteMacro(MacroItem macro, double? actionDelaySec = null)
+    public static void ExecuteMacro(
+        MacroItem macro,
+        double? actionDelaySec = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(macro);
 
         var delayMs = (int)(Math.Max(0, macro.DelaySec) * 1000);
-        if (delayMs > 0)
-            Thread.Sleep(delayMs);
+        Sleep(delayMs, cancellationToken);
 
         var stepDelayMs = (int)(Math.Max(0, actionDelaySec ?? ResolveActionDelaySec()) * 1000);
         for (var i = 0; i < macro.Actions.Count; i++)
         {
-            ExecuteAction(macro.Actions[i]);
+            cancellationToken.ThrowIfCancellationRequested();
+            ExecuteAction(macro.Actions[i], cancellationToken);
             if (stepDelayMs > 0 && i < macro.Actions.Count - 1)
-                Thread.Sleep(stepDelayMs);
+                Sleep(stepDelayMs, cancellationToken);
         }
     }
 
@@ -135,14 +143,18 @@ public static class KeySender
         }
     }
 
-    public static void ExecuteAction(ActionItem action)
+    public static void ExecuteAction(ActionItem action) =>
+        ExecuteAction(action, CancellationToken.None);
+
+    public static void ExecuteAction(ActionItem action, CancellationToken cancellationToken)
     {
         if (action is null) return;
+        cancellationToken.ThrowIfCancellationRequested();
 
         switch ((action.Type ?? string.Empty).Trim().ToLowerInvariant())
         {
             case "text":
-                SendText(action.Value ?? string.Empty);
+                SendText(action.Value ?? string.Empty, cancellationToken);
                 break;
             case "key":
                 SendKey(action.Value ?? string.Empty);
@@ -158,7 +170,11 @@ public static class KeySender
                         System.Globalization.CultureInfo.InvariantCulture, out var sec) ||
                     double.TryParse(action.Value, out sec))
                 {
-                    Thread.Sleep((int)(Math.Max(0, sec) * 1000));
+                    Sleep((int)(Math.Max(0, sec) * 1000), cancellationToken);
+                }
+                else
+                {
+                    ErrorLogger.Write($"wait の値が不正です: '{action.Value}'");
                 }
                 break;
             case "dialog":
@@ -170,12 +186,29 @@ public static class KeySender
         }
     }
 
-    public static void SendText(string text)
+    private static void Sleep(int milliseconds, CancellationToken cancellationToken)
+    {
+        if (milliseconds <= 0) return;
+        const int slice = 50;
+        var remaining = milliseconds;
+        while (remaining > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var step = Math.Min(slice, remaining);
+            Thread.Sleep(step);
+            remaining -= step;
+        }
+    }
+
+    public static void SendText(string text) => SendText(text, CancellationToken.None);
+
+    public static void SendText(string text, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(text)) return;
 
         foreach (var ch in text)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (ch == '\n')
             {
                 SendVirtualKey(VirtualKey.Enter, keyDown: true);
@@ -191,7 +224,7 @@ public static class KeySender
                 SendUnicodeChar(ch, keyDown: false);
             }
 
-            Thread.Sleep(5);
+            Sleep(5, cancellationToken);
         }
     }
 
@@ -372,6 +405,7 @@ public static class KeySender
         if (ExtendedKeys.Contains(key))
             flags |= NativeMethods.KEYEVENTF_EXTENDEDKEY;
 
+        var scan = (ushort)NativeMethods.MapVirtualKeyW((uint)key, NativeMethods.MAPVK_VK_TO_VSC);
         var input = new NativeMethods.INPUT
         {
             type = NativeMethods.INPUT_KEYBOARD,
@@ -380,7 +414,7 @@ public static class KeySender
                 ki = new NativeMethods.KEYBDINPUT
                 {
                     wVk = (ushort)key,
-                    wScan = 0,
+                    wScan = scan,
                     dwFlags = flags,
                     time = 0,
                     dwExtraInfo = IntPtr.Zero

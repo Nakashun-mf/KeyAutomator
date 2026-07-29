@@ -6,19 +6,56 @@ public static class CliRunner
 {
     public static bool IsCliMode(string[] args) => args is { Length: > 0 };
 
+    public static bool IsHelpRequest(string[] args) =>
+        args.Any(a =>
+            string.Equals(a, "-h", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(a, "--help", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(a, "/?", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(a, "-?", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(a, "help", StringComparison.OrdinalIgnoreCase));
+
+    public static string GetHelpText() =>
+        """
+        KeyAutomator — キー入力自動化
+
+        使い方:
+          KeyAutomator.exe                 GUI を起動
+          KeyAutomator.exe -1              ID=1 を実行
+          KeyAutomator.exe -id 1           同上
+          KeyAutomator.exe -alias NAME     引数名で実行
+          KeyAutomator.exe -NAME           同上（短縮）
+          KeyAutomator.exe -name "表示名"  表示名で実行
+          KeyAutomator.exe -h              このヘルプ
+
+        終了コード: 成功 0 / 失敗 1
+        ログ: 実行ファイルと同じフォルダの error.log
+        """;
+
     public static int Run(string[] args)
     {
         try
         {
+            if (IsHelpRequest(args))
+            {
+                TryWriteToConsole(GetHelpText());
+                return 0;
+            }
+
             var macro = ResolveMacro(args);
             if (macro is null)
             {
                 ErrorLogger.Write($"指定マクロが見つかりません: {string.Join(' ', args)}");
+                TryWriteToConsole("指定マクロが見つかりません。-h で使い方を表示します。");
                 return 1;
             }
 
             KeySender.ExecuteMacro(macro);
             return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            ErrorLogger.Write("CLI実行がキャンセルされました");
+            return 1;
         }
         catch (Exception ex)
         {
@@ -68,14 +105,12 @@ public static class CliRunner
                 return ConfigStore.FindByName(macros, args[i + 1]);
         }
 
-        // -1 / -login_ok（スペースなし）または「- 1」「- login_ok」（スペースあり）
         if (TryResolveShortForm(macros, args, out var shortHit))
             return shortHit;
 
         var first = args[0];
         if (!first.StartsWith('-'))
         {
-            // 素の引数: login_ok
             var byAlias = ConfigStore.FindByAlias(macros, first);
             if (byAlias is not null)
                 return byAlias;
@@ -117,5 +152,18 @@ public static class CliRunner
         }
 
         return false;
+    }
+
+    private static void TryWriteToConsole(string text)
+    {
+        try
+        {
+            NativeMethods.AttachConsole(NativeMethods.ATTACH_PARENT_PROCESS);
+            Console.WriteLine(text);
+        }
+        catch
+        {
+            ErrorLogger.Write(text);
+        }
     }
 }

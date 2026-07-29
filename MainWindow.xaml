@@ -100,7 +100,6 @@
                         CanReorderItems="True"
                         DragItemsCompleted="MacroList_DragItemsCompleted"
                         ItemsSource="{Binding Macros}"
-                        KeyDown="MacroList_KeyDown"
                         SelectionChanged="MacroList_SelectionChanged"
                         SelectionMode="Extended"
                         IsEnabled="{Binding IsIdle}"
@@ -436,7 +435,6 @@
                                     IsEnabled="{Binding IsIdle}"
                                     ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                     ItemsSource="{Binding Actions}"
-                                    KeyDown="ActionList_KeyDown"
                                     SelectionChanged="ActionList_SelectionChanged"
                                     SelectionMode="Extended"
                                     ToolTipService.ToolTip="Ctrl / Shift で複数選択。ドラッグで手順を並べ替えできます">
@@ -661,7 +659,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.7.0" />
+                    Text="v2.7.1" />
             </Grid>
         </Border>
     </Grid>

@@ -16,6 +16,7 @@ public sealed partial class MainWindow : Window
     private readonly MainViewModel _vm = new();
     private bool _syncingMacroSelection;
     private bool _syncingActionSelection;
+    private bool _isHandlingDelete;
     private CancellationTokenSource? _runCts;
 
     public MainWindow()
@@ -69,6 +70,9 @@ public sealed partial class MainWindow : Window
     {
         if (!_vm.ConfirmBeforeDelete)
             return true;
+
+        if (Content?.XamlRoot is null)
+            return false;
 
         var dialog = new ContentDialog
         {
@@ -133,19 +137,32 @@ public sealed partial class MainWindow : Window
 
     private async Task TryDeleteMacroAsync()
     {
-        if (_vm.IsBusy) return;
+        if (_isHandlingDelete || _vm.IsBusy) return;
         var targets = _vm.GetMacrosPendingDelete();
         if (targets.Count == 0) return;
 
-        var message = targets.Count == 1
-            ? $"ID {targets[0].Id}「{targets[0].Name}」を削除しますか？"
-            : $"選択した {targets.Count} 件のマクロを削除しますか？";
+        _isHandlingDelete = true;
+        try
+        {
+            var message = targets.Count == 1
+                ? $"ID {targets[0].Id}「{targets[0].Name}」を削除しますか？"
+                : $"選択した {targets.Count} 件のマクロを削除しますか？";
 
-        var ok = await ConfirmDeleteAsync("マクロを削除", message);
-        if (!ok) return;
+            var ok = await ConfirmDeleteAsync("マクロを削除", message);
+            if (!ok) return;
 
-        _vm.DeleteSelectedMacros();
-        SyncMacroListSelectionFromVm();
+            _vm.DeleteSelectedMacros();
+            SyncMacroListSelectionFromVm();
+        }
+        catch (Exception ex)
+        {
+            ErrorLogger.Write(ex, "マクロ削除");
+            _vm.StatusMessage = "削除中にエラーが発生しました";
+        }
+        finally
+        {
+            _isHandlingDelete = false;
+        }
     }
 
     private async void MacroList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -218,17 +235,31 @@ public sealed partial class MainWindow : Window
     }
 
     private static bool IsEditingTextualControl(object? focused) =>
-        focused is TextBox or ComboBox;
+        focused is TextBox or ComboBox or NumberBox or AutoSuggestBox;
+
+    private object? TryGetFocusedElement()
+    {
+        try
+        {
+            if (Content?.XamlRoot is null) return null;
+            return FocusManager.GetFocusedElement(Content.XamlRoot);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     private async void MacroList_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Delete)
             return;
-        if (IsEditingTextualControl(FocusManager.GetFocusedElement(Content.XamlRoot)))
+        if (IsEditingTextualControl(TryGetFocusedElement()))
             return;
 
         e.Handled = true;
-        await TryDeleteMacroAsync();
+        // KeyDown 中に ContentDialog を出すと落ちることがあるため、次のティックへ退避
+        DispatcherQueue.TryEnqueue(() => _ = TryDeleteMacroAsync());
     }
 
     private void MacroList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args) =>
@@ -253,29 +284,42 @@ public sealed partial class MainWindow : Window
 
     private async Task TryRemoveActionAsync()
     {
-        if (_vm.IsBusy) return;
+        if (_isHandlingDelete || _vm.IsBusy) return;
         var targets = _vm.GetActionsPendingDelete();
         if (targets.Count == 0) return;
 
-        var message = targets.Count == 1
-            ? $"手順 {targets[0].Step}（{targets[0].TypeLabel}）を削除しますか？"
-            : $"選択した {targets.Count} 件の手順を削除しますか？";
+        _isHandlingDelete = true;
+        try
+        {
+            var message = targets.Count == 1
+                ? $"手順 {targets[0].Step}（{targets[0].TypeLabel}）を削除しますか？"
+                : $"選択した {targets.Count} 件の手順を削除しますか？";
 
-        var ok = await ConfirmDeleteAsync("手順を削除", message);
-        if (ok)
-            _vm.RemoveSelectedActions();
+            var ok = await ConfirmDeleteAsync("手順を削除", message);
+            if (ok)
+                _vm.RemoveSelectedActions();
+        }
+        catch (Exception ex)
+        {
+            ErrorLogger.Write(ex, "手順削除");
+            _vm.StatusMessage = "削除中にエラーが発生しました";
+        }
+        finally
+        {
+            _isHandlingDelete = false;
+        }
     }
 
-    private async void ActionList_KeyDown(object sender, KeyRoutedEventArgs e)
+    private void ActionList_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Delete)
             return;
 
-        if (IsEditingTextualControl(FocusManager.GetFocusedElement(Content.XamlRoot)))
+        if (IsEditingTextualControl(TryGetFocusedElement()))
             return;
 
         e.Handled = true;
-        await TryRemoveActionAsync();
+        DispatcherQueue.TryEnqueue(() => _ = TryRemoveActionAsync());
     }
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)

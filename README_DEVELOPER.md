@@ -51,6 +51,13 @@ CLI:
 dotnet run -c Release -p:Platform=x64 -- -1
 ```
 
+## ユニットテスト
+
+```powershell
+$Platform = $env:PROCESSOR_ARCHITECTURE
+dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj -c Debug -p:Platform=$Platform
+```
+
 ## 配布用 publish（単一 exe・正式手段）
 
 WinUI 3（非パッケージ）は `PublishSingleFile` + `IncludeAllContentForSelfExtract` で **単一 exe** にできます。  

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using KeyAutomator.Services;
 using KeyAutomator.ViewModels;
 using Microsoft.UI.Windowing;
@@ -12,6 +13,9 @@ namespace KeyAutomator;
 public sealed partial class MainWindow : Window
 {
     private readonly MainViewModel _vm = new();
+    private bool _syncingMacroSelection;
+    private bool _syncingActionSelection;
+    private CancellationTokenSource? _runCts;
 
     public MainWindow()
     {
@@ -23,10 +27,26 @@ public sealed partial class MainWindow : Window
 
         RootGrid.DataContext = _vm;
         VersionText.Text = $"v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "2.0.0"}";
+        _vm.PropertyChanged += OnViewModelPropertyChanged;
 
-        // ComboBox 等にフォーカスがあっても Delete を拾う
         ActionList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(ActionList_KeyDown), handledEventsToo: true);
         MacroList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(MacroList_KeyDown), handledEventsToo: true);
+
+        SyncMacroListSelectionFromVm();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(MainViewModel.SelectedMacro))
+            return;
+        if (_syncingMacroSelection)
+            return;
+
+        if (ReferenceEquals(MacroList.SelectedItem, _vm.SelectedMacro) &&
+            MacroList.SelectedItems.Count == (_vm.SelectedMacro is null ? 0 : 1))
+            return;
+
+        SyncMacroListSelectionFromVm();
     }
 
     private void TryResize(int width, int height)
@@ -62,32 +82,148 @@ public sealed partial class MainWindow : Window
         return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
-    private void NewButton_Click(object sender, RoutedEventArgs e) => _vm.NewMacroCommand.Execute(null);
-
-    private void CloneButton_Click(object sender, RoutedEventArgs e)
+    private async Task<ContentDialogResult> PromptDirtyAsync()
     {
-        if (!_vm.HasSelection) return;
+        var dialog = new ContentDialog
+        {
+            Title = "未保存の変更",
+            Content = "編集中の内容が保存されていません。どうしますか？",
+            PrimaryButtonText = "保存",
+            SecondaryButtonText = "破棄",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot
+        };
+        return await dialog.ShowAsync();
+    }
+
+    private async Task<bool> EnsureCanLeaveEditorAsync()
+    {
+        if (!_vm.IsDirty)
+            return true;
+
+        var result = await PromptDirtyAsync();
+        if (result == ContentDialogResult.None)
+            return false;
+        if (result == ContentDialogResult.Primary)
+            return _vm.TrySaveMacro();
+        // Secondary = discard
+        _vm.CancelEditCommand.Execute(null);
+        return true;
+    }
+
+    private async void NewButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.IsBusy) return;
+        if (!await EnsureCanLeaveEditorAsync()) return;
+        _vm.NewMacroCommand.Execute(null);
+        SyncMacroListSelectionFromVm();
+    }
+
+    private async void CloneButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_vm.HasSelection || _vm.IsBusy) return;
+        if (!await EnsureCanLeaveEditorAsync()) return;
         _vm.CloneMacroCommand.Execute(null);
+        SyncMacroListSelectionFromVm();
     }
 
     private async void DeleteButton_Click(object sender, RoutedEventArgs e) => await TryDeleteMacroAsync();
 
     private async Task TryDeleteMacroAsync()
     {
-        if (_vm.SelectedMacro is null) return;
+        if (_vm.IsBusy) return;
+        var targets = _vm.GetMacrosPendingDelete();
+        if (targets.Count == 0) return;
 
-        var ok = await ConfirmDeleteAsync(
-            "マクロを削除",
-            $"ID {_vm.SelectedMacro.Id}「{_vm.SelectedMacro.Name}」を削除しますか？");
-        if (ok)
-            _vm.DeleteSelectedMacro();
+        var message = targets.Count == 1
+            ? $"ID {targets[0].Id}「{targets[0].Name}」を削除しますか？"
+            : $"選択した {targets.Count} 件のマクロを削除しますか？";
+
+        var ok = await ConfirmDeleteAsync("マクロを削除", message);
+        if (!ok) return;
+
+        _vm.DeleteSelectedMacros();
+        SyncMacroListSelectionFromVm();
     }
+
+    private async void MacroList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingMacroSelection) return;
+
+        var selected = MacroList.SelectedItems.Cast<MacroItem>().ToList();
+        var primary = MacroList.SelectedItem as MacroItem;
+
+        if (!ReferenceEquals(primary, _vm.SelectedMacro) && _vm.IsDirty)
+        {
+            var result = await PromptDirtyAsync();
+            if (result == ContentDialogResult.None)
+            {
+                RestoreMacroSelection(_vm.SelectedMacro);
+                return;
+            }
+
+            if (result == ContentDialogResult.Primary && !_vm.TrySaveMacro())
+            {
+                RestoreMacroSelection(_vm.SelectedMacro);
+                return;
+            }
+
+            if (result == ContentDialogResult.Secondary)
+                _vm.CancelEditCommand.Execute(null);
+        }
+
+        _vm.SyncMacroSelection(selected);
+        if (!ReferenceEquals(primary, _vm.SelectedMacro))
+            _vm.SelectedMacro = primary;
+    }
+
+    private void RestoreMacroSelection(MacroItem? macro)
+    {
+        _syncingMacroSelection = true;
+        try
+        {
+            MacroList.SelectedItems.Clear();
+            if (macro is not null)
+                MacroList.SelectedItems.Add(macro);
+        }
+        finally
+        {
+            _syncingMacroSelection = false;
+        }
+    }
+
+    private void SyncMacroListSelectionFromVm()
+    {
+        _syncingMacroSelection = true;
+        try
+        {
+            MacroList.SelectedItems.Clear();
+            if (_vm.SelectedMacro is not null)
+                MacroList.SelectedItems.Add(_vm.SelectedMacro);
+        }
+        finally
+        {
+            _syncingMacroSelection = false;
+        }
+    }
+
+    private void ActionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingActionSelection) return;
+        var selected = ActionList.SelectedItems.Cast<ActionEditItem>().ToList();
+        _vm.SyncActionSelection(selected);
+        _vm.SelectedAction = ActionList.SelectedItem as ActionEditItem;
+    }
+
+    private static bool IsEditingTextualControl(object? focused) =>
+        focused is TextBox or ComboBox;
 
     private async void MacroList_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Delete)
             return;
-        if (FocusManager.GetFocusedElement(Content.XamlRoot) is TextBox)
+        if (IsEditingTextualControl(FocusManager.GetFocusedElement(Content.XamlRoot)))
             return;
 
         e.Handled = true;
@@ -116,15 +252,17 @@ public sealed partial class MainWindow : Window
 
     private async Task TryRemoveActionAsync()
     {
-        if (_vm.SelectedAction is null) return;
+        if (_vm.IsBusy) return;
+        var targets = _vm.GetActionsPendingDelete();
+        if (targets.Count == 0) return;
 
-        var step = _vm.SelectedAction.Step;
-        var label = _vm.SelectedAction.TypeLabel;
-        var ok = await ConfirmDeleteAsync(
-            "手順を削除",
-            $"手順 {step}（{label}）を削除しますか？");
+        var message = targets.Count == 1
+            ? $"手順 {targets[0].Step}（{targets[0].TypeLabel}）を削除しますか？"
+            : $"選択した {targets.Count} 件の手順を削除しますか？";
+
+        var ok = await ConfirmDeleteAsync("手順を削除", message);
         if (ok)
-            _vm.RemoveSelectedAction();
+            _vm.RemoveSelectedActions();
     }
 
     private async void ActionList_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -132,7 +270,7 @@ public sealed partial class MainWindow : Window
         if (e.Key != VirtualKey.Delete)
             return;
 
-        if (FocusManager.GetFocusedElement(Content.XamlRoot) is TextBox)
+        if (IsEditingTextualControl(FocusManager.GetFocusedElement(Content.XamlRoot)))
             return;
 
         e.Handled = true;
@@ -141,13 +279,20 @@ public sealed partial class MainWindow : Window
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_vm.IsBusy)
+        {
+            _runCts?.Cancel();
+            _vm.StatusMessage = "中断しています…";
+            return;
+        }
+
         var macro = _vm.BuildCurrentMacroForRun();
         if (macro is null) return;
 
         var confirm = new ContentDialog
         {
             Title = "テスト実行",
-            Content = $"起動前ウェイト {macro.DelaySec:0.##} 秒の間に、入力先ウィンドウをアクティブにしてください。",
+            Content = $"起動前ウェイト {macro.DelaySec:0.##} 秒の間に、入力先ウィンドウをアクティブにしてください。\n実行中は「中断」で止められます。",
             PrimaryButtonText = "実行",
             CloseButtonText = "キャンセル",
             DefaultButton = ContentDialogButton.Primary,
@@ -157,14 +302,19 @@ public sealed partial class MainWindow : Window
         if (await confirm.ShowAsync() != ContentDialogResult.Primary)
             return;
 
+        _runCts = new CancellationTokenSource();
+        var token = _runCts.Token;
         _vm.IsBusy = true;
-        TestButton.IsEnabled = false;
-        _vm.StatusMessage = "実行中…";
+        _vm.StatusMessage = "実行中…（中断ボタンで停止）";
         try
         {
-            AppWindow.Hide();
-            await Task.Run(() => KeySender.ExecuteMacro(macro));
-            _vm.StatusMessage = "テスト実行完了";
+            // ウィンドウは隠さず、ダイアログ／フォーカスの問題を避ける
+            await Task.Run(() => KeySender.ExecuteMacro(macro, _vm.ActionDelaySec, token), token);
+            _vm.StatusMessage = token.IsCancellationRequested ? "実行を中断しました" : "テスト実行完了";
+        }
+        catch (OperationCanceledException)
+        {
+            _vm.StatusMessage = "実行を中断しました";
         }
         catch (Exception ex)
         {
@@ -181,10 +331,10 @@ public sealed partial class MainWindow : Window
         }
         finally
         {
-            AppWindow.Show();
             Activate();
             _vm.IsBusy = false;
-            TestButton.IsEnabled = true;
+            _runCts?.Dispose();
+            _runCts = null;
         }
     }
 }

@@ -13,6 +13,8 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<MacroItem> Macros { get; } = [];
     public ObservableCollection<ActionEditItem> Actions { get; } = [];
+    public ObservableCollection<MacroItem> SelectedMacros { get; } = [];
+    public ObservableCollection<ActionEditItem> SelectedActions { get; } = [];
 
     [ObservableProperty] private MacroItem? _selectedMacro;
     [ObservableProperty] private ActionEditItem? _selectedAction;
@@ -21,48 +23,96 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _editAlias = string.Empty;
     [ObservableProperty] private double _editDelaySec;
     [ObservableProperty] private bool _hasSelection;
+    [ObservableProperty] private bool _hasMacroMultiSelection;
+    [ObservableProperty] private bool _hasActionSelection;
     [ObservableProperty] private string _statusMessage = "準備完了";
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isIdle = true;
     [ObservableProperty] private string _actionSummary = "手順はまだありません";
     [ObservableProperty] private bool _confirmBeforeDelete = true;
     [ObservableProperty] private double _actionDelaySec = AppSettings.DefaultActionDelaySec;
+    [ObservableProperty] private bool _isDirty;
+    [ObservableProperty] private string _testButtonLabel = "テスト実行";
 
     private AppSettings _settings = new();
+    private bool _loadingSettings;
+    private bool _loadingEditor;
+    private bool _suppressDirty;
 
     public MainViewModel()
     {
         Actions.CollectionChanged += OnActionsChanged;
+        _loadingSettings = true;
         _settings = SettingsStore.Load();
         ConfirmBeforeDelete = _settings.ConfirmBeforeDelete;
         ActionDelaySec = _settings.ActionDelaySec;
+        _loadingSettings = false;
         Reload();
     }
 
     partial void OnConfirmBeforeDeleteChanged(bool value)
     {
+        if (_loadingSettings) return;
         _settings.ConfirmBeforeDelete = value;
         SettingsStore.Save(_settings);
     }
 
     partial void OnActionDelaySecChanged(double value)
     {
+        if (_loadingSettings) return;
         _settings.ActionDelaySec = Math.Max(0, value);
         SettingsStore.Save(_settings);
     }
+
+    partial void OnEditIdChanged(double value) => MarkDirty();
+    partial void OnEditNameChanged(string value) => MarkDirty();
+    partial void OnEditAliasChanged(string value) => MarkDirty();
+    partial void OnEditDelaySecChanged(double value) => MarkDirty();
+
+    private void MarkDirty()
+    {
+        if (_suppressDirty || _loadingEditor) return;
+        IsDirty = true;
+    }
+
+    private void ClearDirty() => IsDirty = false;
 
     private void OnActionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         RenumberSteps();
         UpdateActionSummary();
         SyncActionSelectionHighlight();
+        MarkDirty();
+
+        if (e.NewItems is not null)
+        {
+            foreach (ActionEditItem item in e.NewItems)
+                item.PropertyChanged += OnActionItemPropertyChanged;
+        }
+
+        if (e.OldItems is not null)
+        {
+            foreach (ActionEditItem item in e.OldItems)
+                item.PropertyChanged -= OnActionItemPropertyChanged;
+        }
     }
 
-    partial void OnSelectedActionChanged(ActionEditItem? value) => SyncActionSelectionHighlight();
+    private void OnActionItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ActionEditItem.Type) or nameof(ActionEditItem.Value))
+            MarkDirty();
+    }
+
+    partial void OnSelectedActionChanged(ActionEditItem? value)
+    {
+        SyncActionSelectionHighlight();
+        UpdateActionSelectionFlags();
+    }
 
     private void SyncActionSelectionHighlight()
     {
         foreach (var action in Actions)
-            action.IsSelected = ReferenceEquals(action, SelectedAction);
+            action.IsSelected = SelectedActions.Contains(action) || ReferenceEquals(action, SelectedAction);
     }
 
     private void RenumberSteps()
@@ -75,26 +125,72 @@ public partial class MainViewModel : ObservableObject
     {
         ActionSummary = Actions.Count == 0
             ? "手順はまだありません。下のボタンから追加してください。"
-            : $"上から順に {Actions.Count} 手順を実行します";
+            : $"上から順に {Actions.Count} 手順を実行します（手順間隔 {ActionDelaySec:0.##} 秒）";
     }
 
     partial void OnSelectedMacroChanged(MacroItem? value)
     {
-        HasSelection = value is not null;
-        if (value is null)
-        {
-            ClearEditor();
-            return;
-        }
+        HasSelection = value is not null || SelectedMacros.Count > 0;
+        LoadEditorFrom(value);
+    }
 
-        EditId = value.Id;
-        EditName = value.Name;
-        EditAlias = value.Alias;
-        EditDelaySec = value.DelaySec;
-        Actions.Clear();
-        foreach (var a in value.Actions)
-            Actions.Add(ActionEditItem.FromModel(a));
-        UpdateActionSummary();
+    public void LoadEditorFrom(MacroItem? value)
+    {
+        _loadingEditor = true;
+        _suppressDirty = true;
+        try
+        {
+            if (value is null)
+            {
+                ClearEditor();
+                return;
+            }
+
+            EditId = value.Id;
+            EditName = value.Name;
+            EditAlias = value.Alias;
+            EditDelaySec = value.DelaySec;
+            Actions.Clear();
+            foreach (var a in value.Actions)
+                Actions.Add(ActionEditItem.FromModel(a));
+            UpdateActionSummary();
+            ClearDirty();
+        }
+        finally
+        {
+            _loadingEditor = false;
+            _suppressDirty = false;
+        }
+    }
+
+    public void SyncMacroSelection(IReadOnlyList<MacroItem> selected)
+    {
+        SelectedMacros.Clear();
+        foreach (var m in selected)
+            SelectedMacros.Add(m);
+
+        HasMacroMultiSelection = SelectedMacros.Count > 1;
+        HasSelection = SelectedMacro is not null || SelectedMacros.Count > 0;
+        DeleteMacroCommand.NotifyCanExecuteChanged();
+        CloneMacroCommand.NotifyCanExecuteChanged();
+    }
+
+    public void SyncActionSelection(IReadOnlyList<ActionEditItem> selected)
+    {
+        SelectedActions.Clear();
+        foreach (var a in selected)
+            SelectedActions.Add(a);
+
+        UpdateActionSelectionFlags();
+        SyncActionSelectionHighlight();
+    }
+
+    private void UpdateActionSelectionFlags()
+    {
+        HasActionSelection = SelectedAction is not null || SelectedActions.Count > 0;
+        RemoveActionCommand.NotifyCanExecuteChanged();
+        MoveActionUpCommand.NotifyCanExecuteChanged();
+        MoveActionDownCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -109,15 +205,25 @@ public partial class MainViewModel : ObservableObject
 
             StatusMessage = $"読込完了: {Macros.Count} 件";
             SelectedMacro = Macros.FirstOrDefault();
+            ClearDirty();
         }
         catch (Exception ex)
         {
             ErrorLogger.Write(ex, "GUI Load");
+            var backup = string.Empty;
+            try { backup = AtomicFile.BackupIfExists(ConfigStore.ConfigPath); }
+            catch { /* ignore */ }
+
             Macros.Clear();
-            try { ConfigStore.Save([]); } catch { /* ignore */ }
-            StatusMessage = "設定の読み込みに失敗したため空で開始しました";
+            SelectedMacro = null;
+            StatusMessage = string.IsNullOrEmpty(backup)
+                ? "設定の読み込みに失敗しました（空の一覧で開始。破損ファイルは上書きしていません）"
+                : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}";
+            ClearDirty();
         }
     }
+
+    public bool TryPrepareMacroSwitch() => !IsDirty;
 
     [RelayCommand]
     private void NewMacro()
@@ -132,10 +238,11 @@ public partial class MainViewModel : ObservableObject
         Macros.Add(item);
         Persist();
         SelectedMacro = item;
+        ClearDirty();
         StatusMessage = $"新規作成: ID {item.Id}";
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanCloneMacro))]
     private void CloneMacro()
     {
         if (SelectedMacro is null) return;
@@ -146,43 +253,83 @@ public partial class MainViewModel : ObservableObject
         Macros.Add(copy);
         Persist();
         SelectedMacro = copy;
+        ClearDirty();
         StatusMessage = $"複製: ID {copy.Id}";
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void DeleteMacro()
+    private bool CanCloneMacro() => SelectedMacro is not null && !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteMacros))]
+    private void DeleteMacro() => DeleteSelectedMacros();
+
+    private bool CanDeleteMacros() =>
+        !IsBusy && (SelectedMacro is not null || SelectedMacros.Count > 0);
+
+    public void DeleteSelectedMacros()
     {
-        if (SelectedMacro is null) return;
-        var id = SelectedMacro.Id;
-        Macros.Remove(SelectedMacro);
+        var targets = SelectedMacros.Count > 0
+            ? SelectedMacros.ToList()
+            : SelectedMacro is null ? [] : [SelectedMacro];
+
+        if (targets.Count == 0) return;
+
+        foreach (var m in targets)
+            Macros.Remove(m);
+
         Persist();
+        SelectedMacros.Clear();
         SelectedMacro = Macros.FirstOrDefault();
-        StatusMessage = $"削除: ID {id}";
+        ClearDirty();
+        StatusMessage = targets.Count == 1
+            ? $"削除: ID {targets[0].Id}"
+            : $"削除: {targets.Count} 件";
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void SaveMacro()
+    public IReadOnlyList<MacroItem> GetMacrosPendingDelete() =>
+        SelectedMacros.Count > 0
+            ? SelectedMacros.ToList()
+            : SelectedMacro is null ? [] : [SelectedMacro];
+
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
+    private void SaveMacro() => TrySaveMacro();
+
+    private bool CanEditMacro() => SelectedMacro is not null && !IsBusy;
+
+    public bool TrySaveMacro()
     {
-        if (SelectedMacro is null) return;
+        if (SelectedMacro is null) return false;
 
         if (string.IsNullOrWhiteSpace(EditName))
         {
             StatusMessage = "マクロ名を入力してください";
-            return;
+            return false;
+        }
+
+        if (Math.Abs(EditId - Math.Round(EditId)) > 0.001)
+        {
+            StatusMessage = "ID は整数で入力してください";
+            return false;
+        }
+
+        var id = (int)Math.Round(EditId);
+        if (id < 1)
+        {
+            StatusMessage = "ID は 1 以上にしてください";
+            return false;
         }
 
         var alias = (EditAlias ?? string.Empty).Trim();
         if (!MacroItem.IsValidAlias(alias, out var aliasError))
         {
             StatusMessage = aliasError;
-            return;
+            return false;
         }
 
         var originalId = SelectedMacro.Id;
-        if (Macros.Any(m => m.Id == (int)EditId && m.Id != originalId))
+        if (Macros.Any(m => m.Id == id && m.Id != originalId))
         {
-            StatusMessage = $"ID {(int)EditId} は既に使用されています";
-            return;
+            StatusMessage = $"ID {id} は既に使用されています";
+            return false;
         }
 
         if (!string.IsNullOrEmpty(alias) &&
@@ -190,10 +337,19 @@ public partial class MainViewModel : ObservableObject
                             string.Equals(m.Alias, alias, StringComparison.OrdinalIgnoreCase)))
         {
             StatusMessage = $"引数名「{alias}」は既に使用されています";
-            return;
+            return false;
         }
 
-        SelectedMacro.Id = (int)EditId;
+        foreach (var action in Actions)
+        {
+            if (!action.TryValidate(out var actionError))
+            {
+                StatusMessage = $"手順 {action.Step}: {actionError}";
+                return false;
+            }
+        }
+
+        SelectedMacro.Id = id;
         SelectedMacro.Name = EditName.Trim();
         SelectedMacro.Alias = alias;
         SelectedMacro.DelaySec = EditDelaySec;
@@ -201,45 +357,51 @@ public partial class MainViewModel : ObservableObject
 
         Persist();
 
-        // ObservableCollection は要素プロパティ変更を通知しないため、差し替えて左一覧を更新する
         var index = Macros.IndexOf(SelectedMacro);
         var saved = SelectedMacro;
         if (index >= 0)
             Macros[index] = saved;
 
+        _suppressDirty = true;
         SelectedMacro = null;
         SelectedMacro = saved;
+        _suppressDirty = false;
+        ClearDirty();
         StatusMessage = string.IsNullOrEmpty(alias)
             ? "保存しました"
             : $"保存しました（引数: -alias {alias} / -{alias}）";
+        return true;
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void CancelEdit()
     {
         if (SelectedMacro is null) return;
         var current = SelectedMacro;
+        _suppressDirty = true;
         SelectedMacro = null;
         SelectedMacro = current;
+        _suppressDirty = false;
+        ClearDirty();
         StatusMessage = "編集を破棄しました";
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddTextAction() => AddAction("text", string.Empty);
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddKeyAction() => AddAction("key", "ENTER");
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddHotkeyAction() => AddAction("hotkey", "CTRL+S");
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddMouseAction() => AddAction("mouse", "RIGHT");
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddWaitAction() => AddAction("wait", "0.5");
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddDialogAction() => AddAction("dialog", UserDialog.DefaultMessage);
 
     private void AddAction(string type, string value)
@@ -247,28 +409,56 @@ public partial class MainViewModel : ObservableObject
         var item = ActionEditItem.FromModel(new ActionItem { Type = type, Value = value });
         Actions.Add(item);
         SelectedAction = item;
+        SelectedActions.Clear();
+        SelectedActions.Add(item);
+        SyncActionSelectionHighlight();
     }
 
-    [RelayCommand]
-    private void RemoveAction()
+    [RelayCommand(CanExecute = nameof(HasActionSelection))]
+    private void RemoveAction() => RemoveSelectedActions();
+
+    public void RemoveSelectedActions()
     {
-        if (SelectedAction is null) return;
-        Actions.Remove(SelectedAction);
+        var targets = SelectedActions.Count > 0
+            ? SelectedActions.ToList()
+            : SelectedAction is null ? [] : [SelectedAction];
+
+        if (targets.Count == 0) return;
+
+        foreach (var a in targets)
+            Actions.Remove(a);
+
+        SelectedActions.Clear();
         SelectedAction = Actions.LastOrDefault();
+        UpdateActionSelectionFlags();
     }
+
+    public IReadOnlyList<ActionEditItem> GetActionsPendingDelete() =>
+        SelectedActions.Count > 0
+            ? SelectedActions.ToList()
+            : SelectedAction is null ? [] : [SelectedAction];
 
     /// <summary>確認なしで手順を削除（UI側で確認済みのとき呼ぶ）</summary>
-    public void RemoveSelectedAction() => RemoveAction();
+    public void RemoveSelectedAction() => RemoveSelectedActions();
 
     /// <summary>確認なしでマクロ削除（UI側で確認済みのとき呼ぶ）</summary>
-    public void DeleteSelectedMacro() => DeleteMacro();
+    public void DeleteSelectedMacro() => DeleteSelectedMacros();
 
-
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanMoveActionUp))]
     private void MoveActionUp() => MoveAction(-1);
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanMoveActionDown))]
     private void MoveActionDown() => MoveAction(1);
+
+    private bool CanMoveActionUp() =>
+        !IsBusy && SelectedAction is not null && Actions.IndexOf(SelectedAction) > 0;
+
+    private bool CanMoveActionDown()
+    {
+        if (IsBusy || SelectedAction is null) return false;
+        var idx = Actions.IndexOf(SelectedAction);
+        return idx >= 0 && idx < Actions.Count - 1;
+    }
 
     private void MoveAction(int delta)
     {
@@ -278,6 +468,8 @@ public partial class MainViewModel : ObservableObject
         if (idx < 0 || newIdx < 0 || newIdx >= Actions.Count) return;
         Actions.Move(idx, newIdx);
         RenumberSteps();
+        MoveActionUpCommand.NotifyCanExecuteChanged();
+        MoveActionDownCommand.NotifyCanExecuteChanged();
     }
 
     public MacroItem? BuildCurrentMacroForRun()
@@ -285,7 +477,7 @@ public partial class MainViewModel : ObservableObject
         if (SelectedMacro is null) return null;
         return new MacroItem
         {
-            Id = (int)EditId,
+            Id = (int)Math.Round(EditId),
             Name = EditName.Trim(),
             Alias = (EditAlias ?? string.Empty).Trim(),
             DelaySec = EditDelaySec,
@@ -301,7 +493,9 @@ public partial class MainViewModel : ObservableObject
         EditDelaySec = 0;
         Actions.Clear();
         SelectedAction = null;
+        SelectedActions.Clear();
         UpdateActionSummary();
+        ClearDirty();
     }
 
     /// <summary>マクロ一覧の DnD 後に順序を保存</summary>
@@ -314,9 +508,9 @@ public partial class MainViewModel : ObservableObject
     /// <summary>手順 DnD 後に番号を振り直す</summary>
     public void OnActionsReordered()
     {
-        // CollectionChanged で番号更新済みの想定。状態表示のみ。
         UpdateActionSummary();
         StatusMessage = "手順の順序を変更しました（保存で確定）";
+        MarkDirty();
     }
 
     private void Persist()
@@ -332,7 +526,21 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    partial void OnHasSelectionChanged(bool value)
+    partial void OnHasSelectionChanged(bool value) => NotifyEditCommands();
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        IsIdle = !value;
+        TestButtonLabel = value ? "中断" : "テスト実行";
+        NotifyEditCommands();
+        DeleteMacroCommand.NotifyCanExecuteChanged();
+        CloneMacroCommand.NotifyCanExecuteChanged();
+        RemoveActionCommand.NotifyCanExecuteChanged();
+        MoveActionUpCommand.NotifyCanExecuteChanged();
+        MoveActionDownCommand.NotifyCanExecuteChanged();
+    }
+
+    private void NotifyEditCommands()
     {
         CloneMacroCommand.NotifyCanExecuteChanged();
         DeleteMacroCommand.NotifyCanExecuteChanged();

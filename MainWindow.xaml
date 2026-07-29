@@ -88,7 +88,7 @@
                         <TextBlock FontSize="22" FontWeight="SemiBold" Text="マクロ一覧" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="選ぶと右で編集 / ドラッグで並べ替え" />
+                            Text="選ぶと右で編集 / Ctrl・Shiftで複数選択 / ドラッグで並べ替え" />
                     </StackPanel>
 
                     <ListView
@@ -101,9 +101,10 @@
                         DragItemsCompleted="MacroList_DragItemsCompleted"
                         ItemsSource="{Binding Macros}"
                         KeyDown="MacroList_KeyDown"
-                        SelectedItem="{Binding SelectedMacro, Mode=TwoWay}"
-                        SelectionMode="Single"
-                        ToolTipService.ToolTip="ドラッグで並べ替えできます">
+                        SelectionChanged="MacroList_SelectionChanged"
+                        SelectionMode="Extended"
+                        IsEnabled="{Binding IsIdle}"
+                        ToolTipService.ToolTip="Ctrl / Shift で複数選択。ドラッグで並べ替えできます">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Padding="4,8" ColumnSpacing="12">
@@ -432,12 +433,13 @@
                                     CanDragItems="True"
                                     CanReorderItems="True"
                                     DragItemsCompleted="ActionList_DragItemsCompleted"
+                                    IsEnabled="{Binding IsIdle}"
                                     ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                     ItemsSource="{Binding Actions}"
                                     KeyDown="ActionList_KeyDown"
-                                    SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
-                                    SelectionMode="Single"
-                                    ToolTipService.ToolTip="ドラッグで手順を並べ替えできます">
+                                    SelectionChanged="ActionList_SelectionChanged"
+                                    SelectionMode="Extended"
+                                    ToolTipService.ToolTip="Ctrl / Shift で複数選択。ドラッグで手順を並べ替えできます">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
@@ -578,17 +580,17 @@
                                     Content="保存"
                                     Style="{StaticResource AccentButtonStyle}" />
                                 <Button
-                                    AutomationProperties.Name="キャンセル"
+                                    AutomationProperties.Name="破棄"
                                     Click="CancelButton_Click"
                                     Content="破棄"
                                     Style="{StaticResource SlimButtonStyle}" />
                                 <Button
                                     x:Name="TestButton"
-                                    AutomationProperties.Name="テスト実行"
+                                    AutomationProperties.Name="テスト実行または中断"
                                     Click="TestButton_Click"
-                                    Content="テスト実行"
+                                    Content="{Binding TestButtonLabel}"
                                     Style="{StaticResource SlimButtonStyle}"
-                                    ToolTipService.ToolTip="待ち時間のあいだに入力先ウィンドウへ切り替えてください" />
+                                    ToolTipService.ToolTip="待ち時間のあいだに入力先ウィンドウへ切り替えてください。実行中は中断できます。" />
                             </StackPanel>
                         </Grid>
                     </ContentControl>
@@ -659,7 +661,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.6.0" />
+                    Text="v2.7.0" />
             </Grid>
         </Border>
     </Grid>

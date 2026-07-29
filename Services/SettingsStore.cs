@@ -52,7 +52,7 @@ public static class SettingsStore
         try
         {
             var json = JsonSerializer.Serialize(settings, JsonOptions);
-            File.WriteAllText(SettingsPath, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            AtomicFile.WriteAllText(SettingsPath, json);
         }
         catch (Exception ex)
         {

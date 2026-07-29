@@ -199,5 +199,32 @@ When integrating Phi Silica, Windows Vision, or other Windows AI APIs (see
   limitations in the instruction files or README so Copilot can pick the right
   approach.
 
+## Cursor Cloud specific instructions
+
+> **Platform reality:** Cursor Cloud Agents run on **Linux**, but `KeyAutomator`
+> is a **Windows-only WinUI 3 / Windows App SDK** desktop app (Win32 `SendInput`,
+> MSIX tooling, `net8.0-windows`). It **cannot be built, run, tested, or
+> published on the Linux VM.** A full build/run/publish requires a Windows
+> machine — follow `README_DEVELOPER.md` there. Do not spend effort trying to
+> make the app launch on Linux; it is fundamentally impossible.
+
+- **`dotnet build` fails on Linux by design.** The WinUI XAML compiler
+  (`XamlCompiler.exe`, shipped in `Microsoft.WindowsAppSDK`) is a Windows PE
+  binary, so build stops with MSB3073 / `Exec format error` (exit code 126).
+  This is expected on Linux, not a regression.
+- **What *does* work on Linux (dev tooling only):** package restore, editing,
+  and IntelliSense/analysis. Restore requires the Windows-targeting flag:
+  `dotnet restore -p:EnableWindowsTargeting=true` (without it you get
+  `NETSDK1100`). The same flag is needed for any `dotnet` command that touches
+  the project on Linux.
+- **.NET SDK location:** The .NET 8 SDK is installed at `~/.dotnet` and added to
+  `PATH` via `~/.bashrc` (with `DOTNET_CLI_TELEMETRY_OPTOUT=1`). Non-login shells
+  that don't source `~/.bashrc` must prepend `~/.dotnet` to `PATH` manually.
+- **No test project exists** in this repo (there is no `KeyAutomator.Tests`),
+  so `dotnet test` has nothing to run. The `.Tests` references in this file are
+  templated placeholders, not an existing project.
+- **Verifying app behavior** (GUI, CLI `-id`/`-alias`/`-name` execution, key
+  sending) must be done on Windows; it cannot be demonstrated from the Linux VM.
+
 
 

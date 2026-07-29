@@ -34,7 +34,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <!-- publish / dist ???????????? -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);publish\**;publish-sf\**;publish-folder\**;dist\**;*.binlog</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);publish\**;publish-sf\**;publish-folder\**;dist\**;*.binlog;KeyAutomator.Tests\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

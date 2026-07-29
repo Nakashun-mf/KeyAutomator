@@ -118,6 +118,7 @@ MSIX パッケージ化が必要な場合は `Package.appxmanifest` を利用し
 
 - リポジトリ: https://github.com/Nakashun-mf/KeyAutomator （Public / MIT）
 - 配布バイナリは GitHub Releases に添付
+- タグ `v*` の Release 公開時（または Actions の `Release` ワークフロー手動実行）に Windows 上で単一 exe をビルドし zip を添付
 - コミットメッセージは日本語（ファイル経由推奨）
 - `bin/`, `obj/`, `publish/`, `publish-sf/`, `dist/`, `config.json`, `settings.json`, `error.log` は `.gitignore` 対象
 

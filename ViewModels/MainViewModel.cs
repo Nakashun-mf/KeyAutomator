@@ -25,6 +25,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string _actionSummary = "手順はまだありません";
     [ObservableProperty] private bool _confirmBeforeDelete = true;
+    [ObservableProperty] private double _actionDelaySec = AppSettings.DefaultActionDelaySec;
 
     private AppSettings _settings = new();
 
@@ -33,12 +34,19 @@ public partial class MainViewModel : ObservableObject
         Actions.CollectionChanged += OnActionsChanged;
         _settings = SettingsStore.Load();
         ConfirmBeforeDelete = _settings.ConfirmBeforeDelete;
+        ActionDelaySec = _settings.ActionDelaySec;
         Reload();
     }
 
     partial void OnConfirmBeforeDeleteChanged(bool value)
     {
         _settings.ConfirmBeforeDelete = value;
+        SettingsStore.Save(_settings);
+    }
+
+    partial void OnActionDelaySecChanged(double value)
+    {
+        _settings.ActionDelaySec = Math.Max(0, value);
         SettingsStore.Save(_settings);
     }
 

@@ -14,10 +14,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>2.5.0</Version>
-    <AssemblyVersion>2.5.0.0</AssemblyVersion>
-    <FileVersion>2.5.0.0</FileVersion>
-    <InformationalVersion>2.5.0</InformationalVersion>
+    <Version>2.6.0</Version>
+    <AssemblyVersion>2.6.0.0</AssemblyVersion>
+    <FileVersion>2.6.0.0</FileVersion>
+    <InformationalVersion>2.6.0</InformationalVersion>
     <Description>??????????????? (WinUI 3)</Description>
     <!-- ???????: ?????? + Runtime ?? + ?? exe -->
     <WindowsPackageType>None</WindowsPackageType>

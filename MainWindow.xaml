@@ -620,6 +620,30 @@
                     VerticalAlignment="Center">
                     <TextBlock
                         VerticalAlignment="Center"
+                        Text="手順間隔" />
+                    <NumberBox
+                        Width="88"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="手順間隔秒"
+                        AutomationProperties.AutomationId="ActionDelaySecBox"
+                        Minimum="0"
+                        Maximum="10"
+                        SmallChange="0.05"
+                        LargeChange="0.1"
+                        SpinButtonPlacementMode="Compact"
+                        ToolTipService.ToolTip="各手順のあいだに自動で挟む待機秒数（0 で無効）"
+                        Value="{Binding ActionDelaySec, Mode=TwoWay}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="秒" />
+                    <Border
+                        Width="1"
+                        Height="20"
+                        Margin="4,0"
+                        Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
                         Text="削除前に確認" />
                     <ToggleSwitch
                         VerticalAlignment="Center"
@@ -635,7 +659,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.5.0" />
+                    Text="v2.6.0" />
             </Grid>
         </Border>
     </Grid>

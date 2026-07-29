@@ -106,7 +106,7 @@ public static class KeySender
         VirtualKey.Insert, VirtualKey.Delete
     ];
 
-    public static void ExecuteMacro(MacroItem macro)
+    public static void ExecuteMacro(MacroItem macro, double? actionDelaySec = null)
     {
         ArgumentNullException.ThrowIfNull(macro);
 
@@ -114,8 +114,25 @@ public static class KeySender
         if (delayMs > 0)
             Thread.Sleep(delayMs);
 
-        foreach (var action in macro.Actions)
-            ExecuteAction(action);
+        var stepDelayMs = (int)(Math.Max(0, actionDelaySec ?? ResolveActionDelaySec()) * 1000);
+        for (var i = 0; i < macro.Actions.Count; i++)
+        {
+            ExecuteAction(macro.Actions[i]);
+            if (stepDelayMs > 0 && i < macro.Actions.Count - 1)
+                Thread.Sleep(stepDelayMs);
+        }
+    }
+
+    private static double ResolveActionDelaySec()
+    {
+        try
+        {
+            return SettingsStore.Load().ActionDelaySec;
+        }
+        catch
+        {
+            return AppSettings.DefaultActionDelaySec;
+        }
     }
 
     public static void ExecuteAction(ActionItem action)

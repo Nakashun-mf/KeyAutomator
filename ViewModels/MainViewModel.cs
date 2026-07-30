@@ -357,15 +357,8 @@ public partial class MainViewModel : ObservableObject
 
         Persist();
 
-        var index = Macros.IndexOf(SelectedMacro);
-        var saved = SelectedMacro;
-        if (index >= 0)
-            Macros[index] = saved;
-
-        _suppressDirty = true;
-        SelectedMacro = null;
-        SelectedMacro = saved;
-        _suppressDirty = false;
+        // 選択を null に差し替えると ListView の SelectionChanged が走り、
+        // 空の手順で再保存されてデータが消えることがあるため、差し替えない。
         ClearDirty();
         StatusMessage = string.IsNullOrEmpty(alias)
             ? "保存しました"
@@ -377,12 +370,7 @@ public partial class MainViewModel : ObservableObject
     private void CancelEdit()
     {
         if (SelectedMacro is null) return;
-        var current = SelectedMacro;
-        _suppressDirty = true;
-        SelectedMacro = null;
-        SelectedMacro = current;
-        _suppressDirty = false;
-        ClearDirty();
+        LoadEditorFrom(SelectedMacro);
         StatusMessage = "編集を破棄しました";
     }
 

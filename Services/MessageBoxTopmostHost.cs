@@ -163,8 +163,7 @@ internal static class MessageBoxTopmostHost
             _cts.Cancel();
             try
             {
-                if (!_thread.Join(800))
-                    _thread.Interrupt();
+                _ = _thread.Join(800);
             }
             catch
             {

@@ -61,7 +61,7 @@ dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj -c Debug -p:Platform=
 ## 配布用 publish（単一 exe・正式手段）
 
 WinUI 3（非パッケージ）は `PublishSingleFile` + `IncludeAllContentForSelfExtract` で **単一 exe** にできます。  
-初回起動時に一時フォルダへ自己展開します。設定ファイルは `AppPaths` により **exe と同じフォルダ** に書きます（展開先 temp には書きません）。
+初回起動時に一時フォルダへ自己展開します。設定ファイルは `AppPaths` により **書き込み可能なデータフォルダ** に書きます（exe 横が書けるならそこ、Program Files 等なら `%LocalAppData%\KeyAutomator`。展開先 temp には書きません）。
 
 ```powershell
 # 実行中の KeyAutomator を終了してから
@@ -84,7 +84,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.7.2"
+$ver = "2.7.4"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue

@@ -68,6 +68,12 @@ jobs:
           if (Test-Path .\config.sample.json) {
             Copy-Item -Force .\config.sample.json $distDir\
           }
+          if (Test-Path .\使い方.txt) {
+            Copy-Item -Force .\使い方.txt $distDir\
+          }
+          if (Test-Path .\README.md) {
+            Copy-Item -Force .\README.md $distDir\
+          }
           $zipPath = ".\dist\$distName.zip"
           Compress-Archive -Path $distDir -DestinationPath $zipPath -Force
           echo "zip=$zipPath" >> $env:GITHUB_OUTPUT

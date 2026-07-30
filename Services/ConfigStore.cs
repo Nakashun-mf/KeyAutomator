@@ -18,9 +18,10 @@ public static class ConfigStore
     {
         if (!File.Exists(ConfigPath))
         {
-            var empty = new List<MacroItem>();
-            Save(empty);
-            return empty;
+            // 初回: 空ではなくサンプルを入れて「壊れてる？」を防ぐ
+            var samples = LoadSampleMacros();
+            Save(samples);
+            return samples;
         }
 
         var json = File.ReadAllText(ConfigPath, Encoding.UTF8);
@@ -29,6 +30,38 @@ public static class ConfigStore
 
         return JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions)
                ?? throw new InvalidDataException("config.json の内容を解釈できませんでした");
+    }
+
+    /// <summary>
+    /// exe 横 / データフォルダの config.sample.json、無ければ内蔵サンプル。
+    /// </summary>
+    public static List<MacroItem> LoadSampleMacros()
+    {
+        foreach (var path in SampleCandidatePaths())
+        {
+            if (!File.Exists(path))
+                continue;
+
+            try
+            {
+                var json = File.ReadAllText(path, Encoding.UTF8);
+                var list = JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions);
+                if (list is { Count: > 0 })
+                    return list;
+            }
+            catch
+            {
+                // 次の候補へ
+            }
+        }
+
+        return BuiltInSamples.Create();
+    }
+
+    private static IEnumerable<string> SampleCandidatePaths()
+    {
+        yield return Path.Combine(AppPaths.ExeDirectory, "config.sample.json");
+        yield return Path.Combine(AppPaths.DataDirectory, "config.sample.json");
     }
 
     public static void Save(IEnumerable<MacroItem> macros)

@@ -29,6 +29,7 @@ public static class CliRunner
 
         終了コード: 成功 0 / 失敗 1
         ログ: error.log（書き込み可能なデータフォルダ。Program Files 配置時は %LocalAppData%\\KeyAutomator）
+        注意: 確認アクション(dialog) は CLI でもメッセージボックスを表示します
         """;
 
     public static int Run(string[] args)

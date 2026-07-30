@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.7.6  
+**バージョン:** 2.7.7  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
@@ -11,17 +11,21 @@
 
 ビルド済みの単一 exe は **GitHub Releases** から入手できます。
 
-→ [最新リリース](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
+→ [最新リリース（ここからダウンロード）](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
 
-1. `KeyAutomator-v*-win-x64-single.zip` をダウンロード
-2. 解凍し、`KeyAutomator.exe` を **書き込み可能なフォルダ**（例: `Documents\KeyAutomator`、デスクトップ上のフォルダ）へ置く
-3. 起動する（`config.json` / `settings.json` / `error.log` は同じ場所に自動作成）
+1. 上記ページを開く（リポジトリの「Code」ではなく **Releases** の最新版）
+2. Assets にある `KeyAutomator-v*-win-x64-single.zip` をダウンロード  
+   （名前の `win-x64-single` は「64bit Windows 用・1ファイル版」という意味です）
+3. 解凍し、`KeyAutomator.exe` を **書き込み可能なフォルダ**（例: `Documents\KeyAutomator`）へ置く  
+   ※ zip 内の `使い方.txt` も一緒に置いておくと安心です
+4. `KeyAutomator.exe` を起動する（初回はサンプルマクロが入ります）
 
 > **Program Files への配置は非推奨です。**  
 > 一般ユーザー権限では exe と同じ場所に設定を書けないため、保存に失敗したり `error.log` が見当たらないことがあります。  
 > v2.7.4 以降は自動で `%LocalAppData%\KeyAutomator` に退避しますが、ポータブル運用なら最初から書き込み可能なフォルダへ置いてください。
 
-追加のランタイムインストールは不要です。初回起動時のみ、内部リソース展開で数秒かかることがあります。
+追加のランタイムインストールは不要です。初回起動時のみ、内部リソース展開で数秒かかることがあります。  
+Windows の SmartScreen が出た場合は「詳細情報」→「実行」で起動できます（自己責任）。
 
 ## できること
 
@@ -38,11 +42,13 @@
 
 ### GUI
 
-1. `KeyAutomator.exe` を起動
-2. 左の一覧でマクロを選ぶか、[新規]
+1. `KeyAutomator.exe` を起動（初回はサンプルが2件入ります）
+2. 左の一覧でマクロを選ぶか、[新規] / [サンプル]
 3. 右側で名前・引数名・起動前ウェイト・アクションを編集
 4. [保存]
-5. [テスト実行] でウェイト中に入力先へフォーカスを移して確認
+5. [テスト実行] → **ウェイト中に入力先ウィンドウをクリックして前面にする**
+
+マウス手順の初期値は **左クリック** です（カーソルがある位置をクリックします）。
 
 ### CLI
 

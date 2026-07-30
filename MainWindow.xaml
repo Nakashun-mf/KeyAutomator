@@ -659,7 +659,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.7.1" />
+                    Text="v2.7.2" />
             </Grid>
         </Border>
     </Grid>

@@ -169,10 +169,23 @@ public sealed partial class MainWindow : Window
     {
         if (_syncingMacroSelection) return;
 
-        var selected = MacroList.SelectedItems.Cast<MacroItem>().ToList();
+        var selected = MacroList.SelectedItems.OfType<MacroItem>().ToList();
         var primary = MacroList.SelectedItem as MacroItem;
 
-        if (!ReferenceEquals(primary, _vm.SelectedMacro) && _vm.IsDirty)
+        // ListView が一時的に選択解除することがある。そのときは復元して終了。
+        if (primary is null && selected.Count == 0 && _vm.SelectedMacro is not null)
+        {
+            RestoreMacroSelection(_vm.SelectedMacro);
+            return;
+        }
+
+        if (ReferenceEquals(primary, _vm.SelectedMacro))
+        {
+            _vm.SyncMacroSelection(selected);
+            return;
+        }
+
+        if (_vm.IsDirty)
         {
             var result = await PromptDirtyAsync();
             if (result == ContentDialogResult.None)
@@ -192,8 +205,7 @@ public sealed partial class MainWindow : Window
         }
 
         _vm.SyncMacroSelection(selected);
-        if (!ReferenceEquals(primary, _vm.SelectedMacro))
-            _vm.SelectedMacro = primary;
+        _vm.SelectedMacro = primary;
     }
 
     private void RestoreMacroSelection(MacroItem? macro)
@@ -268,7 +280,19 @@ public sealed partial class MainWindow : Window
     private void ActionList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args) =>
         _vm.OnActionsReordered();
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e) => _vm.SaveMacroCommand.Execute(null);
+    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    {
+        // 保存中の選択イベントで未保存ダイアログが出ないようにする
+        _syncingMacroSelection = true;
+        try
+        {
+            _vm.SaveMacroCommand.Execute(null);
+        }
+        finally
+        {
+            _syncingMacroSelection = false;
+        }
+    }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e) => _vm.CancelEditCommand.Execute(null);
 

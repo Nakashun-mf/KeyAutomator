@@ -12,7 +12,7 @@ public static class UserDialog
     /// <summary>単体テスト用。設定時は MessageBox の代わりに呼ばれる。</summary>
     public static Action<string>? ShowOkHandler { get; set; }
 
-    /// <summary>メッセージを表示し、ユーザーが OK を押すまでブロックする。</summary>
+    /// <summary>メッセージを表示し、ユーザーが OK を押すまでブロックする。常に最前面。</summary>
     public static void ShowOk(string? message)
     {
         var text = string.IsNullOrWhiteSpace(message) ? DefaultMessage : message.Trim();
@@ -23,14 +23,6 @@ public static class UserDialog
             return;
         }
 
-        NativeMethods.MessageBoxW(
-            IntPtr.Zero,
-            text,
-            Caption,
-            NativeMethods.MB_OK
-            | NativeMethods.MB_ICONINFORMATION
-            | NativeMethods.MB_SETFOREGROUND
-            | NativeMethods.MB_TOPMOST
-            | NativeMethods.MB_TASKMODAL);
+        MessageBoxTopmostHost.ShowOk(text, Caption);
     }
 }

@@ -14,10 +14,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>2.7.5</Version>
-    <AssemblyVersion>2.7.5.0</AssemblyVersion>
-    <FileVersion>2.7.5.0</FileVersion>
-    <InformationalVersion>2.7.5</InformationalVersion>
+    <Version>2.7.6</Version>
+    <AssemblyVersion>2.7.6.0</AssemblyVersion>
+    <FileVersion>2.7.6.0</FileVersion>
+    <InformationalVersion>2.7.6</InformationalVersion>
     <Description>??????????????? (WinUI 3)</Description>
     <!-- ???????: ?????? + Runtime ?? + ?? exe -->
     <WindowsPackageType>None</WindowsPackageType>
@@ -60,6 +60,10 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="KeyAutomator.Tests" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">

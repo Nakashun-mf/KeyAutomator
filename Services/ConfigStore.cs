@@ -33,8 +33,17 @@ public static class ConfigStore
 
     public static void Save(IEnumerable<MacroItem> macros)
     {
-        var json = JsonSerializer.Serialize(macros.ToList(), JsonOptions);
+        var list = macros.ToList();
+        var json = JsonSerializer.Serialize(list, JsonOptions);
         AtomicFile.WriteAllText(ConfigPath, json);
+
+        // 書き込み後に読み返して失敗を検知する
+        if (!File.Exists(ConfigPath))
+            throw new IOException($"保存先にファイルが作成されませんでした: {ConfigPath}");
+
+        var written = File.ReadAllText(ConfigPath, Encoding.UTF8);
+        if (string.IsNullOrWhiteSpace(written))
+            throw new IOException($"保存後の config.json が空です: {ConfigPath}");
     }
 
     public static MacroItem? FindById(IEnumerable<MacroItem> macros, int id) =>

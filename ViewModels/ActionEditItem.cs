@@ -81,7 +81,7 @@ public static class ActionTypeCatalog
         {
             Code = "mouse",
             Label = "マウスクリック",
-            Hint = "現在のマウス位置でクリックします（右クリックなど）",
+            Hint = "いまマウスがある位置をクリックします（座標指定はできません）",
             Placeholder = ""
         },
         new()

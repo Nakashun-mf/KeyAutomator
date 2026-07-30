@@ -292,11 +292,12 @@
                                             PlaceholderText="表示名"
                                             Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                                        <!-- 2行目: 待ち / 引数名 -->
+                                        <!-- 2行目: 開始まで / 引数名 -->
                                         <TextBlock
                                             Grid.Row="1"
                                             Style="{StaticResource InlineLabelStyle}"
-                                            Text="待ち" />
+                                            Text="開始まで"
+                                            ToolTipService.ToolTip="テスト実行・CLI実行のあと、入力が始まるまでの秒数。このあいだに入力先ウィンドウへ切り替えてください" />
                                         <Grid Grid.Row="1" Grid.Column="1" ColumnSpacing="6">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -304,7 +305,7 @@
                                             </Grid.ColumnDefinitions>
                                             <NumberBox
                                                 VerticalAlignment="Center"
-                                                AutomationProperties.Name="起動前ウェイト秒"
+                                                AutomationProperties.Name="開始までの秒数"
                                                 Minimum="0"
                                                 SmallChange="0.5"
                                                 SpinButtonPlacementMode="Compact"
@@ -322,16 +323,16 @@
                                             Grid.Column="2"
                                             Style="{StaticResource InlineLabelStyle}"
                                             Text="引数名"
-                                            ToolTipService.ToolTip="CLI用。英数字と _ のみ。例: login_ok" />
+                                            ToolTipService.ToolTip="任意。CLI用です。空でOK。英数字と _ のみ。例: login_ok" />
                                         <TextBox
                                             Grid.Row="1"
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
-                                            AutomationProperties.Name="引数名エイリアス"
+                                            AutomationProperties.Name="引数名エイリアス（任意）"
                                             FontFamily="Consolas"
-                                            PlaceholderText="login_ok（英数字と _ ）"
+                                            PlaceholderText="任意（CLI用・空でOK）"
                                             Text="{Binding EditAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            ToolTipService.ToolTip="KeyAutomator.exe -alias login_ok や -login_ok で実行" />
+                                            ToolTipService.ToolTip="空でも保存できます。使う場合のみ: KeyAutomator.exe -alias login_ok" />
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -615,7 +616,7 @@
                                     Click="TestButton_Click"
                                     Content="{Binding TestButtonLabel}"
                                     Style="{StaticResource SlimButtonStyle}"
-                                    ToolTipService.ToolTip="待ち時間のあいだに入力先ウィンドウへ切り替えてください。実行中は中断できます。" />
+                                    ToolTipService.ToolTip="開始までの秒数のあいだに入力先ウィンドウへ切り替えてください。実行中は中断できます。" />
                             </StackPanel>
                         </Grid>
                     </ContentControl>
@@ -635,11 +636,22 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding StatusMessage}" />
-
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding StatusMessage}"
+                        TextTrimming="CharacterEllipsis" />
+                    <Button
+                        AutomationProperties.Name="設定フォルダを開く"
+                        Click="OpenDataFolder_Click"
+                        Content="設定フォルダ"
+                        Style="{StaticResource SlimButtonStyle}"
+                        ToolTipService.ToolTip="config.json や error.log があるフォルダをエクスプローラーで開きます" />
+                </StackPanel>
                 <StackPanel
                     Grid.Column="1"
                     Orientation="Horizontal"
@@ -686,7 +698,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.7.7" />
+                    Text="v2.7.8" />
             </Grid>
         </Border>
     </Grid>

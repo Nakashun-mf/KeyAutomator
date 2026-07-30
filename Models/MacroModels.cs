@@ -37,7 +37,7 @@ public sealed partial class MacroItem : ObservableObject
 
     [JsonIgnore]
     public string AliasLabel =>
-        string.IsNullOrWhiteSpace(Alias) ? "引数名なし" : $"引数: {Alias}";
+        string.IsNullOrWhiteSpace(Alias) ? "CLI引数なし（任意）" : $"CLI引数: {Alias}";
 
     partial void OnDelaySecChanged(double value) => OnPropertyChanged(nameof(DelayLabel));
 

@@ -21,7 +21,7 @@ public static class BuiltInSamples
             "actions": [
               { "type": "text", "value": "user_admin" },
               { "type": "key", "value": "TAB" },
-              { "type": "text", "value": "example_password" },
+              { "type": "text", "value": "dummy_secret_do_not_use" },
               { "type": "key", "value": "ENTER" },
               { "type": "dialog", "value": "ログイン完了を確認したら OK を押してください" },
               { "type": "wait", "value": "1.0" },

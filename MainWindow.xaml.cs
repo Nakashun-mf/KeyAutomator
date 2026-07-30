@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using KeyAutomator.Models;
 using KeyAutomator.Services;
 using KeyAutomator.ViewModels;
@@ -154,6 +155,27 @@ public sealed partial class MainWindow : Window
         finally
         {
             _syncingMacroSelection = false;
+        }
+    }
+
+    private void OpenDataFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(AppPaths.DataDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppPaths.DataDirectory,
+                UseShellExecute = true
+            });
+            _vm.StatusMessage = AppPaths.IsUsingFallbackDirectory
+                ? $"設定フォルダを開きました（exe横が書けないため LocalAppData）: {AppPaths.DataDirectory}"
+                : $"設定フォルダを開きました: {AppPaths.DataDirectory}";
+        }
+        catch (Exception ex)
+        {
+            ErrorLogger.Write(ex, "設定フォルダを開く");
+            _vm.StatusMessage = $"設定フォルダを開けませんでした: {AppPaths.DataDirectory}";
         }
     }
 
@@ -394,8 +416,9 @@ public sealed partial class MainWindow : Window
         {
             Title = "テスト実行",
             Content = "【重要】「実行」を押したあと、カウント中に入力したいウィンドウをクリックして前面にしてください。\n"
-                + $"起動前ウェイト: {macro.DelaySec:0.##} 秒\n"
+                + $"開始まで: {macro.DelaySec:0.##} 秒\n"
                 + "このアプリが前面のままだと、ここへ入力されてしまいます。\n"
+                + "管理者権限のアプリへ送る場合は、本アプリも管理者実行が必要です。\n"
                 + "実行中は「中断」で止められます。",
             PrimaryButtonText = "実行",
             CloseButtonText = "キャンセル",

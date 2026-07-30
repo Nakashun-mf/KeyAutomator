@@ -388,7 +388,9 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             ErrorLogger.Write(ex, "テスト実行");
-            _vm.StatusMessage = "実行エラー（error.log を確認）";
+            _vm.StatusMessage = ErrorLogger.LastWrittenPath is { Length: > 0 } path
+                ? $"実行エラー（詳細: {path}）"
+                : "実行エラー（ログを書き込めませんでした）";
             var err = new ContentDialog
             {
                 Title = "実行エラー",

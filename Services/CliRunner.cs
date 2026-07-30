@@ -28,7 +28,7 @@ public static class CliRunner
           KeyAutomator.exe -h              このヘルプ
 
         終了コード: 成功 0 / 失敗 1
-        ログ: 実行ファイルと同じフォルダの error.log
+        ログ: error.log（書き込み可能なデータフォルダ。Program Files 配置時は %LocalAppData%\\KeyAutomator）
         """;
 
     public static int Run(string[] args)

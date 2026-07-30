@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.7.3  
+**バージョン:** 2.7.4  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
@@ -14,8 +14,12 @@
 → [最新リリース](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
 
 1. `KeyAutomator-v*-win-x64-single.zip` をダウンロード
-2. 解凍し、`KeyAutomator.exe` を任意のフォルダへ置く
-3. 起動する（`config.json` / `settings.json` は exe と同じ場所に自動作成）
+2. 解凍し、`KeyAutomator.exe` を **書き込み可能なフォルダ**（例: `Documents\KeyAutomator`、デスクトップ上のフォルダ）へ置く
+3. 起動する（`config.json` / `settings.json` / `error.log` は同じ場所に自動作成）
+
+> **Program Files への配置は非推奨です。**  
+> 一般ユーザー権限では exe と同じ場所に設定を書けないため、保存に失敗したり `error.log` が見当たらないことがあります。  
+> v2.7.4 以降は自動で `%LocalAppData%\KeyAutomator` に退避しますが、ポータブル運用なら最初から書き込み可能なフォルダへ置いてください。
 
 追加のランタイムインストールは不要です。初回起動時のみ、内部リソース展開で数秒かかることがあります。
 
@@ -55,11 +59,15 @@
 
 引数名（alias）は英数字と `_` のみ。表示名とは別です。
 
-成功時 Exit Code `0` / 失敗時 `1`（同階層 `error.log`）
+成功時 Exit Code `0` / 失敗時 `1`（データフォルダの `error.log`。書けない場合は `%TEMP%\KeyAutomator-error.log`）
 
 ### 設定
 
-実行ファイルと同じフォルダの `config.json` を使用します。サンプルは `config.sample.json`。
+書き込み可能なデータフォルダの `config.json` を使用します（通常は exe と同じ場所。Program Files 等で書けない場合は `%LocalAppData%\KeyAutomator`）。サンプルは `config.sample.json`。
+
+保存に成功すると、画面下部ステータスに **実際の保存パス**（例: `C:\...\KeyAutomator\config.json`）が表示されます。別フォルダの `config.json` を見ていると「変わっていない」ように見えるので注意してください。
+
+失敗時もステータスに **error.log のフルパス** を出します（「error.log を確認」だけだと見つからないことがあったため）。
 
 アプリ設定は同フォルダの `settings.json` です。
 
@@ -91,5 +99,6 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 
 - 入力は「その時点のアクティブウィンドウ」へ送られます
 - 管理者権限が必要なアプリへ送る場合は、本アプリも管理者起動してください
+- **Program Files や書き込み禁止フォルダへ置かない**（設定・ログが書けません。v2.7.4 以降は LocalAppData へ自動退避）
 - パスワード等を `config.json` に平文保存する場合は取り扱いに注意してください
 - 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です

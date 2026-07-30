@@ -203,7 +203,9 @@ public partial class MainViewModel : ObservableObject
             foreach (var m in list)
                 Macros.Add(m);
 
-            StatusMessage = $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
+            StatusMessage = AppPaths.IsUsingFallbackDirectory
+                ? $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath} ※exeフォルダが書けないため LocalAppData を使用）"
+                : $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
             SelectedMacro = Macros.FirstOrDefault();
             ClearDirty();
         }
@@ -216,9 +218,10 @@ public partial class MainViewModel : ObservableObject
 
             Macros.Clear();
             SelectedMacro = null;
+            var logHint = FormatLogHint();
             StatusMessage = string.IsNullOrEmpty(backup)
-                ? $"設定の読み込みに失敗しました（{ConfigStore.ConfigPath}）。破損ファイルは上書きしていません"
-                : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}";
+                ? $"設定の読み込みに失敗しました（{ConfigStore.ConfigPath}）。破損ファイルは上書きしていません{logHint}"
+                : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}{logHint}";
             ClearDirty();
         }
     }
@@ -517,9 +520,16 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorLogger.Write(ex, "保存失敗");
-            StatusMessage = $"保存に失敗しました: {ConfigStore.ConfigPath}（error.log を確認）";
+            StatusMessage = $"保存に失敗しました: {ConfigStore.ConfigPath}{FormatLogHint()}";
             return false;
         }
+    }
+
+    private static string FormatLogHint()
+    {
+        return ErrorLogger.LastWrittenPath is { Length: > 0 } path
+            ? $"（詳細: {path}）"
+            : "（ログを書き込めませんでした。書き込み可能なフォルダへ exe を置き直してください）";
     }
 
     partial void OnHasSelectionChanged(bool value) => NotifyEditCommands();

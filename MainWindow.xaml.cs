@@ -125,6 +125,38 @@ public sealed partial class MainWindow : Window
         SyncMacroListSelectionFromVm();
     }
 
+    private async void LoadSampleButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.IsBusy) return;
+        if (!await EnsureCanLeaveEditorAsync()) return;
+
+        if (_vm.Macros.Count > 0)
+        {
+            var confirm = new ContentDialog
+            {
+                Title = "サンプルを読み込む",
+                Content = "現在のマクロ一覧をサンプル（2件）で置き換えます。よろしいですか？\n（置き換え前に保存していない変更は失われます）",
+                PrimaryButtonText = "読み込む",
+                CloseButtonText = "キャンセル",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = Content.XamlRoot
+            };
+            if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+                return;
+        }
+
+        _syncingMacroSelection = true;
+        try
+        {
+            _vm.LoadSampleMacros();
+            SyncMacroListSelectionFromVm();
+        }
+        finally
+        {
+            _syncingMacroSelection = false;
+        }
+    }
+
     private async void CloneButton_Click(object sender, RoutedEventArgs e)
     {
         if (!_vm.HasSelection || _vm.IsBusy) return;
@@ -361,7 +393,10 @@ public sealed partial class MainWindow : Window
         var confirm = new ContentDialog
         {
             Title = "テスト実行",
-            Content = $"起動前ウェイト {macro.DelaySec:0.##} 秒の間に、入力先ウィンドウをアクティブにしてください。\n実行中は「中断」で止められます。",
+            Content = "【重要】「実行」を押したあと、カウント中に入力したいウィンドウをクリックして前面にしてください。\n"
+                + $"起動前ウェイト: {macro.DelaySec:0.##} 秒\n"
+                + "このアプリが前面のままだと、ここへ入力されてしまいます。\n"
+                + "実行中は「中断」で止められます。",
             PrimaryButtonText = "実行",
             CloseButtonText = "キャンセル",
             DefaultButton = ContentDialogButton.Primary,

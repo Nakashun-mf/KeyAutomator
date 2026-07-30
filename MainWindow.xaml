@@ -156,6 +156,11 @@
                             Content="新規"
                             Style="{StaticResource AccentButtonStyle}" />
                         <Button
+                            AutomationProperties.Name="サンプルマクロを読み込む"
+                            Click="LoadSampleButton_Click"
+                            Content="サンプル"
+                            ToolTipService.ToolTip="サンプルマクロを読み込みます" />
+                        <Button
                             AutomationProperties.Name="複製"
                             Click="CloneButton_Click"
                             Content="複製"
@@ -182,7 +187,7 @@
                     <StackPanel
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Spacing="8"
+                        Spacing="12"
                         Visibility="{Binding HasSelection, Converter={StaticResource BoolToVisInvert}}">
                         <FontIcon
                             FontSize="40"
@@ -195,8 +200,30 @@
                             Text="マクロを選んでください" />
                         <TextBlock
                             HorizontalAlignment="Center"
+                            TextWrapping="WrapWholeWords"
+                            MaxWidth="360"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="左の一覧から選ぶか、「新規」で作成します" />
+                            Text="左の一覧から選ぶか、「新規」で作成します。はじめてならサンプルから試せます。" />
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                            <Button
+                                AutomationProperties.Name="新規マクロ"
+                                Click="NewButton_Click"
+                                Content="新規"
+                                Style="{StaticResource AccentButtonStyle}" />
+                            <Button
+                                AutomationProperties.Name="サンプルマクロを読み込む"
+                                Click="LoadSampleButton_Click"
+                                Content="サンプルを読み込む"
+                                ToolTipService.ToolTip="ログイン例とコピー例を読み込みます（既存がある場合は確認します）" />
+                        </StackPanel>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            Text="テスト実行の前に、入力先ウィンドウへ切り替えてください" />
                     </StackPanel>
 
                     <!-- 編集本体 -->
@@ -659,7 +686,7 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.7.6" />
+                    Text="v2.7.7" />
             </Grid>
         </Border>
     </Grid>

@@ -33,6 +33,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private double _actionDelaySec = AppSettings.DefaultActionDelaySec;
     [ObservableProperty] private bool _isDirty;
     [ObservableProperty] private string _testButtonLabel = "テスト実行";
+    [ObservableProperty] private bool _isMacroListEmpty = true;
 
     private AppSettings _settings = new();
     private bool _loadingSettings;
@@ -42,6 +43,7 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel()
     {
         Actions.CollectionChanged += OnActionsChanged;
+        Macros.CollectionChanged += (_, _) => IsMacroListEmpty = Macros.Count == 0;
         _loadingSettings = true;
         _settings = SettingsStore.Load();
         ConfirmBeforeDelete = _settings.ConfirmBeforeDelete;
@@ -207,6 +209,7 @@ public partial class MainViewModel : ObservableObject
                 ? $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath} ※exeフォルダが書けないため LocalAppData を使用）"
                 : $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
             SelectedMacro = Macros.FirstOrDefault();
+            IsMacroListEmpty = Macros.Count == 0;
             ClearDirty();
         }
         catch (Exception ex)
@@ -218,12 +221,37 @@ public partial class MainViewModel : ObservableObject
 
             Macros.Clear();
             SelectedMacro = null;
+            IsMacroListEmpty = true;
             var logHint = FormatLogHint();
             StatusMessage = string.IsNullOrEmpty(backup)
                 ? $"設定の読み込みに失敗しました（{ConfigStore.ConfigPath}）。破損ファイルは上書きしていません{logHint}"
                 : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}{logHint}";
             ClearDirty();
         }
+    }
+
+    /// <summary>サンプルマクロで一覧を置き換える。既存がある場合は呼び出し側で確認すること。</summary>
+    public bool LoadSampleMacros()
+    {
+        var samples = ConfigStore.LoadSampleMacros();
+        if (samples.Count == 0)
+        {
+            StatusMessage = "サンプルマクロを取得できませんでした";
+            return false;
+        }
+
+        Macros.Clear();
+        foreach (var m in samples)
+            Macros.Add(m);
+
+        if (!Persist())
+            return false;
+
+        SelectedMacro = Macros.FirstOrDefault();
+        IsMacroListEmpty = Macros.Count == 0;
+        ClearDirty();
+        StatusMessage = $"サンプルを読み込みました: {Macros.Count} 件 → {ConfigStore.ConfigPath}";
+        return true;
     }
 
     public bool TryPrepareMacroSwitch() => !IsDirty;
@@ -391,7 +419,7 @@ public partial class MainViewModel : ObservableObject
     private void AddHotkeyAction() => AddAction("hotkey", "CTRL+S");
 
     [RelayCommand(CanExecute = nameof(CanEditMacro))]
-    private void AddMouseAction() => AddAction("mouse", "RIGHT");
+    private void AddMouseAction() => AddAction("mouse", "LEFT");
 
     [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddWaitAction() => AddAction("wait", "0.5");

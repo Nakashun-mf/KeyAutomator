@@ -369,7 +369,7 @@ public partial class ActionEditItem : ObservableObject
         else if (string.Equals(value, "mouse", StringComparison.OrdinalIgnoreCase))
         {
             if (!MouseActionCatalog.Contains(Value))
-                Value = "RIGHT";
+                Value = "LEFT";
         }
         else if (string.Equals(value, "dialog", StringComparison.OrdinalIgnoreCase))
         {

@@ -125,7 +125,7 @@ public partial class MainViewModel : ObservableObject
     {
         ActionSummary = Actions.Count == 0
             ? "手順はまだありません。下のボタンから追加してください。"
-            : $"上から順に {Actions.Count} 手順を実行します（手順間隔 {ActionDelaySec:0.##} 秒）";
+            : $"上から順に {Actions.Count} 手順を実行します";
     }
 
     partial void OnSelectedMacroChanged(MacroItem? value)
@@ -402,11 +402,41 @@ public partial class MainViewModel : ObservableObject
     private void AddAction(string type, string value)
     {
         var item = ActionEditItem.FromModel(new ActionItem { Type = type, Value = value });
-        Actions.Add(item);
+        var insertAt = ResolveActionInsertIndex();
+        if (insertAt >= Actions.Count)
+            Actions.Add(item);
+        else
+            Actions.Insert(insertAt, item);
+
         SelectedAction = item;
         SelectedActions.Clear();
         SelectedActions.Add(item);
         SyncActionSelectionHighlight();
+    }
+
+    /// <summary>
+    /// 選択中のアクションの直後に挿入。未選択／見つからない場合は末尾。
+    /// 複数選択時は一覧上でもっとも下の選択の直後。
+    /// </summary>
+    private int ResolveActionInsertIndex()
+    {
+        var anchorIndex = -1;
+
+        if (SelectedActions.Count > 0)
+        {
+            foreach (var selected in SelectedActions)
+            {
+                var i = Actions.IndexOf(selected);
+                if (i > anchorIndex)
+                    anchorIndex = i;
+            }
+        }
+        else if (SelectedAction is not null)
+        {
+            anchorIndex = Actions.IndexOf(SelectedAction);
+        }
+
+        return anchorIndex < 0 ? Actions.Count : anchorIndex + 1;
     }
 
     [RelayCommand(CanExecute = nameof(HasActionSelection))]

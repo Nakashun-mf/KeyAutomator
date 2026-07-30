@@ -16,7 +16,24 @@ public static class AtomicFile
         try
         {
             File.WriteAllText(tempPath, contents, encoding);
-            File.Move(tempPath, path, overwrite: true);
+
+            if (File.Exists(path))
+            {
+                try
+                {
+                    // Windows で上書き置換が安定しやすい
+                    File.Replace(tempPath, path, destinationBackupFileName: null);
+                    return;
+                }
+                catch
+                {
+                    File.Copy(tempPath, path, overwrite: true);
+                }
+            }
+            else
+            {
+                File.Move(tempPath, path);
+            }
         }
         finally
         {

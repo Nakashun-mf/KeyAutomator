@@ -203,7 +203,7 @@ public partial class MainViewModel : ObservableObject
             foreach (var m in list)
                 Macros.Add(m);
 
-            StatusMessage = $"読込完了: {Macros.Count} 件";
+            StatusMessage = $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
             SelectedMacro = Macros.FirstOrDefault();
             ClearDirty();
         }
@@ -217,7 +217,7 @@ public partial class MainViewModel : ObservableObject
             Macros.Clear();
             SelectedMacro = null;
             StatusMessage = string.IsNullOrEmpty(backup)
-                ? "設定の読み込みに失敗しました（空の一覧で開始。破損ファイルは上書きしていません）"
+                ? $"設定の読み込みに失敗しました（{ConfigStore.ConfigPath}）。破損ファイルは上書きしていません"
                 : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}";
             ClearDirty();
         }
@@ -236,7 +236,8 @@ public partial class MainViewModel : ObservableObject
             Actions = []
         };
         Macros.Add(item);
-        Persist();
+        if (!Persist())
+            return;
         SelectedMacro = item;
         ClearDirty();
         StatusMessage = $"新規作成: ID {item.Id}";
@@ -251,7 +252,8 @@ public partial class MainViewModel : ObservableObject
         copy.Name = SelectedMacro.Name + " (コピー)";
         copy.Alias = string.Empty;
         Macros.Add(copy);
-        Persist();
+        if (!Persist())
+            return;
         SelectedMacro = copy;
         ClearDirty();
         StatusMessage = $"複製: ID {copy.Id}";
@@ -276,7 +278,8 @@ public partial class MainViewModel : ObservableObject
         foreach (var m in targets)
             Macros.Remove(m);
 
-        Persist();
+        if (!Persist())
+            return;
         SelectedMacros.Clear();
         SelectedMacro = Macros.FirstOrDefault();
         ClearDirty();
@@ -355,14 +358,15 @@ public partial class MainViewModel : ObservableObject
         SelectedMacro.DelaySec = EditDelaySec;
         SelectedMacro.Actions = Actions.Select(a => a.ToModel()).ToList();
 
-        Persist();
+        if (!Persist())
+            return false;
 
         // 選択を null に差し替えると ListView の SelectionChanged が走り、
         // 空の手順で再保存されてデータが消えることがあるため、差し替えない。
         ClearDirty();
         StatusMessage = string.IsNullOrEmpty(alias)
-            ? "保存しました"
-            : $"保存しました（引数: -alias {alias} / -{alias}）";
+            ? $"保存しました → {ConfigStore.ConfigPath}"
+            : $"保存しました（引数: -alias {alias} / -{alias}）→ {ConfigStore.ConfigPath}";
         return true;
     }
 
@@ -489,7 +493,8 @@ public partial class MainViewModel : ObservableObject
     /// <summary>マクロ一覧の DnD 後に順序を保存</summary>
     public void PersistMacroOrder()
     {
-        Persist();
+        if (!Persist())
+            return;
         StatusMessage = "マクロの順序を保存しました";
     }
 
@@ -501,16 +506,19 @@ public partial class MainViewModel : ObservableObject
         MarkDirty();
     }
 
-    private void Persist()
+    /// <returns>ディスクへの書き込みが成功したら true</returns>
+    private bool Persist()
     {
         try
         {
             ConfigStore.Save(Macros);
+            return true;
         }
         catch (Exception ex)
         {
             ErrorLogger.Write(ex, "保存失敗");
-            StatusMessage = "保存に失敗しました";
+            StatusMessage = $"保存に失敗しました: {ConfigStore.ConfigPath}（error.log を確認）";
+            return false;
         }
     }
 

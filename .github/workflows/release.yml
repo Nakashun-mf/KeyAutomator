@@ -122,29 +122,8 @@ jobs:
           Copy-Item -Force $env:MSIX_PATH $msixDest
           Copy-Item -Force .\KeyAutomator_CI.cer (Join-Path $distDir "KeyAutomator-v$ver-signing.cer")
 
-          $readme = @"
-KeyAutomator MSIX（サイドロード）v$ver
-=====================================
-
-【推奨】まずは単一 exe（*-win-x64-single.zip）で問題ない場合はそちらを使ってください。
-これは PC にインストールする形（MSIX）の配布物です。
-
-【インストール手順】
-1. Windows の「開発者向け」で Developer Mode をオン（またはサイドローディングを許可）
-2. 同梱の KeyAutomator-v$ver-signing.cer をダブルクリック → 「証明書のインストール」
-   - 現在のユーザー or ローカルコンピューター
-   - 「信頼された人」ストアへ配置（見つからなければ「信頼されたルート」でも可）
-3. PowerShell で:
-   Add-AppxPackage -Path .\KeyAutomator-v$ver-win-x64.msix
-4. スタートメニューから KeyAutomator を起動
-
-【アンインストール】
-Get-AppxPackage *KeyAutomator* | Remove-AppxPackage
-
-【注意】
-- 署名はリリースごとに作る自己署名証明書です（同梱の .cer を信頼してください）
-- 設定は %LocalAppData%\KeyAutomator に保存されます
-"@
+          $template = Get-Content -LiteralPath .\scripts\ci\MsixInstallReadme.template.txt -Raw -Encoding utf8
+          $readme = $template.Replace('__VERSION__', $ver)
           Set-Content -LiteralPath (Join-Path $distDir "MSIXの入れ方.txt") -Value $readme -Encoding utf8
 
           foreach ($f in @("README.md", "PRIVACY.md", "使い方.txt")) {

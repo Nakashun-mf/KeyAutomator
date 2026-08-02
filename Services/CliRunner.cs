@@ -163,7 +163,6 @@ public static class CliRunner
     {
         try
         {
-            // 先に標準出力へ書く（リダイレクト／エイリアス起動でも最も安全）
             Console.Out.WriteLine(text);
             Console.Out.Flush();
             return;
@@ -180,7 +179,14 @@ public static class CliRunner
         }
         catch
         {
-            ErrorLogger.Write(text);
+            try
+            {
+                ErrorLogger.Write(text);
+            }
+            catch
+            {
+                // ヘルプ表示失敗でプロセス全体を落とさない
+            }
         }
     }
 }

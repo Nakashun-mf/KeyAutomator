@@ -28,8 +28,12 @@ public static class CliRunner
           KeyAutomator.exe -h              このヘルプ
 
         終了コード: 成功 0 / 失敗 1
-        ログ: error.log（書き込み可能なデータフォルダ。Program Files 配置時は %LocalAppData%\\KeyAutomator）
-        注意: 確認アクション(dialog) は CLI でもメッセージボックスを表示します
+        ログ: error.log（書き込み可能なデータフォルダ。保護フォルダ時は %LocalAppData%\\KeyAutomator）
+
+        注意:
+          - CLI では管理画面を出さずにマクロを実行します
+          - 確認アクション(dialog) があるマクロは、CLI でもメッセージボックスが出ます
+            （完全な無人実行ではありません）
         """;
 
     public static int Run(string[] args)

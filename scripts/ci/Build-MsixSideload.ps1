@@ -24,21 +24,38 @@ $outFull = Join-Path $root $OutDir
 Remove-Item -Recurse -Force $outFull -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $outFull | Out-Null
 
-$msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
-    -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe `
-    -ErrorAction SilentlyContinue | Select-Object -First 1
+function Resolve-MsBuildPath {
+    # microsoft/setup-msbuild@v2 が設定するパスを最優先
+    if ($env:MSBUILD_PATH -and (Test-Path -LiteralPath $env:MSBUILD_PATH)) {
+        return $env:MSBUILD_PATH
+    }
 
-if (-not $msbuild) {
-    # GitHub windows-latest 向けフォールバック
+    $fromPath = Get-Command msbuild.exe -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty Source -First 1
+    if ($fromPath -and (Test-Path -LiteralPath $fromPath)) {
+        return $fromPath
+    }
+
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path -LiteralPath $vswhere) {
+        # ** は PowerShell がグロブ展開するため、単一引用符で渡す
+        $found = & $vswhere -latest -requires Microsoft.Component.MSBuild `
+            -find 'MSBuild\Current\Bin\MSBuild.exe' 2>$null |
+            Where-Object { $_ -and (Test-Path -LiteralPath $_) } |
+            Select-Object -First 1
+        if ($found) { return $found }
+    }
+
     $candidates = @(
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
     )
-    $msbuild = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    return $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 }
 
+$msbuild = Resolve-MsBuildPath
 if (-not $msbuild) {
     throw "MSBuild.exe が見つかりません。"
 }

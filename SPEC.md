@@ -60,7 +60,7 @@
 
 ## 4. データ構造仕様 (`config.json`)
 
-設定データは書き込み可能なデータフォルダの `config.json` に保存する（通常は実行ファイルと同階層。書けない場合は `%LocalAppData%\KeyAutomator`）。
+設定データは書き込み可能なデータフォルダの `config.json` に保存する（通常は実行ファイルと同階層。保護フォルダやパッケージ実行時は `%LocalAppData%\KeyAutomator`）。
 
 ### 4.1 JSONスキーマ・サンプル
 

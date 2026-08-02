@@ -65,6 +65,37 @@ public class AppPathsTests
             if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
         }
     }
+
+    [TestMethod]
+    public void IsRestrictedInstallDirectory_ProgramFilesLikePath_ReturnsTrue()
+    {
+        var pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        if (string.IsNullOrWhiteSpace(pf))
+            Assert.Inconclusive("ProgramFiles パスが取得できない環境");
+
+        Assert.IsTrue(AppPaths.IsRestrictedInstallDirectory(Path.Combine(pf, "KeyAutomator")));
+    }
+
+    [TestMethod]
+    public void IsRestrictedInstallDirectory_TempPath_ReturnsFalse()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "keyautomator-ok-" + Guid.NewGuid().ToString("N"));
+        Assert.IsFalse(AppPaths.IsRestrictedInstallDirectory(dir));
+    }
+
+    [TestMethod]
+    public void IsRestrictedInstallDirectory_WindowsAppsPath_ReturnsTrue()
+    {
+        var fake = @"C:\Program Files\WindowsApps\KeyAutomator_1.0.0.0_x64__abc\App";
+        Assert.IsTrue(AppPaths.IsRestrictedInstallDirectory(fake));
+    }
+
+    [TestMethod]
+    public void GetLocalDataDirectory_EndsWithKeyAutomator()
+    {
+        var path = AppPaths.GetLocalDataDirectory();
+        Assert.IsTrue(path.EndsWith("KeyAutomator", StringComparison.OrdinalIgnoreCase));
+    }
 }
 
 [TestClass]

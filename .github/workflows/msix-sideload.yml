@@ -9,7 +9,6 @@ on:
 permissions:
   contents: read
 
-# 巨大成果物アップロード等で runner が落ちた前ジョブを打ち切る
 concurrency:
   group: msix-sideload-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,7 +16,7 @@ concurrency:
 jobs:
   msix-sideload-smoke:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,6 +44,7 @@ jobs:
       - name: Build MSIX (sideload)
         shell: pwsh
         run: |
+          $out = Join-Path $env:RUNNER_TEMP "KeyAutomatorMsix"
           .\scripts\ci\Build-MsixSideload.ps1 `
             -Configuration Release `
             -Platform x64 `
@@ -52,53 +52,44 @@ jobs:
             -CerPath .\KeyAutomator_CI.cer `
             -ThumbprintPath .\KeyAutomator_CI.thumbprint `
             -Password "KeyAutomator-CI-Temp!" `
-            -OutDir .\AppPackages\CI
-          $pathFile = ".\AppPackages\CI\msix-path.txt"
+            -OutDir $out
+          $pathFile = Join-Path $out "msix-path.txt"
           if (-not (Test-Path $pathFile)) { throw "msix-path.txt がありません" }
           $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
           if (-not $msix -or -not (Test-Path -LiteralPath $msix)) { throw "MSIX が見つかりません: $msix" }
+          "MSIX_PATH=$msix" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "MSIX_OUT=$out" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Get-Item -LiteralPath $msix | Format-List FullName, Length, LastWriteTime
 
       - name: Install and smoke-test MSIX
         shell: pwsh
         run: |
-          $pathFile = ".\AppPackages\CI\msix-path.txt"
-          $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
-          Write-Host "Smoke target: $msix"
-          try {
-            .\scripts\ci\Smoke-MsixSideload.ps1 `
-              -MsixPath $msix `
-              -CerPath .\KeyAutomator_CI.cer `
-              -Password "KeyAutomator-CI-Temp!"
-            "SMOKE PASSED" | Set-Content -LiteralPath .\AppPackages\CI\smoke-result.txt
-          }
-          catch {
-            $_ | Out-String | Set-Content -LiteralPath .\AppPackages\CI\smoke-result.txt
-            throw
+          Write-Host "Smoke target: $env:MSIX_PATH"
+          .\scripts\ci\Smoke-MsixSideload.ps1 `
+            -MsixPath "$env:MSIX_PATH" `
+            -CerPath .\KeyAutomator_CI.cer `
+            -Password "KeyAutomator-CI-Temp!"
+          "SMOKE PASSED" | Set-Content -LiteralPath (Join-Path $env:MSIX_OUT "smoke-result.txt")
+
+      - name: Show smoke result on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          $p = Join-Path $env:MSIX_OUT "smoke-result.txt"
+          if (Test-Path $p) { Get-Content $p | ForEach-Object { Write-Host $_ } }
+          $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
+          if (Test-Path $log) {
+            Write-Host "----- error.log -----"
+            Get-Content $log -Tail 50 | ForEach-Object { Write-Host $_ }
           }
 
-      - name: Summarize package outputs
+      - name: Cleanup large outputs
         if: always()
         shell: pwsh
         run: |
-          if (Test-Path .\AppPackages\CI) {
-            Get-ChildItem .\AppPackages\CI -Recurse -File |
-              Sort-Object Length -Descending |
-              Select-Object -First 30 FullName, @{N='MB';E={[math]::Round($_.Length/1MB,2)}} |
-              Format-Table -AutoSize | Out-String | Write-Host
+          # Post Checkout が巨大成果物の削除で固まらないよう先に消す
+          if ($env:MSIX_OUT) {
+            Remove-Item -Recurse -Force $env:MSIX_OUT -ErrorAction SilentlyContinue
           }
-          if (Test-Path .\AppPackages\CI\smoke-result.txt) {
-            Write-Host "----- smoke-result.txt -----"
-            Get-Content .\AppPackages\CI\smoke-result.txt | ForEach-Object { Write-Host $_ }
-          }
-
-      # Artifact アップロードはこの環境で runner 切断／ハングの原因になるため行わない。
-      # 診断内容は上の Summarize ステップでログへ出す。
-
-      - name: Cleanup cert files
-        if: always()
-        shell: pwsh
-        timeout-minutes: 2
-        run: |
-          # 証明書ストア列挙は環境によって止まることがあるため、ファイルだけ消す
+          Remove-Item -Recurse -Force .\AppPackages, .\bin, .\obj -ErrorAction SilentlyContinue
           Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

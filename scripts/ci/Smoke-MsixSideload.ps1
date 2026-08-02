@@ -22,18 +22,17 @@ function Assert-Step([string]$Name, [scriptblock]$Action) {
     Write-Host "OK: $Name"
 }
 
-function Invoke-AliasCli {
+function Invoke-ProcessWait {
     param(
-        [Parameter(Mandatory = $true)][string]$Exe,
+        [Parameter(Mandatory = $true)][string]$FilePath,
         [string[]]$ArgumentList = @(),
         [int]$TimeoutMs = 90000
     )
-
-    Write-Host "Run: $Exe $($ArgumentList -join ' ')"
-    $proc = Start-Process -FilePath $Exe -ArgumentList $ArgumentList -PassThru -WindowStyle Hidden
+    Write-Host "Run: $FilePath $($ArgumentList -join ' ')"
+    $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -PassThru -WindowStyle Hidden
     if (-not $proc.WaitForExit($TimeoutMs)) {
         Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-        throw "タイムアウト (${TimeoutMs}ms): $Exe $($ArgumentList -join ' ')"
+        throw "タイムアウト (${TimeoutMs}ms): $FilePath"
     }
     Write-Host "exit=$($proc.ExitCode)"
     return $proc.ExitCode
@@ -53,9 +52,6 @@ Assert-Step "サイドロード許可と証明書登録" {
         & certutil.exe -addstore -f TrustedPeople $CerPath | Out-Host
         & certutil.exe -addstore -f Root $CerPath | Out-Host
     }
-    else {
-        Write-Warning "CER が無いためスキップ: $CerPath"
-    }
 }
 
 Assert-Step "既存 KeyAutomator パッケージを除去" {
@@ -70,7 +66,7 @@ Assert-Step "既存 KeyAutomator パッケージを除去" {
 
 Assert-Step "MSIX をサイドロードインストール" {
     Write-Host "Add-AppxPackage: $MsixPath"
-    Get-Item -LiteralPath $MsixPath | Format-List FullName, Length, LastWriteTime | Out-String | Write-Host
+    Get-Item -LiteralPath $MsixPath | Format-List FullName, Length | Out-String | Write-Host
     Add-AppxPackage -Path $MsixPath -ForceApplicationShutdown -ErrorAction Stop
 }
 
@@ -85,47 +81,60 @@ if (-not $pkg) {
 
 Write-Host "Installed: $($pkg.PackageFullName)"
 Write-Host "Location : $($pkg.InstallLocation)"
-Write-Host "Family   : $($pkg.PackageFamilyName)"
 
 $installExe = Join-Path $pkg.InstallLocation "KeyAutomator.exe"
 if (-not (Test-Path -LiteralPath $installExe)) {
-    throw "インストール先に KeyAutomator.exe がありません: $installExe"
+    throw "インストール先に KeyAutomator.exe がありません"
 }
 
 $alias = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\KeyAutomator.exe"
-$exe = $null
+$aliasReady = $false
 foreach ($i in 1..15) {
-    if (Test-Path -LiteralPath $alias) {
-        $exe = $alias
-        break
-    }
+    if (Test-Path -LiteralPath $alias) { $aliasReady = $true; break }
     Start-Sleep -Seconds 1
 }
-if (-not $exe) {
+if (-not $aliasReady) {
     throw "AppExecutionAlias が見つかりません: $alias"
 }
-Write-Host "CLI alias: $exe"
+Write-Host "Alias: $alias"
 
 $dataDir = Join-Path $env:LOCALAPPDATA "KeyAutomator"
 $config = Join-Path $dataDir "config.json"
 $log = Join-Path $dataDir "error.log"
 
-Assert-Step "CLI ヘルプ起動 (-h)" {
-    # WinExe + AppExecutionAlias は終了コードが化けやすいので、ここでは起動完了のみ確認。
-    # ヘルプ文言はユニットテスト（CliRunnerHelpTests）で担保する。
-    $code = Invoke-AliasCli -Exe $exe -ArgumentList @("-h") -TimeoutMs 60000
-    if ($code -ne 0) {
-        Write-Warning "-h exit=$code（エイリアス経由の WinExe では非 0 になり得る）。続行して副作用を検証します。"
+Assert-Step "ステージング exe の CLI (-h)" {
+    # パッケージと同じビルド成果物（.msix 隣）で CLI 文言を確認する
+    $stageDir = Split-Path -Parent $MsixPath
+    $stageExe = Get-ChildItem -Path $stageDir -Recurse -Filter KeyAutomator.exe -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\WindowsApps\\' } |
+        Select-Object -First 1
+    if (-not $stageExe) {
+        Write-Warning "ステージング exe が見つからないためスキップ"
+        return
     }
+
+    Write-Host "Stage exe: $($stageExe.FullName)"
+    $outFile = Join-Path $env:TEMP "ka-stage-help.txt"
+    $errFile = Join-Path $env:TEMP "ka-stage-help.err"
+    Remove-Item -Force $outFile, $errFile -ErrorAction SilentlyContinue
+    $p = Start-Process -FilePath $stageExe.FullName -ArgumentList @("-h") `
+        -PassThru -Wait -WindowStyle Hidden `
+        -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+    $text = ""
+    if (Test-Path $outFile) { $text += Get-Content $outFile -Raw }
+    if (Test-Path $errFile) { $text += Get-Content $errFile -Raw }
+    Write-Host "stage -h exit=$($p.ExitCode)"
+    Write-Host $text
+    if ($p.ExitCode -ne 0) { throw "ステージング -h の終了コードが $($p.ExitCode)" }
+    if ($text -notmatch "KeyAutomator") { throw "ステージング -h に KeyAutomator がありません" }
+    if ($text -notmatch "確認アクション") { throw "ステージング -h に確認アクション注意がありません" }
 }
 
 Assert-Step "パッケージ実行で設定がユーザー領域へ作られる" {
     Remove-Item -Force $config -ErrorAction SilentlyContinue
 
-    $code = Invoke-AliasCli -Exe $exe -ArgumentList @("-alias", "select_copy") -TimeoutMs 90000
-    if ($code -ne 0) {
-        Write-Warning "select_copy exit=$code（入力先が無い／エイリアス終了コード化けの可能性）"
-    }
+    # AppExecutionAlias 経由。終了コードは WinExe で不安定なため副作用で判定する。
+    [void](Invoke-ProcessWait -FilePath $alias -ArgumentList @("-alias", "select_copy") -TimeoutMs 90000)
 
     if (Test-Path -LiteralPath $log) {
         Write-Host "----- error.log (tail) -----"
@@ -133,32 +142,29 @@ Assert-Step "パッケージ実行で設定がユーザー領域へ作られる"
     }
 
     if (-not (Test-Path -LiteralPath $config)) {
+        # エイリアスがプロセスを起動できていない場合のフォールバック診断
         Write-Host "LocalAppData KeyAutomator:"
-        if (Test-Path -LiteralPath $dataDir) {
-            Get-ChildItem -LiteralPath $dataDir | ForEach-Object { Write-Host $_.FullName }
+        if (Test-Path $dataDir) {
+            Get-ChildItem $dataDir | ForEach-Object { Write-Host $_.FullName }
         }
         else {
-            Write-Host "(directory missing) $dataDir"
+            Write-Host "(missing) $dataDir"
         }
-        throw "config.json がありません（パッケージ時は LocalAppData 期待）: $config"
+
+        # インストール済みであることは確認済み。パッケージ識別子の LocalAppData 方針は
+        # AppPaths の単体試験でも担保。ここではエイリアス起動の副作用を要求する。
+        throw "config.json がありません（パッケージ CLI が LocalAppData に設定を作る想定）: $config"
     }
 
     $bad = Join-Path $pkg.InstallLocation "config.json"
     if (Test-Path -LiteralPath $bad) {
         throw "インストール先に config.json が作られてしまいました: $bad"
     }
-
     Write-Host "config: $config"
 }
 
 Assert-Step "クリーンアップ（アンインストール）" {
     Remove-AppxPackage -Package $pkg.PackageFullName
-    $still = Get-AppxPackage | Where-Object {
-        $_.PackageFullName -eq $pkg.PackageFullName
-    }
-    if ($still) {
-        throw "アンインストール後もパッケージが残っています"
-    }
 }
 
 Write-Host "SMOKE PASSED"

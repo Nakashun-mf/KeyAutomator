@@ -147,12 +147,11 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
 
-1. ユニットテスト
-2. 自己署名証明書の作成（`CN=KeyAutomator`）
-3. MSIX サイドロードビルド
-4. インストール → `-h` / サンプル実行 → 設定が `%LocalAppData%\KeyAutomator` にあること
-5. アンインストール
-6. MSIX を Artifact として保存
+1. 自己署名証明書の作成（`CN=KeyAutomator`）
+2. MSIX サイドロードビルド
+3. インストール → `-h` / サンプル実行 → 設定が `%LocalAppData%\KeyAutomator` にあること
+4. アンインストール
+5. MSIX を Artifact として保存
 
 手動実行:
 

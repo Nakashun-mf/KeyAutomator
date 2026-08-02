@@ -169,6 +169,7 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 - **Version** は本体（`.csproj` の `Version`）と揃える
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
+- CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）
 
 ## アーキテクチャ
 

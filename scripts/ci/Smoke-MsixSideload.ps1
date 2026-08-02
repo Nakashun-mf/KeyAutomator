@@ -22,6 +22,34 @@ function Assert-Step([string]$Name, [scriptblock]$Action) {
     Write-Host "OK: $Name"
 }
 
+function Resolve-CliExe {
+    param([Parameter(Mandatory = $true)]$Package)
+
+    # WindowsApps 実体パスは ACL で直接起動できないことがある。
+    # App Execution Alias（%LocalAppData%\Microsoft\WindowsApps\KeyAutomator.exe）を優先する。
+    $aliasCandidates = @(
+        (Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\KeyAutomator.exe")
+        (Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\$($Package.PackageFamilyName)\KeyAutomator.exe")
+    )
+    foreach ($c in $aliasCandidates) {
+        if (Test-Path -LiteralPath $c) {
+            Write-Host "CLI via alias: $c"
+            return $c
+        }
+    }
+
+    $fromPath = Get-Command KeyAutomator.exe -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty Source -First 1
+    if ($fromPath) {
+        Write-Host "CLI via PATH: $fromPath"
+        return $fromPath
+    }
+
+    $fallback = Join-Path $Package.InstallLocation "KeyAutomator.exe"
+    Write-Warning "エイリアス未検出。InstallLocation を試します: $fallback"
+    return $fallback
+}
+
 function Invoke-NativeCapture {
     param(
         [Parameter(Mandatory = $true)][string]$FilePath,
@@ -29,7 +57,6 @@ function Invoke-NativeCapture {
         [int]$TimeoutMs = 60000
     )
 
-    # パッケージアプリは Start-Process -RedirectStandard* が失敗し得るため cmd 経由でファイルへ落とす
     $outFile = [System.IO.Path]::GetTempFileName()
     $errFile = [System.IO.Path]::GetTempFileName()
     $argString = ($ArgumentList | ForEach-Object {
@@ -38,6 +65,7 @@ function Invoke-NativeCapture {
 
     try {
         $cmdLine = "`"$FilePath`" $argString > `"$outFile`" 2> `"$errFile`""
+        Write-Host "Run: cmd /c $cmdLine"
         $proc = Start-Process -FilePath "cmd.exe" `
             -ArgumentList @("/c", $cmdLine) `
             -PassThru `
@@ -71,7 +99,6 @@ Assert-Step "サイドロード許可と証明書登録" {
         Write-Host "Import CER: $CerPath"
         Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\LocalMachine\TrustedPeople" | Out-Null
         Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\CurrentUser\TrustedPeople" | Out-Null
-        # チェーン末端の信頼不足で 0x800B0109 になる環境向け
         & certutil.exe -addstore -f TrustedPeople $CerPath | Out-Host
         & certutil.exe -addstore -f Root $CerPath | Out-Host
     }
@@ -93,20 +120,7 @@ Assert-Step "既存 KeyAutomator パッケージを除去" {
 Assert-Step "MSIX をサイドロードインストール" {
     Write-Host "Add-AppxPackage: $MsixPath"
     Get-Item -LiteralPath $MsixPath | Format-List FullName, Length, LastWriteTime | Out-String | Write-Host
-    try {
-        Add-AppxPackage -Path $MsixPath -ForceApplicationShutdown -ErrorAction Stop
-    }
-    catch {
-        Write-Host "Add-AppxPackage failed: $($_.Exception.Message)"
-        Write-Host "Trying -AllowUnsigned fallback (Developer Mode)..."
-        try {
-            Add-AppxPackage -Path $MsixPath -AllowUnsigned -ForceApplicationShutdown -ErrorAction Stop
-        }
-        catch {
-            Write-Host "AllowUnsigned also failed: $($_.Exception.Message)"
-            throw
-        }
-    }
+    Add-AppxPackage -Path $MsixPath -ForceApplicationShutdown -ErrorAction Stop
 }
 
 $pkg = Get-AppxPackage | Where-Object {
@@ -122,25 +136,30 @@ Write-Host "Installed: $($pkg.PackageFullName)"
 Write-Host "Location : $($pkg.InstallLocation)"
 Write-Host "Family   : $($pkg.PackageFamilyName)"
 
-$exe = Join-Path $pkg.InstallLocation "KeyAutomator.exe"
-if (-not (Test-Path -LiteralPath $exe)) {
-    $exe = Get-ChildItem -Path $pkg.InstallLocation -Recurse -Filter KeyAutomator.exe -ErrorAction SilentlyContinue |
-        Select-Object -First 1 -ExpandProperty FullName
+# エイリアス作成待ち（インストール直後は少し遅れることがある）
+$exe = $null
+foreach ($i in 1..10) {
+    $exe = Resolve-CliExe -Package $pkg
+    if ($exe -and (Test-Path -LiteralPath $exe) -and ($exe -notmatch '\\WindowsApps\\58AAB0EC')) {
+        break
+    }
+    Start-Sleep -Seconds 1
 }
 if (-not $exe -or -not (Test-Path -LiteralPath $exe)) {
-    Write-Host "Install tree (first 80):"
-    Get-ChildItem -Path $pkg.InstallLocation -Recurse -ErrorAction SilentlyContinue |
-        Select-Object -First 80 FullName |
-        ForEach-Object { Write-Host $_.FullName }
-    throw "KeyAutomator.exe がインストール先にありません"
+    throw "CLI 起動用 exe / エイリアスが見つかりません"
 }
-
-Write-Host "Exe: $exe"
 
 Assert-Step "CLI ヘルプ (-h)" {
     $result = Invoke-NativeCapture -FilePath $exe -ArgumentList @("-h") -TimeoutMs 60000
     Write-Host "exit=$($result.ExitCode)"
     Write-Host $result.Combined
+
+    $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
+    if (Test-Path -LiteralPath $log) {
+        Write-Host "----- error.log -----"
+        Get-Content -LiteralPath $log -Tail 40 | ForEach-Object { Write-Host $_ }
+    }
+
     if ($result.ExitCode -ne 0) {
         throw "-h の終了コードが $($result.ExitCode)"
     }
@@ -169,6 +188,11 @@ Assert-Step "パッケージ実行で設定がユーザー領域へ作られる"
         }
         else {
             Write-Host "(directory missing) $dataDir"
+        }
+        $log = Join-Path $dataDir "error.log"
+        if (Test-Path -LiteralPath $log) {
+            Write-Host "----- error.log -----"
+            Get-Content -LiteralPath $log -Tail 40 | ForEach-Object { Write-Host $_ }
         }
         throw "config.json がありません（パッケージ時は LocalAppData 期待）: $config"
     }

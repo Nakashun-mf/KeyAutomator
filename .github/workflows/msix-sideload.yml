@@ -80,13 +80,9 @@ jobs:
             Get-Content $log -Tail 50 | ForEach-Object { Write-Host $_ }
           }
 
-      - name: Cleanup temp package dir
+      - name: Cleanup cert files
         if: always()
         shell: pwsh
-        timeout-minutes: 3
         run: |
-          # bin/obj は巨大で Remove-Item が固まるため触らない（runner 破棄に任せる）
-          if ($env:MSIX_OUT -and (Test-Path -LiteralPath $env:MSIX_OUT)) {
-            cmd /c "rd /s /q `"$env:MSIX_OUT`""
-          }
+          # 巨大成果物の削除は runner 破棄に任せる（rd/Remove-Item が固まるため）
           Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

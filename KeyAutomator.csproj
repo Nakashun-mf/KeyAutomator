@@ -19,7 +19,7 @@
     <FileVersion>2.7.8.0</FileVersion>
     <InformationalVersion>2.7.8</InformationalVersion>
     <Description>??????????????? (WinUI 3)</Description>
-    <!-- ???????: ?????? + Runtime ?? + ?? exe -->
+    <!-- 既定: GitHub Releases 向けの単一 exe（非パッケージ） -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <SelfContained>true</SelfContained>
@@ -27,14 +27,28 @@
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <!-- ???????????????? exe ??????? -->
     <PublishReadyToRun>false</PublishReadyToRun>
     <PublishTrimmed>false</PublishTrimmed>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-    <!-- publish / dist ???????????? -->
     <DefaultItemExcludes>$(DefaultItemExcludes);publish\**;publish-sf\**;publish-folder\**;dist\**;*.binlog;KeyAutomator.Tests\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!--
+    ローカルインストール用 MSIX（サイドロード）を出すとき:
+    -p:KeyAutomatorPackaged=true
+    単一 exe 配布の既定設定は変えない。
+  -->
+  <PropertyGroup Condition="'$(KeyAutomatorPackaged)'=='true'">
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
 
   <ItemGroup>

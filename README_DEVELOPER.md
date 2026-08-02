@@ -109,6 +109,14 @@ Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 
 MSIX パッケージ化が必要な場合は `Package.appxmanifest` を利用し、プロジェクトの Package and Publish から作成できます。
 
+## パッケージマニフェスト
+
+`Package.appxmanifest` は MSIX / サイドロード用の定義です（通常の単一 exe 配布では使いません）。
+
+- **Version** は本体（`.csproj` の `Version`）と揃える
+- 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
+- 未使用の Capability は追加しない
+
 ## アーキテクチャ
 
 - UI: WinUI 3 + MVVM（CommunityToolkit.Mvvm）

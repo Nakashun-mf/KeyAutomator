@@ -19,14 +19,20 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: |
+            8.0.x
+
+      - name: Show SDKs
+        shell: pwsh
+        run: dotnet --list-sdks
 
       - name: Unit tests
         shell: pwsh
         run: |
           dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj `
             -c Release `
-            -p:Platform=x64
+            -p:Platform=x64 `
+            -p:EnableWindowsTargeting=true
 
       - name: Create CI signing certificate
         shell: pwsh

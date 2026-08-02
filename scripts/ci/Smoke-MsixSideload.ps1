@@ -46,6 +46,7 @@ Assert-Step "既存 KeyAutomator パッケージを除去" {
 }
 
 Assert-Step "MSIX をサイドロードインストール" {
+    # .msix / .msixbundle の両方に対応
     Add-AppxPackage -Path $MsixPath
 }
 

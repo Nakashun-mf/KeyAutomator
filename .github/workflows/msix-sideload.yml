@@ -63,17 +63,43 @@ jobs:
             -CerPath .\KeyAutomator_CI.cer `
             -Password "KeyAutomator-CI-Temp!"
 
-      - name: Upload MSIX artifact
+      - name: Summarize package outputs
         if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path .\AppPackages\CI) {
+            Get-ChildItem .\AppPackages\CI -Recurse -File |
+              Sort-Object Length -Descending |
+              Select-Object -First 30 FullName, @{N='MB';E={[math]::Round($_.Length/1MB,2)}} |
+              Format-Table -AutoSize | Out-String | Write-Host
+          }
+
+      # 巨大な self-contained MSIX のアップロードは runner を長時間占有し得るため、
+      # 成功時のみ・保持短縮で上げる。失敗時はログと CER のみ。
+      - name: Upload MSIX artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: KeyAutomator-msix-sideload
           path: |
             AppPackages/CI/**/*.msix
             AppPackages/CI/**/*.msixbundle
-            AppPackages/CI/**/msbuild-msix.log
             KeyAutomator_CI.cer
           if-no-files-found: warn
+          retention-days: 5
+          compression-level: 0
+
+      - name: Upload build diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeyAutomator-msix-diagnostics
+          path: |
+            AppPackages/CI/**/msbuild-msix.log
+            AppPackages/CI/**/msix-path.txt
+            KeyAutomator_CI.cer
+          if-no-files-found: warn
+          retention-days: 5
 
       - name: Cleanup cert files
         if: always()

@@ -157,6 +157,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 ```powershell
 .\scripts\ci\New-CiSigningCertificate.ps1
+# 署名は CurrentUser\My の Thumbprint 経由（パスワード付き PFX 直指定は MSBuild 未サポート）
 $msix = .\scripts\ci\Build-MsixSideload.ps1
 .\scripts\ci\Smoke-MsixSideload.ps1 -MsixPath $msix
 ```

@@ -93,6 +93,7 @@ Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
 Copy-Item -Force .\config.sample.json $distDir\
 Copy-Item -Force .\使い方.txt $distDir\
 Copy-Item -Force .\README.md $distDir\
+Copy-Item -Force .\PRIVACY.md $distDir\
 Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 ```
 

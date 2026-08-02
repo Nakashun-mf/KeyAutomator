@@ -2,20 +2,22 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.8.0  
+**バージョン:** 2.8.1  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
 
 ## ダウンロード（推奨）
 
-ビルド済みの単一 exe は **GitHub Releases** から入手できます。
+ビルド済みの配布物は **GitHub Releases** から入手できます。
 
 → [最新リリース（ここからダウンロード）](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
 
+### A. 単一 exe（いちばん簡単・推奨）
+
 1. 上記ページを開く（リポジトリの「Code」ではなく **Releases** の最新版）
 2. Assets にある `KeyAutomator-v*-win-x64-single.zip` をダウンロード  
-   （名前の `win-x64-single` は「64bit Windows 用・1ファイル版」という意味です）
+   （`win-x64-single`＝64bit Windows 用・1ファイル版）
 3. 解凍し、`KeyAutomator.exe` を **書き込み可能なフォルダ**（例: `Documents\KeyAutomator`）へ置く  
    ※ zip 内の `使い方.txt` も一緒に置いておくと安心です
 4. `KeyAutomator.exe` を起動する（初回はサンプルマクロが入ります）
@@ -26,6 +28,13 @@
 
 追加のランタイムインストールは不要です。初回起動時のみ、内部リソース展開で数秒かかることがあります。  
 Windows の SmartScreen が出た場合は「詳細情報」→「実行」で起動できます（自己責任）。
+
+### B. MSIX（PC にインストールする形）
+
+1. 同じ Releases の Assets から `KeyAutomator-v*-win-x64-msix.zip` をダウンロード
+2. 解凍し、同梱の `MSIXの入れ方.txt` に従って証明書（`.cer`）を信頼してから `.msix` をインストール  
+   （Developer Mode またはサイドローディングの許可が必要です）
+3. スタートメニューから起動。設定は `%LocalAppData%\KeyAutomator` に保存されます
 
 ## できること
 

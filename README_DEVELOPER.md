@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.8.0
+**バージョン:** 2.8.1
 
 ## 開発環境
 
@@ -84,7 +84,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.8.0"
+$ver = "2.8.1"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
@@ -143,6 +143,27 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
+### CI（GitHub Actions）
+
+ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
+
+1. 自己署名証明書の作成（`CN=KeyAutomator`、署名は Thumbprint 方式）
+2. MSIX サイドロードビルド（成果物は `$RUNNER_TEMP`）
+3. インストール → `WindowsApps` 配置 / `AppExecutionAlias` / アンインストールを確認
+4. 可能ならパッケージ CLI で `%LocalAppData%\KeyAutomator\config.json` 作成も確認  
+   （AppExecutionAlias + WinExe は CI 上で終了コードや起動が不安定なため、未作成でもインストール通し成功扱い）
+5. 巨大 MSIX の Artifact アップロードは、スモーク CI では行わない（runner 切断防止）
+6. **GitHub Release**（`.github/workflows/release.yml`）では単一 exe zip に加え、MSIX zip（`.msix` + 署名用 `.cer` + 入れ方）も添付する
+
+手動実行:
+
+```powershell
+.\scripts\ci\New-CiSigningCertificate.ps1
+# 署名は CurrentUser\My の Thumbprint 経由（パスワード付き PFX 直指定は MSBuild 未サポート）
+$msix = .\scripts\ci\Build-MsixSideload.ps1
+.\scripts\ci\Smoke-MsixSideload.ps1 -MsixPath $msix
+```
+
 ## パッケージマニフェスト
 
 `Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。
@@ -150,6 +171,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 - **Version** は本体（`.csproj` の `Version`）と揃える
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
+- CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）
 
 ## アーキテクチャ
 
@@ -161,7 +183,9 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 - リポジトリ: https://github.com/Nakashun-mf/KeyAutomator （Public / MIT）
 - 配布バイナリは GitHub Releases に添付
-- タグ `v*` の Release 公開時（または Actions の `Release` ワークフロー手動実行）に Windows 上で単一 exe をビルドし zip を添付
+- タグ `v*` の Release 公開時（または Actions の `Release` ワークフロー手動実行）に Windows 上で次をビルドして添付する
+  - `KeyAutomator-v*-win-x64-single.zip`（単一 exe）
+  - `KeyAutomator-v*-win-x64-msix.zip`（サイドロード用 MSIX + 署名証明書 + 入れ方）
 - コミットメッセージは日本語（ファイル経由推奨）
 - `bin/`, `obj/`, `publish/`, `publish-sf/`, `dist/`, `config.json`, `settings.json`, `error.log` は `.gitignore` 対象
 

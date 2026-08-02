@@ -16,6 +16,7 @@ permissions:
 jobs:
   build-and-upload:
     runs-on: windows-latest
+    timeout-minutes: 60
     steps:
       - name: Resolve tag
         id: tag
@@ -43,6 +44,9 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
       - name: Publish single-file exe
         shell: pwsh
         run: |
@@ -54,8 +58,8 @@ jobs:
             --self-contained true `
             -o .\publish-sf
 
-      - name: Pack zip
-        id: pack
+      - name: Pack single-file zip
+        id: pack_single
         shell: pwsh
         run: |
           $tag = "${{ steps.tag.outputs.name }}"
@@ -65,34 +69,116 @@ jobs:
           Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $distDir | Out-Null
           Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
-          if (Test-Path .\config.sample.json) {
-            Copy-Item -Force .\config.sample.json $distDir\
-          }
-          if (Test-Path .\使い方.txt) {
-            Copy-Item -Force .\使い方.txt $distDir\
-          }
-          if (Test-Path .\README.md) {
-            Copy-Item -Force .\README.md $distDir\
-          }
-          if (Test-Path .\PRIVACY.md) {
-            Copy-Item -Force .\PRIVACY.md $distDir\
+          foreach ($f in @("config.sample.json", "使い方.txt", "README.md", "PRIVACY.md")) {
+            if (Test-Path $f) { Copy-Item -Force $f $distDir\ }
           }
           $zipPath = ".\dist\$distName.zip"
           Compress-Archive -Path $distDir -DestinationPath $zipPath -Force
-          echo "zip=$zipPath" >> $env:GITHUB_OUTPUT
-          echo "asset=$distName.zip" >> $env:GITHUB_OUTPUT
+          "zip=$zipPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Get-Item $zipPath | Format-List FullName, Length
 
-      - name: Upload release asset
+      - name: Create signing certificate (MSIX)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path .\scripts\ci\New-CiSigningCertificate.ps1)) {
+            throw "scripts/ci/New-CiSigningCertificate.ps1 がありません（このタグに MSIX リリース手順が含まれる必要があります）"
+          }
+          .\scripts\ci\New-CiSigningCertificate.ps1 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Build MSIX (sideload)
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "KeyAutomatorMsixRelease"
+          .\scripts\ci\Build-MsixSideload.ps1 `
+            -Configuration Release `
+            -Platform x64 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!" `
+            -OutDir $out
+          $pathFile = Join-Path $out "msix-path.txt"
+          if (-not (Test-Path $pathFile)) { throw "msix-path.txt がありません" }
+          $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
+          if (-not $msix -or -not (Test-Path -LiteralPath $msix)) { throw "MSIX が見つかりません: $msix" }
+          "MSIX_PATH=$msix" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Get-Item -LiteralPath $msix | Format-List FullName, Length, LastWriteTime
+
+      - name: Pack MSIX zip
+        id: pack_msix
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.tag.outputs.name }}"
+          $ver = $tag.TrimStart('v')
+          $distName = "KeyAutomator-v$ver-win-x64-msix"
+          $distDir = ".\dist\$distName"
+          New-Item -ItemType Directory -Force -Path $distDir | Out-Null
+
+          $msixDest = Join-Path $distDir "KeyAutomator-v$ver-win-x64.msix"
+          Copy-Item -Force $env:MSIX_PATH $msixDest
+          Copy-Item -Force .\KeyAutomator_CI.cer (Join-Path $distDir "KeyAutomator-v$ver-signing.cer")
+
+          $readme = @"
+KeyAutomator MSIX（サイドロード）v$ver
+=====================================
+
+【推奨】まずは単一 exe（*-win-x64-single.zip）で問題ない場合はそちらを使ってください。
+これは PC にインストールする形（MSIX）の配布物です。
+
+【インストール手順】
+1. Windows の「開発者向け」で Developer Mode をオン（またはサイドローディングを許可）
+2. 同梱の KeyAutomator-v$ver-signing.cer をダブルクリック → 「証明書のインストール」
+   - 現在のユーザー or ローカルコンピューター
+   - 「信頼された人」ストアへ配置（見つからなければ「信頼されたルート」でも可）
+3. PowerShell で:
+   Add-AppxPackage -Path .\KeyAutomator-v$ver-win-x64.msix
+4. スタートメニューから KeyAutomator を起動
+
+【アンインストール】
+Get-AppxPackage *KeyAutomator* | Remove-AppxPackage
+
+【注意】
+- 署名はリリースごとに作る自己署名証明書です（同梱の .cer を信頼してください）
+- 設定は %LocalAppData%\KeyAutomator に保存されます
+"@
+          Set-Content -LiteralPath (Join-Path $distDir "MSIXの入れ方.txt") -Value $readme -Encoding utf8
+
+          foreach ($f in @("README.md", "PRIVACY.md", "使い方.txt")) {
+            if (Test-Path $f) { Copy-Item -Force $f $distDir\ }
+          }
+
+          $zipPath = ".\dist\$distName.zip"
+          if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
+          Compress-Archive -Path $distDir -DestinationPath $zipPath -Force
+          "zip=$zipPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Get-Item $zipPath | Format-List FullName, Length
+
+      - name: Upload release assets
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ steps.tag.outputs.name }}"
-          ZIP="${{ steps.pack.outputs.zip }}"
-          # 既存同名アセットがあれば削除して差し替え
-          EXISTING=$(gh release view "$TAG" --json assets --jq ".assets[] | select(.name==\"$(basename "$ZIP")\") | .id" || true)
-          if [ -n "$EXISTING" ]; then
-            gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$EXISTING"
-          fi
-          gh release upload "$TAG" "$ZIP" --clobber
+          upload() {
+            local ZIP="$1"
+            local NAME
+            NAME="$(basename "$ZIP")"
+            EXISTING=$(gh release view "$TAG" --json assets --jq ".assets[] | select(.name==\"$NAME\") | .id" || true)
+            if [ -n "$EXISTING" ]; then
+              gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$EXISTING"
+            fi
+            gh release upload "$TAG" "$ZIP" --clobber
+            echo "Uploaded: $NAME"
+          }
+          upload "${{ steps.pack_single.outputs.zip }}"
+          upload "${{ steps.pack_msix.outputs.zip }}"
+
+      - name: Cleanup cert files
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

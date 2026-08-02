@@ -163,12 +163,30 @@ public static class CliRunner
     {
         try
         {
+            Console.Out.WriteLine(text);
+            Console.Out.Flush();
+            return;
+        }
+        catch
+        {
+            // ignore and fall back
+        }
+
+        try
+        {
             NativeMethods.AttachConsole(NativeMethods.ATTACH_PARENT_PROCESS);
             Console.WriteLine(text);
         }
         catch
         {
-            ErrorLogger.Write(text);
+            try
+            {
+                ErrorLogger.Write(text);
+            }
+            catch
+            {
+                // ヘルプ表示失敗でプロセス全体を落とさない
+            }
         }
     }
 }

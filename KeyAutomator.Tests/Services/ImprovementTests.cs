@@ -57,6 +57,13 @@ public class CliRunnerHelpTests
         var help = CliRunner.GetHelpText();
         StringAssert.Contains(help, "-id");
         StringAssert.Contains(help, "-alias");
+        StringAssert.Contains(help, "確認アクション");
+    }
+
+    [TestMethod]
+    public void Run_HelpRequest_ReturnsZero()
+    {
+        Assert.AreEqual(0, CliRunner.Run(["-h"]));
     }
 }
 

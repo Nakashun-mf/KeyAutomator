@@ -121,10 +121,24 @@ if ($proc.ExitCode -ne 0) {
     throw "MSIX ビルドに失敗しました (exit $($proc.ExitCode))"
 }
 
-$msix = Get-ChildItem -Path $outFull -Recurse -Filter *.msix | Select-Object -First 1
+Write-Host "----- package outputs -----"
+Get-ChildItem -Path $outFull -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -match '\.(msix|msixbundle)$' } |
+    ForEach-Object { Write-Host ("{0:N1} MB  {1}" -f ($_.Length / 1MB), $_.FullName) }
+
+# 依存ランタイム等の小さいパッケージではなく、本体（KeyAutomator / 最大）を選ぶ
+$candidates = @(Get-ChildItem -Path $outFull -Recurse -Filter *.msix -ErrorAction SilentlyContinue)
+$msix = $candidates |
+    Where-Object { $_.Name -match 'KeyAutomator' } |
+    Sort-Object Length -Descending |
+    Select-Object -First 1
 if (-not $msix) {
-    $bundle = Get-ChildItem -Path $outFull -Recurse -Filter *.msixbundle | Select-Object -First 1
-    if ($bundle) { $msix = $bundle }
+    $msix = $candidates | Sort-Object Length -Descending | Select-Object -First 1
+}
+if (-not $msix) {
+    $msix = Get-ChildItem -Path $outFull -Recurse -Filter *.msixbundle -ErrorAction SilentlyContinue |
+        Sort-Object Length -Descending |
+        Select-Object -First 1
 }
 
 if (-not $msix) {

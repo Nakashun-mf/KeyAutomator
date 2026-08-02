@@ -29,19 +29,22 @@ function Invoke-NativeCapture {
         [int]$TimeoutMs = 60000
     )
 
+    # パッケージアプリは Start-Process -RedirectStandard* が失敗し得るため cmd 経由でファイルへ落とす
     $outFile = [System.IO.Path]::GetTempFileName()
     $errFile = [System.IO.Path]::GetTempFileName()
+    $argString = ($ArgumentList | ForEach-Object {
+            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+        }) -join ' '
+
     try {
-        $proc = Start-Process -FilePath $FilePath `
-            -ArgumentList $ArgumentList `
+        $cmdLine = "`"$FilePath`" $argString > `"$outFile`" 2> `"$errFile`""
+        $proc = Start-Process -FilePath "cmd.exe" `
+            -ArgumentList @("/c", $cmdLine) `
             -PassThru `
-            -Wait:$false `
-            -WindowStyle Hidden `
-            -RedirectStandardOutput $outFile `
-            -RedirectStandardError $errFile
+            -WindowStyle Hidden
         if (-not $proc.WaitForExit($TimeoutMs)) {
             Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-            throw "タイムアウト (${TimeoutMs}ms): $FilePath $($ArgumentList -join ' ')"
+            throw "タイムアウト (${TimeoutMs}ms): $FilePath $argString"
         }
         $stdout = Get-Content -LiteralPath $outFile -Raw -ErrorAction SilentlyContinue
         $stderr = Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue
@@ -65,8 +68,12 @@ Assert-Step "サイドロード許可と証明書登録" {
         -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord -Force
 
     if (Test-Path -LiteralPath $CerPath) {
+        Write-Host "Import CER: $CerPath"
         Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\LocalMachine\TrustedPeople" | Out-Null
         Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\CurrentUser\TrustedPeople" | Out-Null
+        # チェーン末端の信頼不足で 0x800B0109 になる環境向け
+        & certutil.exe -addstore -f TrustedPeople $CerPath | Out-Host
+        & certutil.exe -addstore -f Root $CerPath | Out-Host
     }
     else {
         Write-Warning "CER が無いためスキップ: $CerPath"
@@ -84,15 +91,21 @@ Assert-Step "既存 KeyAutomator パッケージを除去" {
 }
 
 Assert-Step "MSIX をサイドロードインストール" {
+    Write-Host "Add-AppxPackage: $MsixPath"
+    Get-Item -LiteralPath $MsixPath | Format-List FullName, Length, LastWriteTime | Out-String | Write-Host
     try {
-        Add-AppxPackage -Path $MsixPath -ErrorAction Stop
+        Add-AppxPackage -Path $MsixPath -ForceApplicationShutdown -ErrorAction Stop
     }
     catch {
         Write-Host "Add-AppxPackage failed: $($_.Exception.Message)"
-        Get-AppxLog -ActivityId ([guid]::Empty) -ErrorAction SilentlyContinue |
-            Select-Object -Last 40 |
-            ForEach-Object { Write-Host $_ }
-        throw
+        Write-Host "Trying -AllowUnsigned fallback (Developer Mode)..."
+        try {
+            Add-AppxPackage -Path $MsixPath -AllowUnsigned -ForceApplicationShutdown -ErrorAction Stop
+        }
+        catch {
+            Write-Host "AllowUnsigned also failed: $($_.Exception.Message)"
+            throw
+        }
     }
 }
 
@@ -107,6 +120,7 @@ if (-not $pkg) {
 
 Write-Host "Installed: $($pkg.PackageFullName)"
 Write-Host "Location : $($pkg.InstallLocation)"
+Write-Host "Family   : $($pkg.PackageFamilyName)"
 
 $exe = Join-Path $pkg.InstallLocation "KeyAutomator.exe"
 if (-not (Test-Path -LiteralPath $exe)) {
@@ -114,7 +128,7 @@ if (-not (Test-Path -LiteralPath $exe)) {
         Select-Object -First 1 -ExpandProperty FullName
 }
 if (-not $exe -or -not (Test-Path -LiteralPath $exe)) {
-    Write-Host "Install tree:"
+    Write-Host "Install tree (first 80):"
     Get-ChildItem -Path $pkg.InstallLocation -Recurse -ErrorAction SilentlyContinue |
         Select-Object -First 80 FullName |
         ForEach-Object { Write-Host $_.FullName }
@@ -139,8 +153,6 @@ Assert-Step "CLI ヘルプ (-h)" {
 }
 
 Assert-Step "パッケージ実行で設定がユーザー領域へ作られる" {
-    # dialog 無しサンプル。キー送信失敗は環境次第なので、exit code より
-    # ConfigStore.Load 側で config.json がユーザー領域にできることを主検証にする。
     $result = Invoke-NativeCapture -FilePath $exe -ArgumentList @("-alias", "select_copy") -TimeoutMs 90000
     Write-Host "select_copy exit=$($result.ExitCode)"
     if ($result.Combined) { Write-Host $result.Combined }

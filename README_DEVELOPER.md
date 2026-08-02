@@ -151,8 +151,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 2. MSIX サイドロードビルド（署名は Thumbprint 方式）
 3. インストール → `-h` / サンプル実行 → 設定が `%LocalAppData%\KeyAutomator` にあること
 4. アンインストール
-5. 診断用の小さな Artifact（パス・ログ・CER）を保存  
-   （self-contained MSIX 本体は数百 MB になるため Artifact には上げない）
+5. 結果サマリを Actions ログへ出力（巨大 MSIX の Artifact アップロードは行わない）
 
 手動実行:
 

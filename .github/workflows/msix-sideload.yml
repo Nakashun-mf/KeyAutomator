@@ -92,20 +92,8 @@ jobs:
             Get-Content .\AppPackages\CI\smoke-result.txt | ForEach-Object { Write-Host $_ }
           }
 
-      # self-contained MSIX は数百 MB になり、Artifact アップロードで runner 切断が起き得る。
-      # CI の目的はビルド＋インストール通し確認なので、診断用の小さなファイルだけ残す。
-      - name: Upload smoke diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: KeyAutomator-msix-smoke-diagnostics
-          path: |
-            AppPackages/CI/msix-path.txt
-            AppPackages/CI/smoke-result.txt
-            AppPackages/CI/msbuild-msix.log
-            KeyAutomator_CI.cer
-          if-no-files-found: warn
-          retention-days: 5
+      # Artifact アップロードはこの環境で runner 切断／ハングの原因になるため行わない。
+      # 診断内容は上の Summarize ステップでログへ出す。
 
       - name: Cleanup cert files
         if: always()

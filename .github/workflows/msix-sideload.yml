@@ -9,9 +9,15 @@ on:
 permissions:
   contents: read
 
+# 巨大成果物アップロード等で runner が落ちた前ジョブを打ち切る
+concurrency:
+  group: msix-sideload-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   msix-sideload-smoke:
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,7 +43,6 @@ jobs:
             -Password "KeyAutomator-CI-Temp!"
 
       - name: Build MSIX (sideload)
-        id: build
         shell: pwsh
         run: |
           .\scripts\ci\Build-MsixSideload.ps1 `
@@ -52,16 +57,25 @@ jobs:
           if (-not (Test-Path $pathFile)) { throw "msix-path.txt がありません" }
           $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
           if (-not $msix -or -not (Test-Path -LiteralPath $msix)) { throw "MSIX が見つかりません: $msix" }
-          "msix=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          Get-Item -LiteralPath $msix | Format-List FullName, Length
+          Get-Item -LiteralPath $msix | Format-List FullName, Length, LastWriteTime
 
       - name: Install and smoke-test MSIX
         shell: pwsh
         run: |
-          .\scripts\ci\Smoke-MsixSideload.ps1 `
-            -MsixPath "${{ steps.build.outputs.msix }}" `
-            -CerPath .\KeyAutomator_CI.cer `
-            -Password "KeyAutomator-CI-Temp!"
+          $pathFile = ".\AppPackages\CI\msix-path.txt"
+          $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
+          Write-Host "Smoke target: $msix"
+          try {
+            .\scripts\ci\Smoke-MsixSideload.ps1 `
+              -MsixPath $msix `
+              -CerPath .\KeyAutomator_CI.cer `
+              -Password "KeyAutomator-CI-Temp!"
+            "SMOKE PASSED" | Set-Content -LiteralPath .\AppPackages\CI\smoke-result.txt
+          }
+          catch {
+            $_ | Out-String | Set-Content -LiteralPath .\AppPackages\CI\smoke-result.txt
+            throw
+          }
 
       - name: Summarize package outputs
         if: always()
@@ -73,30 +87,22 @@ jobs:
               Select-Object -First 30 FullName, @{N='MB';E={[math]::Round($_.Length/1MB,2)}} |
               Format-Table -AutoSize | Out-String | Write-Host
           }
+          if (Test-Path .\AppPackages\CI\smoke-result.txt) {
+            Write-Host "----- smoke-result.txt -----"
+            Get-Content .\AppPackages\CI\smoke-result.txt | ForEach-Object { Write-Host $_ }
+          }
 
-      # 巨大な self-contained MSIX のアップロードは runner を長時間占有し得るため、
-      # 成功時のみ・保持短縮で上げる。失敗時はログと CER のみ。
-      - name: Upload MSIX artifact
-        if: success()
+      # self-contained MSIX は数百 MB になり、Artifact アップロードで runner 切断が起き得る。
+      # CI の目的はビルド＋インストール通し確認なので、診断用の小さなファイルだけ残す。
+      - name: Upload smoke diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: KeyAutomator-msix-sideload
+          name: KeyAutomator-msix-smoke-diagnostics
           path: |
-            AppPackages/CI/**/*.msix
-            AppPackages/CI/**/*.msixbundle
-            KeyAutomator_CI.cer
-          if-no-files-found: warn
-          retention-days: 5
-          compression-level: 0
-
-      - name: Upload build diagnostics on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: KeyAutomator-msix-diagnostics
-          path: |
-            AppPackages/CI/**/msbuild-msix.log
-            AppPackages/CI/**/msix-path.txt
+            AppPackages/CI/msix-path.txt
+            AppPackages/CI/smoke-result.txt
+            AppPackages/CI/msbuild-msix.log
             KeyAutomator_CI.cer
           if-no-files-found: warn
           retention-days: 5

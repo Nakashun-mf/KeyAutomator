@@ -39,15 +39,18 @@ jobs:
         id: build
         shell: pwsh
         run: |
-          $msix = .\scripts\ci\Build-MsixSideload.ps1 `
+          .\scripts\ci\Build-MsixSideload.ps1 `
             -Configuration Release `
             -Platform x64 `
             -PfxPath .\KeyAutomator_CI.pfx `
             -Password "KeyAutomator-CI-Temp!" `
             -OutDir .\AppPackages\CI
-          if (-not $msix) { throw "MSIX path was empty" }
+          $pathFile = ".\AppPackages\CI\msix-path.txt"
+          if (-not (Test-Path $pathFile)) { throw "msix-path.txt がありません" }
+          $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
+          if (-not $msix -or -not (Test-Path -LiteralPath $msix)) { throw "MSIX が見つかりません: $msix" }
           "msix=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          Get-Item $msix | Format-List FullName, Length
+          Get-Item -LiteralPath $msix | Format-List FullName, Length
 
       - name: Install and smoke-test MSIX
         shell: pwsh
@@ -64,6 +67,8 @@ jobs:
           name: KeyAutomator-msix-sideload
           path: |
             AppPackages/CI/**/*.msix
+            AppPackages/CI/**/*.msixbundle
+            AppPackages/CI/**/msbuild-msix.log
             KeyAutomator_CI.cer
           if-no-files-found: warn
 

@@ -38,7 +38,7 @@ function Resolve-MsBuildPath {
 
     $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path -LiteralPath $vswhere) {
-        # ** は PowerShell がグロブ展開するため、単一引用符で渡す
+        # PowerShell のグロブ展開を避けるため単一引用符で渡す
         $found = & $vswhere -latest -requires Microsoft.Component.MSBuild `
             -find 'MSBuild\Current\Bin\MSBuild.exe' 2>$null |
             Where-Object { $_ -and (Test-Path -LiteralPath $_) } |
@@ -62,29 +62,57 @@ if (-not $msbuild) {
 
 Write-Host "Using MSBuild: $msbuild"
 
-& $msbuild .\KeyAutomator.csproj `
-    /restore `
-    /p:Configuration=$Configuration `
-    /p:Platform=$Platform `
-    /p:KeyAutomatorPackaged=true `
-    /p:AppxPackageSigningEnabled=true `
-    /p:PackageCertificateKeyFile="$pfxFull" `
-    /p:PackageCertificatePassword="$Password" `
-    /p:AppxPackageDir="$outFull\" `
-    /p:UapAppxPackageBuildMode=SideLoadOnly `
-    /p:AppxBundle=Never `
-    /p:GenerateAppxPackageOnBuild=true `
-    /p:AppxSymbolPackageEnabled=false `
-    /verbosity:minimal
+$logPath = Join-Path $outFull "msbuild-msix.log"
+$pathFile = Join-Path $outFull "msix-path.txt"
 
-if ($LASTEXITCODE -ne 0) {
-    throw "MSIX ビルドに失敗しました (exit $LASTEXITCODE)"
+# stderr をパイプしない（ErrorActionPreference=Stop 下で警告が失敗扱いになるため）
+# 成功ストリーム汚染を避けるため、結果パスはファイルに書く
+$msbuildArgs = @(
+    ".\KeyAutomator.csproj"
+    "/restore"
+    "/p:Configuration=$Configuration"
+    "/p:Platform=$Platform"
+    "/p:KeyAutomatorPackaged=true"
+    "/p:AppxPackageSigningEnabled=true"
+    "/p:PackageCertificateKeyFile=$pfxFull"
+    "/p:PackageCertificatePassword=$Password"
+    "/p:AppxPackageDir=$outFull\"
+    "/p:UapAppxPackageBuildMode=SideLoadOnly"
+    "/p:AppxBundle=Never"
+    "/p:GenerateAppxPackageOnBuild=true"
+    "/p:AppxSymbolPackageEnabled=false"
+    "/verbosity:minimal"
+    "/nologo"
+    "/flp:LogFile=$logPath;Verbosity=normal"
+)
+
+$proc = Start-Process -FilePath $msbuild -ArgumentList $msbuildArgs -WorkingDirectory $root -Wait -PassThru -NoNewWindow
+if ($proc.ExitCode -ne 0) {
+    if (Test-Path -LiteralPath $logPath) {
+        Write-Host "----- msbuild-msix.log (tail) -----"
+        Get-Content -LiteralPath $logPath -Tail 80 | ForEach-Object { Write-Host $_ }
+    }
+    throw "MSIX ビルドに失敗しました (exit $($proc.ExitCode))"
 }
 
 $msix = Get-ChildItem -Path $outFull -Recurse -Filter *.msix | Select-Object -First 1
 if (-not $msix) {
+    # .msixbundle だけの場合もある
+    $bundle = Get-ChildItem -Path $outFull -Recurse -Filter *.msixbundle | Select-Object -First 1
+    if ($bundle) {
+        $msix = $bundle
+    }
+}
+
+if (-not $msix) {
+    if (Test-Path -LiteralPath $logPath) {
+        Write-Host "----- msbuild-msix.log (tail) -----"
+        Get-Content -LiteralPath $logPath -Tail 80 | ForEach-Object { Write-Host $_ }
+    }
     throw "MSIX ファイルが見つかりません: $outFull"
 }
 
+Set-Content -LiteralPath $pathFile -Value $msix.FullName -NoNewline -Encoding utf8
 Write-Host "MSIX: $($msix.FullName)"
-Write-Output $msix.FullName
+# 呼び出し側が代入しても壊れないよう、明示的にパスだけ返す
+return $msix.FullName

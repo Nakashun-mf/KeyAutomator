@@ -36,6 +36,12 @@ error.log
 *.exe
 !tools/**
 dist/
+AppPackages/
+
+## CI / local MSIX signing (never commit)
+*.pfx
+KeyAutomator_CI.cer
+KeyAutomator_CI.thumbprint
 
 ## Temp / commit helpers
 .commitmsg.tmp

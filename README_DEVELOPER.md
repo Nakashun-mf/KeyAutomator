@@ -97,9 +97,9 @@ Copy-Item -Force .\PRIVACY.md $distDir\
 Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 ```
 
-主な csproj 設定:
+主な csproj 設定（単一 exe・既定）:
 
-- `WindowsPackageType=None`（非 MSIX）
+- `WindowsPackageType=None`（非パッケージ）
 - `WindowsAppSDKSelfContained=true` / `SelfContained=true`
 - `PublishSingleFile=true`
 - `IncludeAllContentForSelfExtract=true`
@@ -108,11 +108,44 @@ Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 
 - `publish-sf/` / `dist/` は `.gitignore` 対象（zip はリポジトリに含めない）
 
-MSIX パッケージ化が必要な場合は `Package.appxmanifest` を利用し、プロジェクトの Package and Publish から作成できます。
+## MSIX サイドロード（ローカルインストール用）
+
+単一 exe 以外に、PC へインストールする形（MSIX）でもビルドできます。  
+設定ファイルはパッケージ実行時 `%LocalAppData%\KeyAutomator` に保存されます（`AppPaths`）。
+
+### Visual Studio から（推奨）
+
+1. Windows で Developer Mode を有効化
+2. ソリューションを開き、プロジェクトを右クリック → **Package and Publish** → **Create App Packages...**
+3. **Sideloading** を選ぶ（ローカルインストール用）
+4. 証明書は開発用の自動作成で可（自分の PC / 検証用）
+5. アーキテクチャは当面 **x64** を選択
+6. 出力された `.msix` / `.msixbundle` を登録
+
+```powershell
+Add-AppxPackage -Path .\AppPackages\...\KeyAutomator_*.msixbundle
+```
+
+アンインストール例:
+
+```powershell
+Get-AppxPackage *KeyAutomator* | Remove-AppxPackage
+```
+
+### コマンドラインから（実験的）
+
+既定の単一 exe 設定を崩さないよう、フラグで切り替えます。
+
+```powershell
+$Platform = $env:PROCESSOR_ARCHITECTURE
+dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutomatorPackaged=true
+```
+
+環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
 ## パッケージマニフェスト
 
-`Package.appxmanifest` は MSIX / サイドロード用の定義です（通常の単一 exe 配布では使いません）。
+`Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。
 
 - **Version** は本体（`.csproj` の `Version`）と揃える
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）

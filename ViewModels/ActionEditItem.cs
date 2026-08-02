@@ -97,6 +97,20 @@ public static class ActionTypeCatalog
             Label = "確認ダイアログ",
             Hint = "メッセージを表示し、OK を押すまで次へ進みません",
             Placeholder = "例: 入力先ウィンドウをアクティブにして OK"
+        },
+        new()
+        {
+            Code = RepeatBlock.StartType,
+            Label = "繰り返し",
+            Hint = "ここから「ここまで」までの手順を指定回数繰り返します（ネスト可）",
+            Placeholder = "例: 3"
+        },
+        new()
+        {
+            Code = RepeatBlock.EndType,
+            Label = "ここまで",
+            Hint = "繰り返しブロックの終わりです",
+            Placeholder = ""
         }
     ];
 
@@ -246,11 +260,13 @@ public partial class HotkeyPartEditItem : ObservableObject
 public partial class ActionEditItem : ObservableObject
 {
     private bool _syncingHotkey;
+    private const double IndentPerLevel = 18;
 
     [ObservableProperty] private int _step = 1;
     [ObservableProperty] private string _type = "text";
     [ObservableProperty] private string _value = string.Empty;
     [ObservableProperty] private bool _isSelected;
+    [ObservableProperty] private int _depth;
 
     public ObservableCollection<HotkeyPartEditItem> HotkeyParts { get; } = [];
 
@@ -261,7 +277,14 @@ public partial class ActionEditItem : ObservableObject
     public bool IsKeyType => string.Equals(Type, "key", StringComparison.OrdinalIgnoreCase);
     public bool IsHotkeyType => string.Equals(Type, "hotkey", StringComparison.OrdinalIgnoreCase);
     public bool IsMouseType => string.Equals(Type, "mouse", StringComparison.OrdinalIgnoreCase);
-    public bool IsFreeTextType => !IsKeyType && !IsHotkeyType && !IsMouseType;
+    public bool IsRepeatType => RepeatBlock.IsStart(Type);
+    public bool IsEndRepeatType => RepeatBlock.IsEnd(Type);
+    public bool IsLoopMarker => IsRepeatType || IsEndRepeatType;
+    public bool IsFreeTextType =>
+        !IsKeyType && !IsHotkeyType && !IsMouseType && !IsRepeatType && !IsEndRepeatType;
+
+    /// <summary>ネスト表示用の左余白（px）。</summary>
+    public double IndentWidth => Depth * IndentPerLevel;
 
     public ActionTypeOption SelectedTypeOption
     {
@@ -301,6 +324,23 @@ public partial class ActionEditItem : ObservableObject
     public string Hint => ActionTypeCatalog.Get(Type).Hint;
     public string Placeholder => ActionTypeCatalog.Get(Type).Placeholder;
 
+    public double RepeatCount
+    {
+        get => RepeatBlock.TryParseCount(Value, out var n) ? n : RepeatBlock.DefaultCount;
+        set
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                return;
+
+            var n = (int)Math.Clamp(Math.Round(value), 1, RepeatBlock.MaxCount);
+            var text = n.ToString(CultureInfo.InvariantCulture);
+            if (string.Equals(Value, text, StringComparison.Ordinal))
+                return;
+            Value = text;
+            OnPropertyChanged(nameof(RepeatCount));
+        }
+    }
+
     public ActionEditItem()
     {
         HotkeyParts.CollectionChanged += OnHotkeyPartsChanged;
@@ -309,12 +349,16 @@ public partial class ActionEditItem : ObservableObject
     private void OnHotkeyPartsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
         SyncHotkeyValueFromParts();
 
+    partial void OnDepthChanged(int value) => OnPropertyChanged(nameof(IndentWidth));
+
     partial void OnValueChanged(string value)
     {
         if (IsKeyType)
             OnPropertyChanged(nameof(SelectedSpecialKey));
         if (IsMouseType)
             OnPropertyChanged(nameof(SelectedMouseAction));
+        if (IsRepeatType)
+            OnPropertyChanged(nameof(RepeatCount));
     }
 
     public void SyncHotkeyValueFromParts()
@@ -380,14 +424,27 @@ public partial class ActionEditItem : ObservableObject
                 Value = UserDialog.DefaultMessage;
             }
         }
+        else if (RepeatBlock.IsStart(value))
+        {
+            if (!RepeatBlock.TryParseCount(Value, out _))
+                Value = RepeatBlock.DefaultCount.ToString(CultureInfo.InvariantCulture);
+        }
+        else if (RepeatBlock.IsEnd(value))
+        {
+            Value = string.Empty;
+        }
 
         OnPropertyChanged(nameof(SelectedTypeOption));
         OnPropertyChanged(nameof(IsKeyType));
         OnPropertyChanged(nameof(IsHotkeyType));
         OnPropertyChanged(nameof(IsMouseType));
+        OnPropertyChanged(nameof(IsRepeatType));
+        OnPropertyChanged(nameof(IsEndRepeatType));
+        OnPropertyChanged(nameof(IsLoopMarker));
         OnPropertyChanged(nameof(IsFreeTextType));
         OnPropertyChanged(nameof(SelectedSpecialKey));
         OnPropertyChanged(nameof(SelectedMouseAction));
+        OnPropertyChanged(nameof(RepeatCount));
         OnPropertyChanged(nameof(TypeLabel));
         OnPropertyChanged(nameof(Hint));
         OnPropertyChanged(nameof(Placeholder));
@@ -424,11 +481,18 @@ public partial class ActionEditItem : ObservableObject
         }
         else if (string.Equals(Type, "wait", StringComparison.OrdinalIgnoreCase))
         {
-            if (!double.TryParse(Value, System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture, out _) &&
+            if (!double.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out _) &&
                 !double.TryParse(Value, out _))
             {
                 error = "待機秒数は数値で入力してください";
+                return false;
+            }
+        }
+        else if (IsRepeatType)
+        {
+            if (!RepeatBlock.TryParseCount(Value, out _))
+            {
+                error = $"繰り返し回数は 1〜{RepeatBlock.MaxCount} の整数で指定してください";
                 return false;
             }
         }
@@ -515,6 +579,18 @@ public partial class ActionEditItem : ObservableObject
         {
             item.Type = "dialog";
             item.Value = string.IsNullOrWhiteSpace(value) ? UserDialog.DefaultMessage : value;
+        }
+        else if (RepeatBlock.IsStart(type))
+        {
+            item.Type = RepeatBlock.StartType;
+            item.Value = RepeatBlock.TryParseCount(value, out var n)
+                ? n.ToString(CultureInfo.InvariantCulture)
+                : RepeatBlock.DefaultCount.ToString(CultureInfo.InvariantCulture);
+        }
+        else if (RepeatBlock.IsEnd(type))
+        {
+            item.Type = RepeatBlock.EndType;
+            item.Value = string.Empty;
         }
         else
         {

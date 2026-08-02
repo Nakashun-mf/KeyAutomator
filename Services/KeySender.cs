@@ -122,13 +122,119 @@ public static class KeySender
         Sleep(delayMs, cancellationToken);
 
         var stepDelayMs = (int)(Math.Max(0, actionDelaySec ?? ResolveActionDelaySec()) * 1000);
-        for (var i = 0; i < macro.Actions.Count; i++)
+        ExecuteActionsWithRepeats(macro.Actions, stepDelayMs, cancellationToken);
+    }
+
+    /// <summary>
+    /// repeat / end_repeat を解釈しながらアクション列を実行する。
+    /// </summary>
+    internal static void ExecuteActionsWithRepeats(
+        IReadOnlyList<ActionItem> actions,
+        int stepDelayMs,
+        CancellationToken cancellationToken)
+    {
+        if (actions.Count == 0) return;
+
+        // (bodyStartIndex, remainingIterationsIncludingCurrent)
+        var stack = new Stack<(int BodyStart, int Remaining)>();
+        var i = 0;
+
+        while (i < actions.Count)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            ExecuteAction(macro.Actions[i], cancellationToken);
-            if (stepDelayMs > 0 && i < macro.Actions.Count - 1)
+            var action = actions[i];
+            var type = (action.Type ?? string.Empty).Trim();
+
+            if (RepeatBlock.IsStart(type))
+            {
+                if (!RepeatBlock.TryParseCount(action.Value, out var count))
+                {
+                    ErrorLogger.Write($"repeat の回数が不正です: '{action.Value}'");
+                    i++;
+                    continue;
+                }
+
+                var end = RepeatBlock.FindMatchingEnd(actions, i);
+                if (end < 0)
+                {
+                    ErrorLogger.Write($"repeat に対応する end_repeat がありません（手順 {i + 1}）");
+                    return;
+                }
+
+                if (count <= 0 || end == i + 1)
+                {
+                    // 0 回または空ボディ → ブロックを飛ばす
+                    i = end + 1;
+                    continue;
+                }
+
+                stack.Push((i + 1, count));
+                i++;
+                continue;
+            }
+
+            if (RepeatBlock.IsEnd(type))
+            {
+                if (stack.Count == 0)
+                {
+                    ErrorLogger.Write($"対応する repeat のない end_repeat です（手順 {i + 1}）");
+                    i++;
+                    continue;
+                }
+
+                var frame = stack.Pop();
+                var remaining = frame.Remaining - 1;
+                if (remaining > 0)
+                {
+                    stack.Push((frame.BodyStart, remaining));
+                    if (stepDelayMs > 0)
+                        Sleep(stepDelayMs, cancellationToken);
+                    i = frame.BodyStart;
+                    continue;
+                }
+
+                i++;
+                continue;
+            }
+
+            ExecuteAction(action, cancellationToken);
+            i++;
+
+            if (stepDelayMs > 0 && HasMoreExecutableWork(actions, i, stack))
                 Sleep(stepDelayMs, cancellationToken);
         }
+    }
+
+    private static bool HasMoreExecutableWork(
+        IReadOnlyList<ActionItem> actions,
+        int nextIndex,
+        Stack<(int BodyStart, int Remaining)> stack)
+    {
+        // 最終周回（Remaining == 1）ではジャンプバックしないので、末尾の余分な間隔を入れない
+        if (stack.Any(frame => frame.Remaining > 1))
+            return true;
+
+        for (var i = nextIndex; i < actions.Count; i++)
+        {
+            if (!RepeatBlock.IsMarker(actions[i].Type))
+                return true;
+            if (RepeatBlock.IsStart(actions[i].Type))
+            {
+                var end = RepeatBlock.FindMatchingEnd(actions, i);
+                if (end < 0)
+                    return false;
+                if (RepeatBlock.TryParseCount(actions[i].Value, out var count) &&
+                    count > 0 &&
+                    end > i + 1)
+                {
+                    return true;
+                }
+
+                i = end;
+            }
+        }
+
+        return false;
     }
 
     private static double ResolveActionDelaySec()
@@ -179,6 +285,10 @@ public static class KeySender
                 break;
             case "dialog":
                 UserDialog.ShowOk(action.Value);
+                break;
+            case "repeat":
+            case "end_repeat":
+                // ExecuteMacro 側で解釈する。単体呼び出し時は何もしない。
                 break;
             default:
                 ErrorLogger.Write($"未知のアクション種別: {action.Type}");

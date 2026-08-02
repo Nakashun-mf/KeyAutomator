@@ -101,6 +101,9 @@ public partial class MainViewModel : ObservableObject
 
     private void OnActionItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(ActionEditItem.Type))
+            RefreshActionDepths();
+
         if (e.PropertyName is nameof(ActionEditItem.Type) or nameof(ActionEditItem.Value))
             MarkDirty();
     }
@@ -121,12 +124,28 @@ public partial class MainViewModel : ObservableObject
     {
         for (var i = 0; i < Actions.Count; i++)
             Actions[i].Step = i + 1;
+        RefreshActionDepths();
+    }
+
+    private void RefreshActionDepths()
+    {
+        var models = Actions.Select(a => a.ToModel()).ToList();
+        var depths = RepeatBlock.ComputeDepths(models);
+        for (var i = 0; i < Actions.Count && i < depths.Length; i++)
+            Actions[i].Depth = depths[i];
     }
 
     private void UpdateActionSummary()
     {
-        ActionSummary = Actions.Count == 0
-            ? "手順はまだありません。下のボタンから追加してください。"
+        if (Actions.Count == 0)
+        {
+            ActionSummary = "手順はまだありません。下のボタンから追加してください。";
+            return;
+        }
+
+        var loops = Actions.Count(a => a.IsRepeatType);
+        ActionSummary = loops > 0
+            ? $"上から順に {Actions.Count} 手順（繰り返し {loops}）を実行します"
             : $"上から順に {Actions.Count} 手順を実行します";
     }
 
@@ -383,6 +402,13 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
+        var pending = Actions.Select(a => a.ToModel()).ToList();
+        if (!RepeatBlock.TryValidate(pending, out var loopError))
+        {
+            StatusMessage = loopError;
+            return false;
+        }
+
         SelectedMacro.Id = id;
         SelectedMacro.Name = EditName.Trim();
         SelectedMacro.Alias = alias;
@@ -426,6 +452,59 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand(CanExecute = nameof(CanEditMacro))]
     private void AddDialogAction() => AddAction("dialog", UserDialog.DefaultMessage);
+
+    /// <summary>
+    /// 選択中の手順を繰り返しブロックで囲む。未選択なら空の繰り返しを挿入。
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanEditMacro))]
+    private void WrapInRepeat()
+    {
+        var selected = SelectedActions.Count > 0
+            ? SelectedActions.ToList()
+            : SelectedAction is null ? [] : [SelectedAction];
+
+        var start = ActionEditItem.FromModel(new ActionItem
+        {
+            Type = RepeatBlock.StartType,
+            Value = RepeatBlock.DefaultCount.ToString()
+        });
+        var end = ActionEditItem.FromModel(new ActionItem
+        {
+            Type = RepeatBlock.EndType,
+            Value = string.Empty
+        });
+
+        if (selected.Count == 0)
+        {
+            var insertAt = ResolveActionInsertIndex();
+            Actions.Insert(insertAt, start);
+            Actions.Insert(insertAt + 1, end);
+            SelectedAction = start;
+            SelectedActions.Clear();
+            SelectedActions.Add(start);
+            SyncActionSelectionHighlight();
+            StatusMessage = "空の繰り返しブロックを挿入しました（「ここまで」までのあいだに手順を入れてください）";
+            return;
+        }
+
+        var indices = selected
+            .Select(Actions.IndexOf)
+            .Where(i => i >= 0)
+            .OrderBy(i => i)
+            .ToList();
+        if (indices.Count == 0) return;
+
+        var first = indices[0];
+        var last = indices[^1];
+        Actions.Insert(first, start);
+        Actions.Insert(last + 2, end);
+
+        SelectedAction = start;
+        SelectedActions.Clear();
+        SelectedActions.Add(start);
+        SyncActionSelectionHighlight();
+        StatusMessage = $"手順 {first + 1}〜{last + 1} を繰り返しで囲みました（回数は編集できます）";
+    }
 
     private void AddAction(string type, string value)
     {

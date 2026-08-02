@@ -354,6 +354,7 @@ public sealed partial class MainWindow : Window
     private void AddDialog_Click(object sender, RoutedEventArgs e) => _vm.AddDialogActionCommand.Execute(null);
     private void AddHotkey_Click(object sender, RoutedEventArgs e) => _vm.AddHotkeyActionCommand.Execute(null);
     private void AddMouse_Click(object sender, RoutedEventArgs e) => _vm.AddMouseActionCommand.Execute(null);
+    private void WrapInRepeat_Click(object sender, RoutedEventArgs e) => _vm.WrapInRepeatCommand.Execute(null);
     private async void RemoveAction_Click(object sender, RoutedEventArgs e) => await TryRemoveActionAsync();
     private void MoveUp_Click(object sender, RoutedEventArgs e) => _vm.MoveActionUpCommand.Execute(null);
     private void MoveDown_Click(object sender, RoutedEventArgs e) => _vm.MoveActionDownCommand.Execute(null);

@@ -1,0 +1,79 @@
+name: MSIX Sideload Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  msix-sideload-smoke:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Unit tests
+        shell: pwsh
+        run: |
+          $Platform = "x64"
+          dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj `
+            -c Release `
+            -p:Platform=$Platform `
+            --filter "FullyQualifiedName!~UserDialog" `
+            --no-restore false
+
+      - name: Create CI signing certificate
+        shell: pwsh
+        run: |
+          .\scripts\ci\New-CiSigningCertificate.ps1 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Build MSIX (sideload)
+        id: build
+        shell: pwsh
+        run: |
+          $msix = .\scripts\ci\Build-MsixSideload.ps1 `
+            -Configuration Release `
+            -Platform x64 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -Password "KeyAutomator-CI-Temp!" `
+            -OutDir .\AppPackages\CI
+          if (-not $msix) { throw "MSIX path was empty" }
+          "msix=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Get-Item $msix | Format-List FullName, Length
+
+      - name: Install and smoke-test MSIX
+        shell: pwsh
+        run: |
+          .\scripts\ci\Smoke-MsixSideload.ps1 `
+            -MsixPath "${{ steps.build.outputs.msix }}" `
+            -CerPath .\KeyAutomator_CI.cer `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Upload MSIX artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeyAutomator-msix-sideload
+          path: |
+            AppPackages/CI/**/*.msix
+            KeyAutomator_CI.cer
+          if-no-files-found: warn
+
+      - name: Cleanup cert files
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Force .\KeyAutomator_CI.pfx -ErrorAction SilentlyContinue
+          Remove-Item -Force .\KeyAutomator_CI.cer -ErrorAction SilentlyContinue

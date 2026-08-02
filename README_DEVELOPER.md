@@ -143,6 +143,25 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
+### CI（GitHub Actions）
+
+ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
+
+1. ユニットテスト
+2. 自己署名証明書の作成（`CN=KeyAutomator`）
+3. MSIX サイドロードビルド
+4. インストール → `-h` / サンプル実行 → 設定が `%LocalAppData%\KeyAutomator` にあること
+5. アンインストール
+6. MSIX を Artifact として保存
+
+手動実行:
+
+```powershell
+.\scripts\ci\New-CiSigningCertificate.ps1
+$msix = .\scripts\ci\Build-MsixSideload.ps1
+.\scripts\ci\Smoke-MsixSideload.ps1 -MsixPath $msix
+```
+
 ## パッケージマニフェスト
 
 `Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。

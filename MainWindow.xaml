@@ -388,6 +388,13 @@
                                         Content="確認"
                                         Style="{StaticResource SlimButtonStyle}"
                                         ToolTipService.ToolTip="メッセージを表示し、OK で次へ進む" />
+                                    <Button
+                                        AutomationProperties.Name="繰り返しで囲む"
+                                        AutomationProperties.AutomationId="WrapInRepeatButton"
+                                        Click="WrapInRepeat_Click"
+                                        Content="繰り返し"
+                                        Style="{StaticResource SlimButtonStyle}"
+                                        ToolTipService.ToolTip="選択した手順を繰り返しブロックで囲みます（未選択なら空ブロックを挿入）" />
                                     <Border
                                         Width="1"
                                         Margin="4,2"
@@ -478,14 +485,40 @@
                                                     CornerRadius="6"
                                                     Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
 
-                                                <Grid Padding="8,4,8,4" ColumnSpacing="8">
+                                                <!-- 繰り返しブロックの薄い背景 -->
+                                                <Border
+                                                    Margin="0,1"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    CornerRadius="6"
+                                                    Opacity="0.08"
+                                                    Visibility="{Binding IsLoopMarker, Converter={StaticResource BoolToVis}}" />
+
+                                                <Grid Padding="4,4,8,4" ColumnSpacing="6">
                                                     <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="28" />
                                                         <ColumnDefinition Width="148" />
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
 
+                                                    <!-- ネストインデント -->
                                                     <Border
+                                                        Width="{Binding IndentWidth}"
+                                                        Background="Transparent" />
+
+                                                    <!-- ループ開始/終了のアクセントバー -->
+                                                    <Border
+                                                        Grid.Column="1"
+                                                        Width="3"
+                                                        Margin="0,6"
+                                                        VerticalAlignment="Stretch"
+                                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                        CornerRadius="1.5"
+                                                        Visibility="{Binding IsLoopMarker, Converter={StaticResource BoolToVis}}" />
+
+                                                    <Border
+                                                        Grid.Column="2"
                                                         Width="28"
                                                         Height="28"
                                                         VerticalAlignment="Center"
@@ -500,7 +533,7 @@
                                                     </Border>
 
                                                     <ComboBox
-                                                        Grid.Column="1"
+                                                        Grid.Column="3"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="アクション種別"
                                                         DisplayMemberPath="Label"
@@ -509,7 +542,7 @@
 
                                                     <!-- 特殊キー -->
                                                     <ComboBox
-                                                        Grid.Column="2"
+                                                        Grid.Column="4"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="特殊キー選択"
                                                         DisplayMemberPath="Label"
@@ -521,7 +554,7 @@
 
                                                     <!-- マウスクリック -->
                                                     <ComboBox
-                                                        Grid.Column="2"
+                                                        Grid.Column="4"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="マウス操作選択"
                                                         DisplayMemberPath="Label"
@@ -531,7 +564,7 @@
 
                                                     <!-- ショートカット: 同時押しキーを複数追加 -->
                                                     <ScrollViewer
-                                                        Grid.Column="2"
+                                                        Grid.Column="4"
                                                         HorizontalScrollBarVisibility="Auto"
                                                         HorizontalScrollMode="Enabled"
                                                         VerticalScrollBarVisibility="Disabled"
@@ -579,9 +612,42 @@
                                                         </StackPanel>
                                                     </ScrollViewer>
 
-                                                    <!-- テキスト / 待機 -->
+                                                    <!-- 繰り返し回数 -->
+                                                    <StackPanel
+                                                        Grid.Column="4"
+                                                        VerticalAlignment="Center"
+                                                        Orientation="Horizontal"
+                                                        Spacing="8"
+                                                        Visibility="{Binding IsRepeatType, Converter={StaticResource BoolToVis}}">
+                                                        <NumberBox
+                                                            Width="110"
+                                                            Minimum="1"
+                                                            Maximum="9999"
+                                                            SpinButtonPlacementMode="Compact"
+                                                            AutomationProperties.Name="繰り返し回数"
+                                                            Value="{Binding RepeatCount, Mode=TwoWay}" />
+                                                        <TextBlock
+                                                            VerticalAlignment="Center"
+                                                            FontSize="13"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                            Text="回くりかえす" />
+                                                    </StackPanel>
+
+                                                    <!-- ここまで -->
+                                                    <TextBlock
+                                                        Grid.Column="4"
+                                                        VerticalAlignment="Center"
+                                                        AutomationProperties.Name="繰り返しここまで"
+                                                        FontSize="13"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="──────── ここまで ────────"
+                                                        Visibility="{Binding IsEndRepeatType, Converter={StaticResource BoolToVis}}" />
+
+                                                    <!-- テキスト / 待機 / 確認 -->
                                                     <TextBox
-                                                        Grid.Column="2"
+                                                        Grid.Column="4"
                                                         VerticalAlignment="Center"
                                                         AutomationProperties.Name="アクション設定値"
                                                         PlaceholderText="{Binding Placeholder}"

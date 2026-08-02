@@ -23,5 +23,16 @@
       { "type": "hotkey", "value": "CTRL+A" },
       { "type": "hotkey", "value": "CTRL+C" }
     ]
+  },
+  {
+    "id": 3,
+    "name": "Enterを3回",
+    "alias": "enter_x3",
+    "delay_sec": 2.0,
+    "actions": [
+      { "type": "repeat", "value": "3" },
+      { "type": "key", "value": "ENTER" },
+      { "type": "end_repeat", "value": "" }
+    ]
   }
 ]

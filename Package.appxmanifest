@@ -10,7 +10,7 @@
   <Identity
     Name="58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5"
     Publisher="CN=KeyAutomator"
-    Version="2.7.9.0" />
+    Version="2.8.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

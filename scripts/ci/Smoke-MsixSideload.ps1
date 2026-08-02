@@ -83,30 +83,30 @@ Assert-Step "CLI ヘルプ (-h)" {
     }
 }
 
-Assert-Step "設定フォルダ解決（パッケージ実行後）" {
-    # 一度ヘルプを叩いただけでは設定が無いことがあるので、空マクロ実行ではなく
-    # AppPaths 相当の Locals を確認できるよう、select_copy を短く実行する。
-    # dialog 無しサンプル。フォーカス先へのキー送信は許容（CI 検証目的）。
+Assert-Step "パッケージ実行で設定がユーザー領域へ作られる" {
+    # dialog 無しサンプル。キー送信失敗は環境次第なので、exit code より
+    # ConfigStore.Load 側で config.json がユーザー領域にできることを主検証にする。
     $proc = Start-Process -FilePath $exe -ArgumentList @("-alias", "select_copy") -PassThru -WindowStyle Hidden
     if (-not $proc.WaitForExit(60000)) {
         Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
         throw "select_copy がタイムアウトしました"
     }
     if ($proc.ExitCode -ne 0) {
-        Write-Warning "select_copy exit=$($proc.ExitCode)（入力先が無い環境では失敗し得る）。継続確認します。"
+        Write-Warning "select_copy exit=$($proc.ExitCode)（入力先が無い環境では失敗し得る）"
     }
 
     $dataDir = Join-Path $env:LOCALAPPDATA "KeyAutomator"
-    if (-not (Test-Path $dataDir)) {
-        # 初回サンプル投入は GUI 起動時と同等の Load 経路。CLI は既存 config を読む。
-        # パッケージ直後で config が無い場合は Load がサンプルを書く想定だが、
-        # CLI 経路でも ConfigStore.Load が走るので作成されるはず。
-        throw "データフォルダがありません: $dataDir"
-    }
     $config = Join-Path $dataDir "config.json"
     if (-not (Test-Path $config)) {
-        throw "config.json がありません: $config"
+        throw "config.json がありません（パッケージ時は LocalAppData 期待）: $config"
     }
+
+    # インストール先（書けない場所）に設定が散っていないこと
+    $bad = Join-Path $pkg.InstallLocation "config.json"
+    if (Test-Path $bad) {
+        throw "インストール先に config.json が作られてしまいました: $bad"
+    }
+
     Write-Host "config: $config"
 }
 

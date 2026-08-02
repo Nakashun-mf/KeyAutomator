@@ -98,13 +98,7 @@ jobs:
       - name: Cleanup cert files
         if: always()
         shell: pwsh
+        timeout-minutes: 2
         run: |
-          if (Test-Path .\KeyAutomator_CI.thumbprint) {
-            $tp = (Get-Content .\KeyAutomator_CI.thumbprint -Raw).Trim()
-            Get-ChildItem Cert:\CurrentUser\My |
-              Where-Object { $_.Thumbprint -eq $tp } |
-              ForEach-Object { Remove-Item $_.PSPath -Force -ErrorAction SilentlyContinue }
-          }
-          Remove-Item -Force .\KeyAutomator_CI.pfx -ErrorAction SilentlyContinue
-          Remove-Item -Force .\KeyAutomator_CI.cer -ErrorAction SilentlyContinue
-          Remove-Item -Force .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue
+          # 証明書ストア列挙は環境によって止まることがあるため、ファイルだけ消す
+          Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

@@ -22,53 +22,62 @@ function Assert-Step([string]$Name, [scriptblock]$Action) {
     Write-Host "OK: $Name"
 }
 
-function Resolve-CliExe {
-    param([Parameter(Mandatory = $true)]$Package)
-
-    # WindowsApps 実体パス直実行は ACL で失敗し得る。
-    # App Execution Alias を優先する。
-    $aliasCandidates = @(
-        (Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\KeyAutomator.exe")
-        (Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\$($Package.PackageFamilyName)\KeyAutomator.exe")
+function Wait-File {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$TimeoutSec = 60
     )
-    foreach ($c in $aliasCandidates) {
-        if (Test-Path -LiteralPath $c) {
-            Write-Host "CLI via alias: $c"
-            return $c
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    while ($sw.Elapsed.TotalSeconds -lt $TimeoutSec) {
+        if (Test-Path -LiteralPath $Path) {
+            Start-Sleep -Milliseconds 300
+            return $true
         }
+        Start-Sleep -Milliseconds 400
     }
-
-    $fromPath = Get-Command KeyAutomator.exe -ErrorAction SilentlyContinue |
-        Select-Object -ExpandProperty Source -First 1
-    if ($fromPath) {
-        Write-Host "CLI via PATH: $fromPath"
-        return $fromPath
-    }
-
-    $fallback = Join-Path $Package.InstallLocation "KeyAutomator.exe"
-    Write-Warning "エイリアス未検出。InstallLocation を試します: $fallback"
-    return $fallback
+    return $false
 }
 
-function Invoke-PackagedCli {
+function Invoke-InPackageCli {
     param(
-        [Parameter(Mandatory = $true)][string]$FilePath,
-        [string[]]$ArgumentList = @(),
-        [int]$TimeoutMs = 90000
+        [Parameter(Mandatory = $true)]$Package,
+        [Parameter(Mandatory = $true)][string]$CliArgs,
+        [Parameter(Mandatory = $true)][string]$OutFile,
+        [Parameter(Mandatory = $true)][string]$ExitFile,
+        [int]$TimeoutSec = 90
     )
 
-    # App Execution Alias は stdout/stderr リダイレクトと相性が悪く、即 exit=1 になり得る。
-    # CI ではリダイレクトせず終了コードと副作用（config.json 等）で検証する。
-    Write-Host "Run: $FilePath $($ArgumentList -join ' ')"
-    $proc = Start-Process -FilePath $FilePath `
-        -ArgumentList $ArgumentList `
-        -PassThru `
-        -WindowStyle Hidden
-    if (-not $proc.WaitForExit($TimeoutMs)) {
-        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-        throw "タイムアウト (${TimeoutMs}ms): $FilePath $($ArgumentList -join ' ')"
+    Remove-Item -Force $OutFile, $ExitFile -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force -Path (Split-Path $OutFile -Parent) | Out-Null
+
+    # AppId は Package.appxmanifest の Application Id（"App"）
+    # エイリアス直起動は WinExe の終了コードが化けやすいので、パッケージ文脈で cmd 経由する。
+    $cmdArgs = "/c KeyAutomator.exe $CliArgs > `"$OutFile`" 2>&1 & echo %ERRORLEVEL%> `"$ExitFile`""
+    Write-Host "Invoke-CommandInDesktopPackage AppId=App Args=$cmdArgs"
+
+    if (-not (Get-Command Invoke-CommandInDesktopPackage -ErrorAction SilentlyContinue)) {
+        throw "Invoke-CommandInDesktopPackage がありません"
     }
-    return $proc.ExitCode
+
+    Invoke-CommandInDesktopPackage `
+        -PackageFamilyName $Package.PackageFamilyName `
+        -AppId "App" `
+        -Command "cmd.exe" `
+        -Args $cmdArgs `
+        -PreventBreakaway | Out-Null
+
+    if (-not (Wait-File -Path $ExitFile -TimeoutSec $TimeoutSec)) {
+        throw "CLI 終了コードファイルがタイムアウト: $ExitFile"
+    }
+
+    $codeText = (Get-Content -LiteralPath $ExitFile -Raw).Trim()
+    $code = 1
+    [void][int]::TryParse($codeText, [ref]$code)
+    $output = ""
+    if (Test-Path -LiteralPath $OutFile) {
+        $output = Get-Content -LiteralPath $OutFile -Raw -ErrorAction SilentlyContinue
+    }
+    return [pscustomobject]@{ ExitCode = $code; Output = $output }
 }
 
 Assert-Step "サイドロード許可と証明書登録" {
@@ -123,49 +132,49 @@ $installExe = Join-Path $pkg.InstallLocation "KeyAutomator.exe"
 if (-not (Test-Path -LiteralPath $installExe)) {
     throw "インストール先に KeyAutomator.exe がありません: $installExe"
 }
-Write-Host "Install exe: $installExe"
 
-$exe = $null
-foreach ($i in 1..10) {
-    $exe = Resolve-CliExe -Package $pkg
-    if ($exe -and (Test-Path -LiteralPath $exe)) { break }
-    Start-Sleep -Seconds 1
+$alias = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\KeyAutomator.exe"
+if (Test-Path -LiteralPath $alias) {
+    Write-Host "Alias present: $alias"
 }
-if (-not $exe -or -not (Test-Path -LiteralPath $exe)) {
-    throw "CLI 起動用 exe / エイリアスが見つかりません"
+else {
+    Write-Warning "AppExecutionAlias 未検出（インストール直後の遅延の可能性）"
 }
+
+$dataDir = Join-Path $env:LOCALAPPDATA "KeyAutomator"
+New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
 Assert-Step "CLI ヘルプ (-h)" {
-    # ヘルプ文言の中身はユニットテストで担保。ここではパッケージ起動の成功を見る。
-    $code = Invoke-PackagedCli -FilePath $exe -ArgumentList @("-h") -TimeoutMs 60000
-    Write-Host "exit=$code"
-    $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
-    if (Test-Path -LiteralPath $log) {
-        Write-Host "----- error.log -----"
-        Get-Content -LiteralPath $log -Tail 40 | ForEach-Object { Write-Host $_ }
+    $helpOut = Join-Path $dataDir "ci-help-out.txt"
+    $helpExit = Join-Path $dataDir "ci-help-exit.txt"
+    $result = Invoke-InPackageCli -Package $pkg -CliArgs "-h" -OutFile $helpOut -ExitFile $helpExit -TimeoutSec 90
+    Write-Host "exit=$($result.ExitCode)"
+    Write-Host $result.Output
+    if ($result.ExitCode -ne 0) {
+        throw "-h の終了コードが $($result.ExitCode)"
     }
-    if ($code -ne 0) {
-        throw "-h の終了コードが $code"
+    if ($result.Output -notmatch "KeyAutomator") {
+        throw "-h 出力に KeyAutomator が含まれません"
+    }
+    if ($result.Output -notmatch "確認アクション") {
+        throw "-h に確認アクションの注意がありません"
     }
 }
 
 Assert-Step "パッケージ実行で設定がユーザー領域へ作られる" {
-    $code = Invoke-PackagedCli -FilePath $exe -ArgumentList @("-alias", "select_copy") -TimeoutMs 90000
-    Write-Host "select_copy exit=$code"
-    if ($code -ne 0) {
-        Write-Warning "select_copy exit=$code（入力先が無い環境では失敗し得る）"
+    $runOut = Join-Path $dataDir "ci-alias-out.txt"
+    $runExit = Join-Path $dataDir "ci-alias-exit.txt"
+    $result = Invoke-InPackageCli -Package $pkg -CliArgs "-alias select_copy" -OutFile $runOut -ExitFile $runExit -TimeoutSec 90
+    Write-Host "select_copy exit=$($result.ExitCode)"
+    if ($result.Output) { Write-Host $result.Output }
+    if ($result.ExitCode -ne 0) {
+        Write-Warning "select_copy exit=$($result.ExitCode)（入力先が無い環境では失敗し得る）"
     }
 
-    $dataDir = Join-Path $env:LOCALAPPDATA "KeyAutomator"
     $config = Join-Path $dataDir "config.json"
     if (-not (Test-Path -LiteralPath $config)) {
         Write-Host "LocalAppData KeyAutomator:"
-        if (Test-Path -LiteralPath $dataDir) {
-            Get-ChildItem -LiteralPath $dataDir | ForEach-Object { Write-Host $_.FullName }
-        }
-        else {
-            Write-Host "(directory missing) $dataDir"
-        }
+        Get-ChildItem -LiteralPath $dataDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
         $log = Join-Path $dataDir "error.log"
         if (Test-Path -LiteralPath $log) {
             Write-Host "----- error.log -----"

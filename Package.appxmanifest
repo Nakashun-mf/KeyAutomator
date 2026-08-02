@@ -5,13 +5,12 @@
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:systemai="http://schemas.microsoft.com/appx/manifest/systemai/windows10"
-  IgnorableNamespaces="uap rescap systemai">
+  IgnorableNamespaces="uap rescap">
 
   <Identity
     Name="58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5"
     Publisher="CN=KeyAutomator"
-    Version="1.0.0.0" />
+    Version="2.7.8.0" />
 
   <mp:PhoneIdentity PhoneProductId="58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -36,7 +35,7 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="KeyAutomator"
-        Description="KeyAutomator"
+        Description="キー入力マクロを登録し、アクティブウィンドウへ自動入力するデスクトップアプリ"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
@@ -47,7 +46,7 @@
   </Applications>
 
   <Capabilities>
+    <!-- SendInput 等のデスクトップ自動化に必要。未使用の権限は持たない。 -->
     <rescap:Capability Name="runFullTrust" />
-    <systemai:Capability Name="systemAIModels"/>
   </Capabilities>
 </Package>

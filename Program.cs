@@ -12,8 +12,8 @@ public static class Program
     {
         if (CliRunner.IsCliMode(args))
         {
-            Environment.ExitCode = CliRunner.Run(args);
-            return;
+            // WinExe でも呼び出し元へ確実にコードを返す
+            Environment.Exit(CliRunner.Run(args));
         }
 
         ComWrappersSupport.InitializeComWrappers();

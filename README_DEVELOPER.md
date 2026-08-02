@@ -143,6 +143,26 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
+### CI（GitHub Actions）
+
+ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
+
+1. 自己署名証明書の作成（`CN=KeyAutomator`、署名は Thumbprint 方式）
+2. MSIX サイドロードビルド（成果物は `$RUNNER_TEMP`）
+3. インストール → `WindowsApps` 配置 / `AppExecutionAlias` / アンインストールを確認
+4. 可能ならパッケージ CLI で `%LocalAppData%\KeyAutomator\config.json` 作成も確認  
+   （AppExecutionAlias + WinExe は CI 上で終了コードや起動が不安定なため、未作成でもインストール通し成功扱い）
+5. 巨大 MSIX の Artifact アップロードは行わない（runner 切断防止）
+
+手動実行:
+
+```powershell
+.\scripts\ci\New-CiSigningCertificate.ps1
+# 署名は CurrentUser\My の Thumbprint 経由（パスワード付き PFX 直指定は MSBuild 未サポート）
+$msix = .\scripts\ci\Build-MsixSideload.ps1
+.\scripts\ci\Smoke-MsixSideload.ps1 -MsixPath $msix
+```
+
 ## パッケージマニフェスト
 
 `Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。
@@ -150,6 +170,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 - **Version** は本体（`.csproj` の `Version`）と揃える
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
+- CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）
 
 ## アーキテクチャ
 

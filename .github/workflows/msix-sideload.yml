@@ -1,0 +1,88 @@
+name: MSIX Sideload Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msix-sideload-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  msix-sideload-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # 注: WinUI テストプロジェクトは CI 上の SDK / VSTest 組み合わせが不安定なため、
+      # このワークフローでは MSIX インストール通しを主検証とする。
+
+      - name: Create CI signing certificate
+        shell: pwsh
+        run: |
+          .\scripts\ci\New-CiSigningCertificate.ps1 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Build MSIX (sideload)
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "KeyAutomatorMsix"
+          .\scripts\ci\Build-MsixSideload.ps1 `
+            -Configuration Release `
+            -Platform x64 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!" `
+            -OutDir $out
+          $pathFile = Join-Path $out "msix-path.txt"
+          if (-not (Test-Path $pathFile)) { throw "msix-path.txt がありません" }
+          $msix = (Get-Content -LiteralPath $pathFile -Raw).Trim()
+          if (-not $msix -or -not (Test-Path -LiteralPath $msix)) { throw "MSIX が見つかりません: $msix" }
+          "MSIX_PATH=$msix" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "MSIX_OUT=$out" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Get-Item -LiteralPath $msix | Format-List FullName, Length, LastWriteTime
+
+      - name: Install and smoke-test MSIX
+        shell: pwsh
+        run: |
+          Write-Host "Smoke target: $env:MSIX_PATH"
+          .\scripts\ci\Smoke-MsixSideload.ps1 `
+            -MsixPath "$env:MSIX_PATH" `
+            -CerPath .\KeyAutomator_CI.cer `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Show diagnostics on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
+          if (Test-Path $log) {
+            Write-Host "----- error.log -----"
+            Get-Content $log -Tail 50 | ForEach-Object { Write-Host $_ }
+          }
+
+      - name: Cleanup cert files
+        if: always()
+        shell: pwsh
+        run: |
+          # 巨大成果物の削除は runner 破棄に任せる（rd/Remove-Item が固まるため）
+          Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

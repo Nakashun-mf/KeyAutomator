@@ -163,14 +163,18 @@ public static class CliRunner
     {
         try
         {
-            // パイプ／リダイレクト時は標準出力へ直接書く（AttachConsole だと落ちる／見えない）
-            if (Console.IsOutputRedirected)
-            {
-                Console.Out.WriteLine(text);
-                Console.Out.Flush();
-                return;
-            }
+            // 先に標準出力へ書く（リダイレクト／エイリアス起動でも最も安全）
+            Console.Out.WriteLine(text);
+            Console.Out.Flush();
+            return;
+        }
+        catch
+        {
+            // ignore and fall back
+        }
 
+        try
+        {
             NativeMethods.AttachConsole(NativeMethods.ATTACH_PARENT_PROCESS);
             Console.WriteLine(text);
         }

@@ -74,6 +74,9 @@ jobs:
           if (Test-Path .\README.md) {
             Copy-Item -Force .\README.md $distDir\
           }
+          if (Test-Path .\PRIVACY.md) {
+            Copy-Item -Force .\PRIVACY.md $distDir\
+          }
           $zipPath = ".\dist\$distName.zip"
           Compress-Archive -Path $distDir -DestinationPath $zipPath -Force
           echo "zip=$zipPath" >> $env:GITHUB_OUTPUT

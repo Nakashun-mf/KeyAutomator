@@ -109,6 +109,8 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 
 - 入力は「その時点のアクティブウィンドウ」へ送られます
 - 管理者権限が必要なアプリへ送る場合は、本アプリも管理者起動してください
-- **Program Files や書き込み禁止フォルダへ置かない**（設定・ログが書けません。v2.7.4 以降は LocalAppData へ自動退避）
-- パスワード等を `config.json` に平文保存する場合は取り扱いに注意してください
+- **Program Files や書き込み禁止フォルダへ置かない**（設定は LocalAppData 側になります）
+- パスワード等を `config.json` に入れると平文で残ります（取り扱いに注意）
 - 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です
+
+保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（データの取り扱い）を参照してください。

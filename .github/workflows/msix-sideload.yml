@@ -69,29 +69,24 @@ jobs:
             -MsixPath "$env:MSIX_PATH" `
             -CerPath .\KeyAutomator_CI.cer `
             -Password "KeyAutomator-CI-Temp!"
-          "SMOKE PASSED" | Set-Content -LiteralPath (Join-Path $env:MSIX_OUT "smoke-result.txt")
 
-      - name: Show smoke result on failure
+      - name: Show diagnostics on failure
         if: failure()
         shell: pwsh
         run: |
-          if ($env:MSIX_OUT) {
-            $p = Join-Path $env:MSIX_OUT "smoke-result.txt"
-            if (Test-Path $p) { Get-Content $p | ForEach-Object { Write-Host $_ } }
-          }
           $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
           if (Test-Path $log) {
             Write-Host "----- error.log -----"
             Get-Content $log -Tail 50 | ForEach-Object { Write-Host $_ }
           }
 
-      - name: Cleanup large outputs
+      - name: Cleanup temp package dir
         if: always()
         shell: pwsh
+        timeout-minutes: 3
         run: |
-          # Post Checkout が巨大成果物の削除で固まらないよう先に消す
-          if ($env:MSIX_OUT) {
-            Remove-Item -Recurse -Force $env:MSIX_OUT -ErrorAction SilentlyContinue
+          # bin/obj は巨大で Remove-Item が固まるため触らない（runner 破棄に任せる）
+          if ($env:MSIX_OUT -and (Test-Path -LiteralPath $env:MSIX_OUT)) {
+            cmd /c "rd /s /q `"$env:MSIX_OUT`""
           }
-          Remove-Item -Recurse -Force .\AppPackages, .\bin, .\obj -ErrorAction SilentlyContinue
           Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

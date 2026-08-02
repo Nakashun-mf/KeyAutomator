@@ -168,9 +168,7 @@ public sealed partial class MainWindow : Window
                 FileName = AppPaths.DataDirectory,
                 UseShellExecute = true
             });
-            _vm.StatusMessage = AppPaths.IsUsingFallbackDirectory
-                ? $"設定フォルダを開きました（exe横が書けないため LocalAppData）: {AppPaths.DataDirectory}"
-                : $"設定フォルダを開きました: {AppPaths.DataDirectory}";
+            _vm.StatusMessage = $"設定フォルダを開きました: {AppPaths.DataDirectory}";
         }
         catch (Exception ex)
         {

@@ -206,7 +206,7 @@ public partial class MainViewModel : ObservableObject
                 Macros.Add(m);
 
             StatusMessage = AppPaths.IsUsingFallbackDirectory
-                ? $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath} ※exeフォルダが書けないため LocalAppData を使用）"
+                ? $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath} ※設定はユーザーフォルダ側）"
                 : $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
             SelectedMacro = Macros.FirstOrDefault();
             IsMacroListEmpty = Macros.Count == 0;

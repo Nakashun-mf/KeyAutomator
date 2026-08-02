@@ -2,8 +2,9 @@ namespace KeyAutomator.Services;
 
 /// <summary>
 /// 設定・ログの保存先。
-/// exe と同じフォルダが書き込み可能ならそこ（ポータブル）、
-/// Program Files など書けない場所なら LocalAppData にフォールバックする。
+/// - ポータブル（書き込み可能な場所に exe を置いた場合）: exe と同じフォルダ
+/// - 書けない／書き込みが不安定な場所: %LocalAppData%\KeyAutomator
+/// - パッケージ実行時: 常に LocalAppData（インストール先へは書かない）
 /// （単一ファイル配布時、AppContext.BaseDirectory は展開先 temp になるため使わない）
 /// </summary>
 public static class AppPaths
@@ -42,19 +43,99 @@ public static class AppPaths
     private static string ResolveDataDirectory()
     {
         var exeDir = ExeDirectory;
+        var appData = GetLocalDataDirectory();
+
+        // パッケージ実行や Program Files 配下など、exe 横に書くとしんどい場所は最初から AppData へ
+        if (IsRunningPackaged() || IsRestrictedInstallDirectory(exeDir))
+        {
+            Directory.CreateDirectory(appData);
+            TryMigrateSidecarFiles(exeDir, appData);
+            return appData;
+        }
+
         if (CanWriteToDirectory(exeDir))
             return exeDir;
 
-        var fallback = Path.Combine(
+        Directory.CreateDirectory(appData);
+        TryMigrateSidecarFiles(exeDir, appData);
+        return appData;
+    }
+
+    public static string GetLocalDataDirectory() =>
+        Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KeyAutomator");
-        Directory.CreateDirectory(fallback);
-        TryMigrateSidecarFiles(exeDir, fallback);
-        return fallback;
+
+    /// <summary>
+    /// インストール先・保護フォルダなど、ユーザーデータ向きでないパスかどうか。
+    /// </summary>
+    public static bool IsRestrictedInstallDirectory(string? directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+            return true;
+
+        string full;
+        try
+        {
+            full = Path.GetFullPath(directory);
+        }
+        catch
+        {
+            return true;
+        }
+
+        foreach (var root in GetRestrictedRoots())
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                continue;
+
+            var prefix = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                         + Path.DirectorySeparatorChar;
+            if (full.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                    root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        // WindowsApps（ストア／MSIX の実体置き場）
+        if (full.Contains($"{Path.DirectorySeparatorChar}WindowsApps{Path.DirectorySeparatorChar}",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> GetRestrictedRoots()
+    {
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.System);
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+    }
+
+    /// <summary>MSIX 等のパッケージとして動作しているか。</summary>
+    public static bool IsRunningPackaged()
+    {
+        try
+        {
+            // unpackaged だと InvalidOperationException
+            _ = Windows.ApplicationModel.Package.Current.Id;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>
-    /// Program Files 等に置いた exe 横の設定を、書き込み可能なフォルダへ一度だけコピーする。
+    /// exe 横の設定を、書き込み可能なフォルダへ一度だけコピーする。
     /// </summary>
     public static void TryMigrateSidecarFiles(string sourceDirectory, string destinationDirectory)
     {

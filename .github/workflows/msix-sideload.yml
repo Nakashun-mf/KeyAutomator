@@ -19,20 +19,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
+          dotnet-version: "8.0.x"
 
-      - name: Show SDKs
-        shell: pwsh
-        run: dotnet --list-sdks
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Unit tests
+      - name: Unit tests (VS MSBuild)
         shell: pwsh
         run: |
-          dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj `
-            -c Release `
-            -p:Platform=x64 `
-            -p:EnableWindowsTargeting=true
+          # WinUI 参照プロジェクトは dotnet SDK 単体だと Pri タスクが無いことがある
+          msbuild .\KeyAutomator.Tests\KeyAutomator.Tests.csproj `
+            /restore `
+            /t:VSTest `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:VSTestNoLogo=true
 
       - name: Create CI signing certificate
         shell: pwsh

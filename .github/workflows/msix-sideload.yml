@@ -24,12 +24,9 @@ jobs:
       - name: Unit tests
         shell: pwsh
         run: |
-          $Platform = "x64"
           dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj `
             -c Release `
-            -p:Platform=$Platform `
-            --filter "FullyQualifiedName!~UserDialog" `
-            --no-restore false
+            -p:Platform=x64
 
       - name: Create CI signing certificate
         shell: pwsh

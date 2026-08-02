@@ -50,7 +50,12 @@ if (-not $storeCert) {
 Write-Host "Signing thumbprint: $thumbprint"
 Write-Host "Signing subject   : $($storeCert.Subject)"
 
-$outFull = Join-Path $root $OutDir
+if ([System.IO.Path]::IsPathRooted($OutDir)) {
+    $outFull = $OutDir
+}
+else {
+    $outFull = Join-Path $root $OutDir
+}
 Remove-Item -Recurse -Force $outFull -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $outFull | Out-Null
 

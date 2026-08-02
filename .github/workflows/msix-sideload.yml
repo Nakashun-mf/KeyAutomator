@@ -75,8 +75,10 @@ jobs:
         if: failure()
         shell: pwsh
         run: |
-          $p = Join-Path $env:MSIX_OUT "smoke-result.txt"
-          if (Test-Path $p) { Get-Content $p | ForEach-Object { Write-Host $_ } }
+          if ($env:MSIX_OUT) {
+            $p = Join-Path $env:MSIX_OUT "smoke-result.txt"
+            if (Test-Path $p) { Get-Content $p | ForEach-Object { Write-Host $_ } }
+          }
           $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
           if (Test-Path $log) {
             Write-Host "----- error.log -----"

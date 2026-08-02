@@ -7,6 +7,8 @@ param(
     [string]$Configuration = "Release",
     [string]$Platform = "x64",
     [string]$PfxPath = ".\KeyAutomator_CI.pfx",
+    [string]$CerPath = ".\KeyAutomator_CI.cer",
+    [string]$ThumbprintPath = ".\KeyAutomator_CI.thumbprint",
     [string]$Password = "KeyAutomator-CI-Temp!",
     [string]$OutDir = ".\AppPackages\CI"
 )
@@ -15,17 +17,44 @@ $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Set-Location $root
 
-if (-not (Test-Path $PfxPath)) {
-    & "$PSScriptRoot\New-CiSigningCertificate.ps1" -PfxPath $PfxPath -Password $Password
+if (-not (Test-Path -LiteralPath $ThumbprintPath)) {
+    & "$PSScriptRoot\New-CiSigningCertificate.ps1" `
+        -PfxPath $PfxPath `
+        -CerPath $CerPath `
+        -ThumbprintPath $ThumbprintPath `
+        -Password $Password
 }
 
-$pfxFull = (Resolve-Path $PfxPath).Path
+$thumbprint = (Get-Content -LiteralPath $ThumbprintPath -Raw).Trim()
+if (-not $thumbprint) {
+    throw "Thumbprint が空です: $ThumbprintPath"
+}
+
+$storeCert = Get-ChildItem Cert:\CurrentUser\My |
+    Where-Object { $_.Thumbprint -eq $thumbprint } |
+    Select-Object -First 1
+if (-not $storeCert) {
+    # ストアに無い場合は PFX から戻す
+    if (-not (Test-Path -LiteralPath $PfxPath)) {
+        throw "署名証明書がストアにも PFX にもありません。"
+    }
+    $secure = ConvertTo-SecureString -String $Password -Force -AsPlainText
+    $storeCert = Import-PfxCertificate `
+        -FilePath $PfxPath `
+        -CertStoreLocation "Cert:\CurrentUser\My" `
+        -Password $secure
+    $thumbprint = $storeCert.Thumbprint
+    Set-Content -LiteralPath $ThumbprintPath -Value $thumbprint -NoNewline -Encoding ascii
+}
+
+Write-Host "Signing thumbprint: $thumbprint"
+Write-Host "Signing subject   : $($storeCert.Subject)"
+
 $outFull = Join-Path $root $OutDir
 Remove-Item -Recurse -Force $outFull -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $outFull | Out-Null
 
 function Resolve-MsBuildPath {
-    # microsoft/setup-msbuild@v2 が設定するパスを最優先
     if ($env:MSBUILD_PATH -and (Test-Path -LiteralPath $env:MSBUILD_PATH)) {
         return $env:MSBUILD_PATH
     }
@@ -38,7 +67,6 @@ function Resolve-MsBuildPath {
 
     $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path -LiteralPath $vswhere) {
-        # PowerShell のグロブ展開を避けるため単一引用符で渡す
         $found = & $vswhere -latest -requires Microsoft.Component.MSBuild `
             -find 'MSBuild\Current\Bin\MSBuild.exe' 2>$null |
             Where-Object { $_ -and (Test-Path -LiteralPath $_) } |
@@ -65,8 +93,7 @@ Write-Host "Using MSBuild: $msbuild"
 $logPath = Join-Path $outFull "msbuild-msix.log"
 $pathFile = Join-Path $outFull "msix-path.txt"
 
-# stderr をパイプしない（ErrorActionPreference=Stop 下で警告が失敗扱いになるため）
-# 成功ストリーム汚染を避けるため、結果パスはファイルに書く
+# PackageCertificatePassword 付き PFX は未サポートのため Thumbprint で署名する
 $msbuildArgs = @(
     ".\KeyAutomator.csproj"
     "/restore"
@@ -74,8 +101,7 @@ $msbuildArgs = @(
     "/p:Platform=$Platform"
     "/p:KeyAutomatorPackaged=true"
     "/p:AppxPackageSigningEnabled=true"
-    "/p:PackageCertificateKeyFile=$pfxFull"
-    "/p:PackageCertificatePassword=$Password"
+    "/p:PackageCertificateThumbprint=$thumbprint"
     "/p:AppxPackageDir=$outFull\"
     "/p:UapAppxPackageBuildMode=SideLoadOnly"
     "/p:AppxBundle=Never"
@@ -97,11 +123,8 @@ if ($proc.ExitCode -ne 0) {
 
 $msix = Get-ChildItem -Path $outFull -Recurse -Filter *.msix | Select-Object -First 1
 if (-not $msix) {
-    # .msixbundle だけの場合もある
     $bundle = Get-ChildItem -Path $outFull -Recurse -Filter *.msixbundle | Select-Object -First 1
-    if ($bundle) {
-        $msix = $bundle
-    }
+    if ($bundle) { $msix = $bundle }
 }
 
 if (-not $msix) {
@@ -114,5 +137,4 @@ if (-not $msix) {
 
 Set-Content -LiteralPath $pathFile -Value $msix.FullName -NoNewline -Encoding utf8
 Write-Host "MSIX: $($msix.FullName)"
-# 呼び出し側が代入しても壊れないよう、明示的にパスだけ返す
 return $msix.FullName

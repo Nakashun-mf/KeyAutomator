@@ -33,6 +33,7 @@ jobs:
           .\scripts\ci\New-CiSigningCertificate.ps1 `
             -PfxPath .\KeyAutomator_CI.pfx `
             -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
             -Password "KeyAutomator-CI-Temp!"
 
       - name: Build MSIX (sideload)
@@ -43,6 +44,8 @@ jobs:
             -Configuration Release `
             -Platform x64 `
             -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
             -Password "KeyAutomator-CI-Temp!" `
             -OutDir .\AppPackages\CI
           $pathFile = ".\AppPackages\CI\msix-path.txt"
@@ -76,5 +79,12 @@ jobs:
         if: always()
         shell: pwsh
         run: |
+          if (Test-Path .\KeyAutomator_CI.thumbprint) {
+            $tp = (Get-Content .\KeyAutomator_CI.thumbprint -Raw).Trim()
+            Get-ChildItem Cert:\CurrentUser\My |
+              Where-Object { $_.Thumbprint -eq $tp } |
+              ForEach-Object { Remove-Item $_.PSPath -Force -ErrorAction SilentlyContinue }
+          }
           Remove-Item -Force .\KeyAutomator_CI.pfx -ErrorAction SilentlyContinue
           Remove-Item -Force .\KeyAutomator_CI.cer -ErrorAction SilentlyContinue
+          Remove-Item -Force .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue

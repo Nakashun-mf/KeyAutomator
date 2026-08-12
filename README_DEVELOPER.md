@@ -148,7 +148,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 **Visual Studio は不要です。** Partner Center の Identity をマニフェストに手書きし、Release の `.msix`（または `.msixupload`）をアップロードします。
 
 1. Partner Center でアプリ名を予約 → **製品の管理 → 製品の ID** を開く
-2. 表示された Name / Publisher / PublisherDisplayName を `Package.appxmanifest` に転記（仮値 `CN=KeyAutomator` のまま出さない）
+2. 表示された Name / Publisher / PublisherDisplayName を `Package.appxmanifest` に転記（現状は転記済み。詳細は [docs/microsoft-store/product-identity.md](docs/microsoft-store/product-identity.md)）
 3. Windows 上で次のいずれか:
 
 ```powershell
@@ -167,7 +167,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
 
-1. 自己署名証明書の作成（`CN=KeyAutomator`、署名は Thumbprint 方式）
+1. 自己署名証明書の作成（Publisher と同一 Subject、署名は Thumbprint 方式）
 2. MSIX サイドロードビルド（成果物は `$RUNNER_TEMP`）
 3. インストール → `WindowsApps` 配置 / `AppExecutionAlias` / アンインストールを確認
 4. 可能ならパッケージ CLI で `%LocalAppData%\KeyAutomator\config.json` 作成も確認  

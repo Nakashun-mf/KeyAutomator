@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.8.2  
+**バージョン:** 2.8.3  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
@@ -12,6 +12,8 @@
 ビルド済みの配布物は **GitHub Releases** から入手できます。
 
 → [最新リリース（ここからダウンロード）](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
+
+> **Microsoft Store 公開について:** 準備・申請手順は [docs/microsoft-store/README.md](docs/microsoft-store/README.md) を参照してください（Partner Center 操作が必要です）。
 
 ### A. 単一 exe（いちばん簡単・推奨）
 
@@ -128,3 +130,11 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 - 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です
 
 保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（データの取り扱い）を参照してください。
+
+## Microsoft Store
+
+Store への公開準備・Partner Center 記入例・`runFullTrust` 正当化文は次を参照してください。
+
+- [docs/microsoft-store/README.md](docs/microsoft-store/README.md)
+- [docs/microsoft-store/partner-center-copy.md](docs/microsoft-store/partner-center-copy.md)
+

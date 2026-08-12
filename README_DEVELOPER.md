@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.8.2
+**バージョン:** 2.8.3
 
 ## 開発環境
 
@@ -84,7 +84,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.8.2"
+$ver = "2.8.3"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
@@ -143,11 +143,31 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
+### Microsoft Store 提出用（VS なし可）
+
+**Visual Studio は不要です。** Partner Center の Identity をマニフェストに手書きし、Release の `.msix`（または `.msixupload`）をアップロードします。
+
+1. Partner Center でアプリ名を予約 → **製品の管理 → 製品の ID** を開く
+2. 表示された Name / Publisher / PublisherDisplayName を `Package.appxmanifest` に転記（現状は転記済み。詳細は [docs/microsoft-store/product-identity.md](docs/microsoft-store/product-identity.md)）
+3. Windows 上で次のいずれか:
+
+```powershell
+# A. Release .msix をそのまま提出（シンプル）
+.\scripts\ci\New-CiSigningCertificate.ps1
+.\scripts\ci\Build-MsixSideload.ps1 -Configuration Release -Platform x64
+
+# B. .msixupload（推奨・シンボル付き）
+.\scripts\ci\New-CiSigningCertificate.ps1
+.\scripts\ci\Build-MsixStore.ps1 -Platform x64 -AppxBundlePlatforms "x64"
+```
+
+認定後、Microsoft がパッケージを再署名します。詳細は [docs/microsoft-store/README.md](docs/microsoft-store/README.md)。
+
 ### CI（GitHub Actions）
 
 ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
 
-1. 自己署名証明書の作成（`CN=KeyAutomator`、署名は Thumbprint 方式）
+1. 自己署名証明書の作成（Publisher と同一 Subject、署名は Thumbprint 方式）
 2. MSIX サイドロードビルド（成果物は `$RUNNER_TEMP`）
 3. インストール → `WindowsApps` 配置 / `AppExecutionAlias` / アンインストールを確認
 4. 可能ならパッケージ CLI で `%LocalAppData%\KeyAutomator\config.json` 作成も確認  
@@ -166,12 +186,14 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 
 ## パッケージマニフェスト
 
-`Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。
+`Package.appxmanifest` は MSIX / サイドロード / Store 用の定義です（単一 exe 配布では使いません）。
 
-- **Version** は本体（`.csproj` の `Version`）と揃える
+- **Version** は本体（`.csproj` の `Version`）と揃える（4 部。Store では末尾 `0` 推奨）
+- **Identity / Publisher** はサイドロード用の仮値。Store 提出前に VS の「ストアに関連付ける」で Partner Center の値へ更新する
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
 - CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）
+- Store 提出の手順・文言: [docs/microsoft-store/README.md](docs/microsoft-store/README.md)
 
 ## アーキテクチャ
 

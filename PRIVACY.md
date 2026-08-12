@@ -1,7 +1,10 @@
-# データの取り扱い
+# データの取り扱い（プライバシーポリシー）
 
 KeyAutomator は、インターネットへ個人情報やマクロ内容を送信しません。  
 保存・参照はすべてこの PC 上で行います。
+
+> Microsoft Store 提出時は、本ページの **公開 HTTPS URL** を Partner Center に登録してください。  
+> 例: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md`
 
 ## このアプリが保存するもの
 
@@ -14,7 +17,7 @@ KeyAutomator は、インターネットへ個人情報やマクロ内容を送�
 置き場所は次のいずれかです。
 
 - exe と同じフォルダ（書き込みできる場所に置いた場合）
-- `%LocalAppData%\KeyAutomator`（保護フォルダやパッケージ実行時など）
+- `%LocalAppData%\KeyAutomator`（保護フォルダやパッケージ／Store インストール時など）
 
 画面下の「設定フォルダ」ボタンで、実際の場所を開けます。
 
@@ -23,8 +26,13 @@ KeyAutomator は、インターネットへ個人情報やマクロ内容を送�
 - マクロの内容
 - 入力した文字やパスワード
 - 端末情報の定期送信や利用状況の収集
+- キー入力の傍受・記録（本アプリは送信のみで、キーロガーではありません）
 
 （起動時に外部へ問い合わせる処理はありません。）
+
+## 権限について（MSIX / Store）
+
+パッケージ版では、WinUI 3 デスクトップ実行と Win32 `SendInput` による入力自動化のため、制限付き機能 `runFullTrust` を宣言しています。未使用の Capability は追加していません。
 
 ## 注意してほしいこと
 
@@ -37,3 +45,6 @@ KeyAutomator は、インターネットへ個人情報やマクロ内容を送�
 不具合や質問は GitHub の Issues へどうぞ。
 
 https://github.com/Nakashun-mf/KeyAutomator/issues
+
+Microsoft Store 経由で入手した場合も、上記 Issues をサポート窓口とします。  
+（公開者側でメール窓口を用意した場合は、Store のサポート連絡先にも同じ案内を載せます。）

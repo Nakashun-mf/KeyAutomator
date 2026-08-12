@@ -3,6 +3,17 @@
 Store 提出時にマニフェストへ反映済みの値です。  
 出典: Partner Center → 製品の管理 → 製品の ID
 
+## 公開リポジトリについて
+
+これらの値（Identity Name / Publisher / PFN / Store ID など）は **秘密情報ではありません**。  
+公開後は Store の URL やインストール済みパッケージからも分かる情報で、public リポジトリに含めて問題ありません。
+
+コミットしてはいけないもの:
+
+- `.pfx` / 秘密鍵（`.gitignore` 済み）
+- Partner Center のログイン情報・API シークレット
+- コード署名の商用証明書のパスワード
+
 | 項目 | 値 | マニフェスト |
 |---|---|---|
 | Package/Identity/Name | `pryzo.KeyAutomator` | `<Identity Name>` |

@@ -56,8 +56,8 @@
   <!--
     Microsoft Store 提出用パッケージ（.msixupload）を出すとき:
     -p:KeyAutomatorStore=true
-    事前に Visual Studio で「Store との関連付け」を行い、Package.appxmanifest の
-    Identity / Publisher を Partner Center の値に更新すること。
+    事前に Partner Center の「製品の ID」から Identity / Publisher を
+    Package.appxmanifest へ転記すること（Visual Studio の関連付けは不要）。
     詳細: docs/microsoft-store/README.md
   -->
   <PropertyGroup Condition="'$(KeyAutomatorStore)'=='true'">

@@ -143,23 +143,25 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
-### Microsoft Store 提出用（.msixupload）
+### Microsoft Store 提出用（VS なし可）
 
-サイドロード用とは別に、Store 提出用パッケージを出せます。
+**Visual Studio は不要です。** Partner Center の Identity をマニフェストに手書きし、Release の `.msix`（または `.msixupload`）をアップロードします。
 
-1. Partner Center でアプリ名を予約
-2. Visual Studio で **アプリケーションをストアに関連付ける**（`Package.appxmanifest` の Identity / Publisher が更新される）
-3. Windows 上で次を実行:
+1. Partner Center でアプリ名を予約 → **製品の管理 → 製品の ID** を開く
+2. 表示された Name / Publisher / PublisherDisplayName を `Package.appxmanifest` に転記（仮値 `CN=KeyAutomator` のまま出さない）
+3. Windows 上で次のいずれか:
 
 ```powershell
+# A. Release .msix をそのまま提出（シンプル）
+.\scripts\ci\New-CiSigningCertificate.ps1
+.\scripts\ci\Build-MsixSideload.ps1 -Configuration Release -Platform x64
+
+# B. .msixupload（推奨・シンボル付き）
 .\scripts\ci\New-CiSigningCertificate.ps1
 .\scripts\ci\Build-MsixStore.ps1 -Platform x64 -AppxBundlePlatforms "x64"
 ```
 
-成果物は `AppPackages\Store\` 配下の `.msixupload`（または `.msixbundle`）です。  
-認定後、Microsoft がパッケージを再署名します。
-
-詳細な申請チェックリスト・Partner Center 用の説明文は [docs/microsoft-store/README.md](docs/microsoft-store/README.md) を参照してください。
+認定後、Microsoft がパッケージを再署名します。詳細は [docs/microsoft-store/README.md](docs/microsoft-store/README.md)。
 
 ### CI（GitHub Actions）
 

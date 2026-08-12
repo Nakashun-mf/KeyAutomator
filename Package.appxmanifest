@@ -10,8 +10,8 @@
 
   <!--
     Identity / Publisher はサイドロード用の仮値です。
-    Microsoft Store 提出前に Visual Studio の「プロジェクトをストアに関連付ける」を実行し、
-    Partner Center が割り当てた Name / Publisher (CN=...) に更新してください。
+    Microsoft Store 提出前に Partner Center「製品の ID」の Name / Publisher /
+    PublisherDisplayName をここに転記してください（Visual Studio 不要）。
     手順: docs/microsoft-store/README.md
   -->
   <Identity

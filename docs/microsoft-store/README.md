@@ -40,8 +40,8 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 |---|---|---|---|
 | 開発者アカウント | 未確認 | [Partner Center](https://partner.microsoft.com/dashboard) 登録（個人/企業） | **あなた** |
 | アプリ名予約 | 未実施 | 「KeyAutomator」等を予約 | **あなた** |
-| Identity / Publisher | サイドロード用仮値 `CN=KeyAutomator` | VS で **ストアに関連付け** | **あなた（Windows）** |
-| Store 用ビルド | `KeyAutomatorStore=true` / `Build-MsixStore.ps1` を追加済み | Windows で `.msixupload` 生成 | **あなた（Windows）** |
+| Identity / Publisher | サイドロード用仮値 `CN=KeyAutomator` | Partner Center の値を **マニフェストへ手書き**（VS 不要） | **あなた** |
+| Store 用ビルド | `Build-MsixStore.ps1` / サイドロード Release MSIX | Windows で **Release** の `.msix` または `.msixupload` | **あなた（Windows）** |
 | プライバシーポリシー URL | リポジトリの `PRIVACY.md` | **HTTPS の公開 URL** を Partner Center に登録 | **あなた**（下記） |
 | スクリーンショット | 未作成 | 1366×768 以上を 1 枚以上 | **あなた（Windows）** |
 | ストア説明文 | 下書きあり | Partner Center に転記 | 共同（文面は本フォルダ） |
@@ -49,7 +49,8 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 | WACK（任意だが推奨） | 未実施 | Windows App Certification Kit | **あなた（Windows）** |
 | 年齢区分 | 未実施 | IARC アンケート | 共同（回答例あり） |
 
-> Linux 上の Cloud Agent では WinUI / MSIX の実ビルド・スクリーンショット撮影はできません。Store パッケージ生成と画面キャプチャは **Windows PC** で行ってください。
+> Linux 上の Cloud Agent では WinUI / MSIX の実ビルド・スクリーンショット撮影はできません。Store パッケージ生成と画面キャプチャは **Windows PC** で行ってください。  
+> **Visual Studio は必須ではありません。** Partner Center + マニフェスト編集 + `dotnet` / 既存の PowerShell スクリプトで提出できます。
 
 ---
 
@@ -65,38 +66,49 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 
 1. **新しい製品** → **MSIX または PWA アプリ**（表記は UI により異なる）
 2. 名前候補: `KeyAutomator`（取れない場合は `KeyAutomator Desktop` など）
-3. 予約後、パッケージ ID（Identity Name / Publisher）が発行される
+3. 予約後、左メニュー **製品の管理** → **製品の ID（Product identity）** を開く
 
-### 3. Visual Studio でストア関連付け（必須）
+### 3. Identity をマニフェストへ反映（VS なし・必須）
 
-Windows でリポジトリを開き:
+Partner Center の **製品の ID** に表示される次の 3 つを、`Package.appxmanifest` に **一字一句同じ**で書き写す:
 
-1. プロジェクトを右クリック → **パッケージ化と公開** → **アプリケーションをストアに関連付ける...**
-2. Partner Center の予約済みアプリを選択
-3. `Package.appxmanifest` の次が **自動更新**されることを確認する  
-   - `Identity/@Name`  
-   - `Identity/@Publisher`（`CN=...`）  
-   - `Properties/PublisherDisplayName`
-4. 変更をコミットする（Identity をリポジトリに残すと次回以降の提出が楽）
+| Partner Center | マニフェスト |
+|---|---|
+| Package/Identity/Name | `<Identity Name="...">` |
+| Package/Identity/Publisher | `<Identity Publisher="CN=...">` |
+| Package/Properties/PublisherDisplayName | `<PublisherDisplayName>` |
 
-> 関連付け前の仮 Publisher（`CN=KeyAutomator`）のまま提出すると、認定で弾かれやすいです。
+いまのリポジトリ値（`Name=58AAB0EC-...` / `Publisher=CN=KeyAutomator`）は **サイドロード用の仮値**です。  
+このままの Release `.msix` を上げると、Identity 不一致で弾かれる可能性が高いです。
 
-### 4. Store 用パッケージのビルド
+変更後はコミットしておくと、次回提出が楽です。
 
-関連付け後、Windows PowerShell で:
+### 4. Release パッケージのビルド（VS なし）
+
+**どちらでも Partner Center にアップロードできます。**
+
+#### A. Release の `.msix` をそのまま上げる（シンプル）
+
+Identity 更新後:
 
 ```powershell
-# 作業用の自己署名で可（Store は認定後に再署名）
 .\scripts\ci\New-CiSigningCertificate.ps1
-$pkg = .\scripts\ci\Build-MsixStore.ps1 -Platform x64 -AppxBundlePlatforms "x64"
-# 出力: AppPackages\Store\*.msixupload （または .msixbundle）
+$msix = .\scripts\ci\Build-MsixSideload.ps1 -Configuration Release -Platform x64
+# できた .msix を Partner Center の「パッケージ」へアップロード
 ```
 
-Visual Studio ウィザードでも可:
+自己署名のままで可（認定後に Microsoft が再署名）。  
+GitHub Releases に付いている **古い Identity の** サイドロード zip を流用しないこと。
 
-1. **パッケージ化と公開** → **アプリ パッケージの作成**
-2. **Microsoft Store に新しいアプリをアップロードする**（または既存アプリを更新）
-3. アーキテクチャは初回は **x64** のみで十分（後から ARM64 追加可）
+#### B. `.msixupload` を作る（推奨・クラッシュ解析用シンボル付き）
+
+```powershell
+.\scripts\ci\New-CiSigningCertificate.ps1
+.\scripts\ci\Build-MsixStore.ps1 -Platform x64 -AppxBundlePlatforms "x64"
+# AppPackages\Store\*.msixupload をアップロード
+```
+
+Visual Studio がある場合のみ、ウィザードでも可（必須ではない）。
 
 ### 5. Partner Center 提出の記入
 
@@ -110,7 +122,7 @@ Visual Studio ウィザードでも可:
 - [ ] 年齢区分（IARC）
 - [ ] プライバシーポリシー URL
 - [ ] 説明・短い説明・スクリーンショット
-- [ ] パッケージアップロード
+- [ ] パッケージアップロード（Release の `.msix` または `.msixupload`）
 - [ ] `runFullTrust` の追加説明
 - [ ] 認定用メモ（テスター向け手順）
 

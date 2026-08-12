@@ -9,8 +9,8 @@
 
   事前条件（Windows 上）:
   1. Partner Center でアプリ名を予約済み
-  2. Visual Studio で「プロジェクトをストアに関連付ける」済み
-     （Package.appxmanifest の Identity / Publisher が Store 値になっていること）
+  2. Package.appxmanifest の Identity / Publisher が
+     Partner Center「製品の ID」の値になっていること（VS 不要・手書き可）
   3. 署名用証明書（自己署名で可。Store 認定後に Microsoft が再署名）
 
   詳細: docs/microsoft-store/README.md

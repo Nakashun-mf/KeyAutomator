@@ -38,12 +38,13 @@ if (-not (Test-Path -LiteralPath $manifestPath)) {
 [xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw
 $identity = $manifest.Package.Identity
 $publisher = [string]$identity.Publisher
-if ($publisher -eq "CN=KeyAutomator") {
+$expectedPublisher = "CN=4B1F058B-F39E-44DE-8373-4258152DED0F"
+if ($publisher -ne $expectedPublisher) {
     Write-Warning @"
-Package.appxmanifest の Publisher がまだサイドロード用の仮値 (CN=KeyAutomator) です。
-Store 提出前に Visual Studio で「プロジェクトをストアに関連付ける」を実行し、
-Partner Center の Publisher (CN=...) へ更新してください。
-このままの Identity では認定で拒否される可能性が高いです。
+Package.appxmanifest の Publisher が Partner Center 値と一致しません。
+  現在: $publisher
+  期待: $expectedPublisher
+docs/microsoft-store/product-identity.md を確認してください。
 "@
 }
 

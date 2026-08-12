@@ -8,6 +8,7 @@
 | [README.md](README.md)（本ファイル） | 方針・ギャップ・手順チェックリスト |
 | [partner-center-copy.md](partner-center-copy.md) | Partner Center に貼る説明文・年齢区分・認定ノート |
 | [runFullTrust.md](runFullTrust.md) | 制限付き機能 `runFullTrust` の正当化文 |
+| [product-identity.md](product-identity.md) | Partner Center の Identity / Store ID（転記済み） |
 | [listing-assets/README.md](listing-assets/README.md) | スクリーンショット等の素材仕様 |
 
 公式ドキュメント:
@@ -40,7 +41,7 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 |---|---|---|---|
 | 開発者アカウント | 未確認 | [Partner Center](https://partner.microsoft.com/dashboard) 登録（個人/企業） | **あなた** |
 | アプリ名予約 | 未実施 | 「KeyAutomator」等を予約 | **あなた** |
-| Identity / Publisher | サイドロード用仮値 `CN=KeyAutomator` | Partner Center の値を **マニフェストへ手書き**（VS 不要） | **あなた** |
+| Identity / Publisher | Partner Center 値を転記済み（`pryzo.KeyAutomator`） | 変更時は [product-identity.md](product-identity.md) とマニフェストを同期 | 共同 |
 | Store 用ビルド | `Build-MsixStore.ps1` / サイドロード Release MSIX | Windows で **Release** の `.msix` または `.msixupload` | **あなた（Windows）** |
 | プライバシーポリシー URL | リポジトリの `PRIVACY.md` | **HTTPS の公開 URL** を Partner Center に登録 | **あなた**（下記） |
 | スクリーンショット | 未作成 | 1366×768 以上を 1 枚以上 | **あなた（Windows）** |
@@ -68,20 +69,18 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 2. 名前候補: `KeyAutomator`（取れない場合は `KeyAutomator Desktop` など）
 3. 予約後、左メニュー **製品の管理** → **製品の ID（Product identity）** を開く
 
-### 3. Identity をマニフェストへ反映（VS なし・必須）
+### 3. Identity をマニフェストへ反映（完了）
 
-Partner Center の **製品の ID** に表示される次の 3 つを、`Package.appxmanifest` に **一字一句同じ**で書き写す:
+Partner Center の値は `Package.appxmanifest` と [product-identity.md](product-identity.md) に反映済みです。
 
-| Partner Center | マニフェスト |
+| 項目 | 値 |
 |---|---|
-| Package/Identity/Name | `<Identity Name="...">` |
-| Package/Identity/Publisher | `<Identity Publisher="CN=...">` |
-| Package/Properties/PublisherDisplayName | `<PublisherDisplayName>` |
+| Name | `pryzo.KeyAutomator` |
+| Publisher | `CN=4B1F058B-F39E-44DE-8373-4258152DED0F` |
+| PublisherDisplayName | `pryzo` |
+| Store ID | `9P814VCBNVGF` |
 
-いまのリポジトリ値（`Name=58AAB0EC-...` / `Publisher=CN=KeyAutomator`）は **サイドロード用の仮値**です。  
-このままの Release `.msix` を上げると、Identity 不一致で弾かれる可能性が高いです。
-
-変更後はコミットしておくと、次回提出が楽です。
+署名証明書の Subject も **Publisher と同一**にしてください（`New-CiSigningCertificate.ps1` の既定で対応済み）。
 
 ### 4. Release パッケージのビルド（VS なし）
 

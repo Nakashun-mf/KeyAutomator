@@ -8,6 +8,12 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap uap5 rescap">
 
+  <!--
+    Identity / Publisher はサイドロード用の仮値です。
+    Microsoft Store 提出前に Visual Studio の「プロジェクトをストアに関連付ける」を実行し、
+    Partner Center が割り当てた Name / Publisher (CN=...) に更新してください。
+    手順: docs/microsoft-store/README.md
+  -->
   <Identity
     Name="58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5"
     Publisher="CN=KeyAutomator"

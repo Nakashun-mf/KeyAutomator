@@ -143,6 +143,24 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 
 環境や SDK によっては Visual Studio のウィザードの方が安定します。失敗時はウィザード経路を使ってください。
 
+### Microsoft Store 提出用（.msixupload）
+
+サイドロード用とは別に、Store 提出用パッケージを出せます。
+
+1. Partner Center でアプリ名を予約
+2. Visual Studio で **アプリケーションをストアに関連付ける**（`Package.appxmanifest` の Identity / Publisher が更新される）
+3. Windows 上で次を実行:
+
+```powershell
+.\scripts\ci\New-CiSigningCertificate.ps1
+.\scripts\ci\Build-MsixStore.ps1 -Platform x64 -AppxBundlePlatforms "x64"
+```
+
+成果物は `AppPackages\Store\` 配下の `.msixupload`（または `.msixbundle`）です。  
+認定後、Microsoft がパッケージを再署名します。
+
+詳細な申請チェックリスト・Partner Center 用の説明文は [docs/microsoft-store/README.md](docs/microsoft-store/README.md) を参照してください。
+
 ### CI（GitHub Actions）
 
 ワークフロー `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）が Windows runner 上で次を行います。
@@ -166,12 +184,14 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 
 ## パッケージマニフェスト
 
-`Package.appxmanifest` は MSIX / サイドロード用の定義です（単一 exe 配布では使いません）。
+`Package.appxmanifest` は MSIX / サイドロード / Store 用の定義です（単一 exe 配布では使いません）。
 
-- **Version** は本体（`.csproj` の `Version`）と揃える
+- **Version** は本体（`.csproj` の `Version`）と揃える（4 部。Store では末尾 `0` 推奨）
+- **Identity / Publisher** はサイドロード用の仮値。Store 提出前に VS の「ストアに関連付ける」で Partner Center の値へ更新する
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
 - CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）
+- Store 提出の手順・文言: [docs/microsoft-store/README.md](docs/microsoft-store/README.md)
 
 ## アーキテクチャ
 

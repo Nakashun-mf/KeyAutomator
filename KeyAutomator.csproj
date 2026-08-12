@@ -18,7 +18,7 @@
     <AssemblyVersion>2.8.2.0</AssemblyVersion>
     <FileVersion>2.8.2.0</FileVersion>
     <InformationalVersion>2.8.2</InformationalVersion>
-    <Description>??????????????? (WinUI 3)</Description>
+    <Description>KeyAutomator - keyboard macro automation (WinUI 3)</Description>
     <!-- 既定: GitHub Releases 向けの単一 exe（非パッケージ） -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -51,6 +51,29 @@
     <AppxBundle>Never</AppxBundle>
     <UapAppxPackageBuildMode>SideLoadOnly</UapAppxPackageBuildMode>
     <AppxSymbolPackageEnabled>false</AppxSymbolPackageEnabled>
+  </PropertyGroup>
+
+  <!--
+    Microsoft Store 提出用パッケージ（.msixupload）を出すとき:
+    -p:KeyAutomatorStore=true
+    事前に Visual Studio で「Store との関連付け」を行い、Package.appxmanifest の
+    Identity / Publisher を Partner Center の値に更新すること。
+    詳細: docs/microsoft-store/README.md
+  -->
+  <PropertyGroup Condition="'$(KeyAutomatorStore)'=='true'">
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <AppxBundle>Always</AppxBundle>
+    <UapAppxPackageBuildMode>StoreUpload</UapAppxPackageBuildMode>
+    <AppxSymbolPackageEnabled>true</AppxSymbolPackageEnabled>
+    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <!-- ストア提出用シンボルのため、単一 exe 向けの Debug 抑制を解除 -->
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>

@@ -40,8 +40,9 @@ Assert-Step "サイドロード許可と証明書登録" {
 
 Assert-Step "既存 KeyAutomator パッケージを除去" {
     Get-AppxPackage | Where-Object {
+        $_.Name -eq "pryzo.KeyAutomator" -or
         $_.Name -match "KeyAutomator" -or
-        $_.PackageFullName -match "58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5"
+        $_.PackageFamilyName -eq "pryzo.KeyAutomator_29frz59n2q2dp"
     } | ForEach-Object {
         Write-Host "Remove $($_.PackageFullName)"
         Remove-AppxPackage -Package $_.PackageFullName -ErrorAction SilentlyContinue
@@ -55,8 +56,9 @@ Assert-Step "MSIX をサイドロードインストール" {
 }
 
 $pkg = Get-AppxPackage | Where-Object {
+    $_.Name -eq "pryzo.KeyAutomator" -or
     $_.Name -match "KeyAutomator" -or
-    $_.PackageFullName -match "58AAB0EC-5590-46F6-AEE7-2AEF1231D0E5"
+    $_.PackageFamilyName -eq "pryzo.KeyAutomator_29frz59n2q2dp"
 } | Select-Object -First 1
 
 if (-not $pkg) {

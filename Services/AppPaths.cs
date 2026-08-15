@@ -10,9 +10,20 @@ namespace KeyAutomator.Services;
 public static class AppPaths
 {
     private static readonly Lazy<string> DataDirectoryLazy = new(ResolveDataDirectory);
+    private static string? _dataDirectoryOverride;
 
     /// <summary>設定ファイルを置くディレクトリ（書き込み可能であることが保証される想定）。</summary>
-    public static string DataDirectory => DataDirectoryLazy.Value;
+    public static string DataDirectory =>
+        !string.IsNullOrWhiteSpace(_dataDirectoryOverride)
+            ? _dataDirectoryOverride!
+            : DataDirectoryLazy.Value;
+
+    /// <summary>
+    /// 単体テスト専用。実データの config.json / settings.json / error.log を触らないよう、
+    /// データフォルダを一時ディレクトリへ差し替える。本番コードからは呼ばない。
+    /// </summary>
+    internal static void SetDataDirectoryOverride(string? directory) =>
+        _dataDirectoryOverride = directory;
 
     /// <summary>互換用。DataDirectory と同じ。</summary>
     public static string AppDirectory => DataDirectory;

@@ -82,6 +82,16 @@ public static class CliRunner
             return null;
         }
 
+        return ResolveMacro(args, macros);
+    }
+
+    /// <summary>
+    /// 読み込み済みマクロ一覧から CLI 引数で対象を解決する（ディスク I/O なし）。
+    /// </summary>
+    public static MacroItem? ResolveMacro(string[] args, IReadOnlyList<MacroItem> macros)
+    {
+        ArgumentNullException.ThrowIfNull(macros);
+
         if (args is not { Length: > 0 })
             return null;
 
@@ -124,7 +134,7 @@ public static class CliRunner
         return null;
     }
 
-    private static bool TryResolveShortForm(List<MacroItem> macros, string[] args, out MacroItem? macro)
+    private static bool TryResolveShortForm(IReadOnlyList<MacroItem> macros, string[] args, out MacroItem? macro)
     {
         macro = null;
         if (args is not { Length: > 0 })

@@ -43,5 +43,8 @@ AppPackages/
 KeyAutomator_CI.cer
 KeyAutomator_CI.thumbprint
 
+## Test output
+TestResults/
+
 ## Temp / commit helpers
 .commitmsg.tmp

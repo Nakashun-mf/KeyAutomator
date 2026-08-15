@@ -51,12 +51,36 @@ CLI:
 dotnet run -c Release -p:Platform=x64 -- -1
 ```
 
-## ユニットテスト
+## 品質ゲート（公開前に必ず通す）
+
+公開アプリとして、次の 2 系統をどちらも通す。
+
+| ゲート | 何を守るか | 実行場所 |
+|---|---|---|
+| ユニットテスト | CLI 解決、config/settings の読み書き、繰り返し、エイリアス検証など。実データの `config.json` は触らない | Windows（`KeyAutomator.Tests`） |
+| MSIX サイドロード スモーク | パッケージのビルド〜インストール通し | GitHub Actions `windows-latest` |
+
+Linux 上では WinUI の XAML コンパイラが動かないため、`dotnet test` / `dotnet build` は失敗する（想定どおり）。検証は Windows か CI で行う。
+
+### ユニットテスト
+
+ローカル（Windows）:
 
 ```powershell
 $Platform = $env:PROCESSOR_ARCHITECTURE
+# CI と同じ経路（MSBuild でビルド → dotnet test --no-build）
+.\scripts\ci\Run-UnitTests.ps1 -Configuration Debug -Platform $Platform
+
+# または SDK 直接（Visual Studio / Windows App SDK が揃っている場合）
 dotnet test .\KeyAutomator.Tests\KeyAutomator.Tests.csproj -c Debug -p:Platform=$Platform
 ```
+
+テストは一時フォルダへデータディレクトリを差し替える。開発者の `%LocalAppData%\KeyAutomator` や exe 横の設定は書き換えない。
+
+### CI
+
+- `Unit Tests`（`.github/workflows/unit-tests.yml`）: 上記スクリプトを Windows runner で実行。失敗すると成果物 `TestResults/` を残す
+- `MSIX Sideload Smoke`（`.github/workflows/msix-sideload.yml`）: インストール通し。単体テストは重複実行しない
 
 ## 配布用 publish（単一 exe・正式手段）
 
@@ -174,10 +198,15 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
    （AppExecutionAlias + WinExe は CI 上で終了コードや起動が不安定なため、未作成でもインストール通し成功扱い）
 5. 巨大 MSIX の Artifact アップロードは、スモーク CI では行わない（runner 切断防止）
 6. **GitHub Release**（`.github/workflows/release.yml`）では単一 exe zip に加え、MSIX zip（`.msix` + 署名用 `.cer` + 入れ方）も添付する
+7. **Unit Tests**（`.github/workflows/unit-tests.yml`）が PR / main で `scripts/ci/Run-UnitTests.ps1` を実行する（MSIX スモークとは別ジョブ）
 
 手動実行:
 
 ```powershell
+# ユニットテスト（Windows）
+.\scripts\ci\Run-UnitTests.ps1 -Configuration Release -Platform x64
+
+# MSIX スモーク
 .\scripts\ci\New-CiSigningCertificate.ps1
 # 署名は CurrentUser\My の Thumbprint 経由（パスワード付き PFX 直指定は MSBuild 未サポート）
 $msix = .\scripts\ci\Build-MsixSideload.ps1

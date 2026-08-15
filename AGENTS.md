@@ -220,9 +220,14 @@ When integrating Phi Silica, Windows Vision, or other Windows AI APIs (see
 - **.NET SDK location:** The .NET 8 SDK is installed at `~/.dotnet` and added to
   `PATH` via `~/.bashrc` (with `DOTNET_CLI_TELEMETRY_OPTOUT=1`). Non-login shells
   that don't source `~/.bashrc` must prepend `~/.dotnet` to `PATH` manually.
-- **No test project exists** in this repo (there is no `KeyAutomator.Tests`),
-  so `dotnet test` has nothing to run. The `.Tests` references in this file are
-  templated placeholders, not an existing project.
+- **Unit tests exist** in `KeyAutomator.Tests` (MSTest). They cannot be executed
+  on the Linux VM because the WinUI XAML compiler is a Windows PE binary. Do not
+  treat a Linux `dotnet test` failure as a product regression.
+- **Run tests on Windows or rely on CI.** The `Unit Tests` workflow
+  (`.github/workflows/unit-tests.yml`) builds with MSBuild and runs
+  `dotnet test --no-build` via `scripts/ci/Run-UnitTests.ps1`. Tests isolate
+  `AppPaths` to a temp directory so they never rewrite the developer's real
+  `config.json`.
 - **Verifying app behavior** (GUI, CLI `-id`/`-alias`/`-name` execution, key
   sending) must be done on Windows; it cannot be demonstrated from the Linux VM.
 

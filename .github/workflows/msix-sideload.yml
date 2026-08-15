@@ -29,8 +29,8 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 注: WinUI テストプロジェクトは CI 上の SDK / VSTest 組み合わせが不安定なため、
-      # このワークフローでは MSIX インストール通しを主検証とする。
+      # 単体テストは Unit Tests ワークフロー（unit-tests.yml）が担当する。
+      # こちらは MSIX のビルド〜インストール通しを検証する。
 
       - name: Create CI signing certificate
         shell: pwsh

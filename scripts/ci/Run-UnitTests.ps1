@@ -3,8 +3,8 @@
 .SYNOPSIS
   ユニットテストをビルドして実行する。
 
-  WinUI 参照プロジェクトは dotnet SDK 単体だと Pri タスクが欠けることがあるため、
-  ビルドは MSBuild、実行は dotnet test --no-build に分ける。
+  WinUI 参照プロジェクトは `dotnet test` の再ビルドで ExpandPriContent が欠ける。
+  ビルドは Visual Studio MSBuild、実行は出力 DLL への vstest に分ける。
 #>
 param(
     [string]$Configuration = "Release",
@@ -37,30 +37,37 @@ if ($LASTEXITCODE -ne 0) {
     throw "テストプロジェクトのビルドに失敗しました (exit $LASTEXITCODE)"
 }
 
+$outRoot = Join-Path $root "KeyAutomator.Tests\bin\$Platform\$Configuration"
+$dll = Get-ChildItem -Path $outRoot -Recurse -Filter "KeyAutomator.Tests.dll" |
+    Select-Object -First 1
+if (-not $dll) {
+    throw "KeyAutomator.Tests.dll が見つかりません: $outRoot"
+}
+
+$dir = $dll.DirectoryName
+Write-Host "Test assembly: $($dll.FullName)"
+Get-ChildItem -LiteralPath $dir -Filter "*.runtimeconfig.json" | ForEach-Object { Write-Host "  $($_.Name)" }
+
+$appCfg = Join-Path $dir "KeyAutomator.Tests.runtimeconfig.json"
+$hostCfg = Join-Path $dir "testhost.runtimeconfig.json"
+if ((Test-Path -LiteralPath $appCfg) -and -not (Test-Path -LiteralPath $hostCfg)) {
+    Copy-Item -LiteralPath $appCfg -Destination $hostCfg
+    Write-Host "Copied testhost.runtimeconfig.json from KeyAutomator.Tests.runtimeconfig.json"
+}
+
+$appDeps = Join-Path $dir "KeyAutomator.Tests.deps.json"
+$hostDeps = Join-Path $dir "testhost.deps.json"
+if ((Test-Path -LiteralPath $appDeps) -and -not (Test-Path -LiteralPath $hostDeps)) {
+    Copy-Item -LiteralPath $appDeps -Destination $hostDeps
+}
+
 $resultsDir = Join-Path $root "TestResults"
 New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
 
-$outRoot = Join-Path $root "KeyAutomator.Tests\bin\$Platform\$Configuration"
-$testhostCfg = Get-ChildItem -Path $outRoot -Recurse -Filter testhost.runtimeconfig.json -ErrorAction SilentlyContinue |
-    Select-Object -First 1
-$testArgs = @(
-    $testProj,
-    "-c", $Configuration,
-    "-p:Platform=$Platform",
-    "-p:SelfContained=false",
-    "-p:PublishSingleFile=false",
-    "--logger", "trx;LogFileName=KeyAutomator.Tests.trx",
-    "--results-directory", $resultsDir
-)
-if ($testhostCfg) {
-    Write-Host "testhost: $($testhostCfg.FullName)"
-    $testArgs += "--no-build"
-} else {
-    Write-Host "testhost.runtimeconfig.json が無いため dotnet test で再ビルドします"
-}
-
-Write-Host "dotnet test $($testArgs -join ' ')"
-dotnet test @testArgs
+Write-Host "dotnet vstest $($dll.FullName)"
+dotnet vstest $dll.FullName `
+    --logger:"trx;LogFileName=KeyAutomator.Tests.trx" `
+    --ResultsDirectory:$resultsDir
 if ($LASTEXITCODE -ne 0) {
     throw "ユニットテストが失敗しました (exit $LASTEXITCODE)"
 }

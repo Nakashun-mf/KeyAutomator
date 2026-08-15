@@ -49,17 +49,14 @@ Write-Host "Test assembly: $($dll.FullName)"
 Get-ChildItem -LiteralPath $dir -Filter "*.runtimeconfig.json" | ForEach-Object { Write-Host "  $($_.Name)" }
 
 $appCfg = Join-Path $dir "KeyAutomator.Tests.runtimeconfig.json"
-$hostCfg = Join-Path $dir "testhost.runtimeconfig.json"
-if ((Test-Path -LiteralPath $appCfg) -and -not (Test-Path -LiteralPath $hostCfg)) {
-    Copy-Item -LiteralPath $appCfg -Destination $hostCfg
-    Write-Host "Copied testhost.runtimeconfig.json from KeyAutomator.Tests.runtimeconfig.json"
-}
+Write-Host "App runtimeconfig: $(Test-Path -LiteralPath $appCfg)"
 
-$appDeps = Join-Path $dir "KeyAutomator.Tests.deps.json"
-$hostDeps = Join-Path $dir "testhost.deps.json"
-if ((Test-Path -LiteralPath $appDeps) -and -not (Test-Path -LiteralPath $hostDeps)) {
-    Copy-Item -LiteralPath $appDeps -Destination $hostDeps
-}
+# 出力フォルダの不完全な testhost が VS 付属 testhost を隠すため除去する
+Get-ChildItem -LiteralPath $dir -Filter "testhost*" -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        Write-Host "Remove shadowed testhost: $($_.Name)"
+        Remove-Item -LiteralPath $_.FullName -Force
+    }
 
 $resultsDir = Join-Path $root "TestResults"
 New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null

@@ -18,6 +18,10 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <EnableCoreMrtTooling>false</EnableCoreMrtTooling>
     <AppxGeneratePriEnabled>false</AppxGeneratePriEnabled>
+    <!-- testhost は WASDK を初期化しない。本体 DLL 側の自動初期化も CI スクリプトで抑止する -->
+    <WindowsAppSdkBootstrapInitialize>false</WindowsAppSdkBootstrapInitialize>
+    <WindowsAppSdkDeploymentManagerInitialize>false</WindowsAppSdkDeploymentManagerInitialize>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
   </PropertyGroup>

@@ -5,6 +5,7 @@
 
   WinUI の Pri タスクは VS Developer Shell 上の MSBuild で解決する。
   testhost は NuGet から一式を出力フォルダへコピーしてから実行する。
+  本体の WASDK 自動初期化はオフにして、testhost がランタイム無しで DLL を読めるようにする。
 #>
 param(
     [string]$Configuration = "Release",
@@ -45,6 +46,8 @@ $commonProps = @(
     "-p:SelfContained=false",
     "-p:PublishSingleFile=false",
     "-p:WindowsAppSDKSelfContained=false",
+    "-p:WindowsAppSdkBootstrapInitialize=false",
+    "-p:WindowsAppSdkDeploymentManagerInitialize=false",
     "-p:EnableCoreMrtTooling=false",
     "-p:GenerateAppxPackageOnBuild=false"
 )
@@ -63,45 +66,130 @@ if (-not $dll) {
 $dir = $dll.DirectoryName
 Write-Host "Test assembly: $($dll.FullName)"
 
-function Copy-NuGetLib {
-    param([string]$Package, [string]$Destination)
+function Copy-NuGetFiles {
+    param(
+        [string]$Package,
+        [string]$Destination,
+        [string[]]$RelativeRoots = @("lib", "build", "buildTransitive")
+    )
     $pkgRoot = Join-Path $env:USERPROFILE ".nuget\packages\$Package"
     if (-not (Test-Path -LiteralPath $pkgRoot)) {
         Write-Host "skip $Package (not restored)"
         return
     }
     $pkg = Get-ChildItem -LiteralPath $pkgRoot -Directory | Sort-Object Name -Descending | Select-Object -First 1
-    $lib = Join-Path $pkg.FullName "lib"
-    foreach ($tfm in @("net8.0", "net6.0", "netstandard2.0", "netcoreapp3.1")) {
-        $tfmDir = Join-Path $lib $tfm
-        if (Test-Path -LiteralPath $tfmDir) {
-            Copy-Item -Path (Join-Path $tfmDir "*") -Destination $Destination -Force
-            Write-Host "Copied $Package ($tfm)"
+    $copied = $false
+    foreach ($rel in $RelativeRoots) {
+        $baseDir = Join-Path $pkg.FullName $rel
+        if (-not (Test-Path -LiteralPath $baseDir)) {
+            continue
+        }
+        $tfms = @(
+            "net8.0",
+            "net8.0-windows10.0.26100.0",
+            "net6.0",
+            "net6.0-windows10.0.17763.0",
+            "netstandard2.0",
+            "netcoreapp3.1",
+            "_common"
+        )
+        foreach ($tfm in $tfms) {
+            $tfmDir = Join-Path $baseDir $tfm
+            if (Test-Path -LiteralPath $tfmDir) {
+                Copy-Item -Path (Join-Path $tfmDir "*") -Destination $Destination -Force -ErrorAction SilentlyContinue
+                Write-Host "Copied $Package ($rel/$tfm)"
+                $copied = $true
+                break
+            }
+        }
+        if ($copied) {
             return
         }
     }
-    Write-Host "skip $Package (no matching lib TFM)"
+    $commonDir = Join-Path $pkg.FullName "build\_common"
+    if (Test-Path -LiteralPath $commonDir) {
+        Copy-Item -Path (Join-Path $commonDir "*") -Destination $Destination -Force -ErrorAction SilentlyContinue
+        Write-Host "Copied $Package (build/_common)"
+        return
+    }
+    Write-Host "skip $Package (no matching lib/build TFM)"
 }
 
-$appDll = Get-ChildItem -Path (Join-Path $root "bin\$Platform\$Configuration") -Recurse -Filter "KeyAutomator.dll" |
-    Select-Object -First 1
+function Copy-NuGetAssembly {
+    param(
+        [string]$Package,
+        [string]$FileName,
+        [string]$Destination
+    )
+    $pkgRoot = Join-Path $env:USERPROFILE ".nuget\packages\$Package"
+    if (-not (Test-Path -LiteralPath $pkgRoot)) {
+        Write-Host "skip $FileName ($Package not restored)"
+        return
+    }
+    $hit = Get-ChildItem -LiteralPath $pkgRoot -Recurse -Filter $FileName -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($hit) {
+        Copy-Item -LiteralPath $hit.FullName -Destination (Join-Path $Destination $FileName) -Force
+        Write-Host "Copied $FileName from $($hit.FullName)"
+        return
+    }
+    Write-Host "skip $FileName (not in $Package)"
+}
+
+$appSearchRoots = @(
+    (Join-Path $root "bin\$Platform\$Configuration"),
+    (Join-Path $root "bin"),
+    $dir
+)
+$appDll = $null
+foreach ($search in $appSearchRoots) {
+    if (-not (Test-Path -LiteralPath $search)) {
+        continue
+    }
+    $appDll = Get-ChildItem -Path $search -Recurse -Filter "KeyAutomator.dll" -ErrorAction SilentlyContinue |
+        Where-Object { $_.DirectoryName -ne $dir } |
+        Select-Object -First 1
+    if ($appDll) {
+        break
+    }
+}
 if ($appDll) {
     Write-Host "Copy app output from $($appDll.DirectoryName)"
     Copy-Item -Path (Join-Path $appDll.DirectoryName "*") -Destination $dir -Force
+} else {
+    Write-Host "KeyAutomator.dll output not found beside the test assembly; using NuGet copies"
 }
 
-Copy-NuGetLib "microsoft.testplatform.testhost" $dir
-Copy-NuGetLib "microsoft.testplatform.objectmodel" $dir
-Copy-NuGetLib "microsoft.testplatform.communicationutilities" $dir
-Copy-NuGetLib "mstest.testframework" $dir
-Copy-NuGetLib "mstest.testadapter" $dir
-Copy-NuGetLib "newtonsoft.json" $dir
+Copy-NuGetFiles "microsoft.testplatform.testhost" $dir
+Copy-NuGetFiles "microsoft.testplatform.objectmodel" $dir
+Copy-NuGetFiles "microsoft.testplatform.communicationutilities" $dir
+Copy-NuGetFiles "mstest.testframework" $dir
+Copy-NuGetFiles "mstest.testadapter" $dir
+Copy-NuGetFiles "newtonsoft.json" $dir
+Copy-NuGetFiles "communitytoolkit.mvvm" $dir
+
+Copy-NuGetAssembly "communitytoolkit.mvvm" "CommunityToolkit.Mvvm.dll" $dir
+Copy-NuGetAssembly "microsoft.windowsappsdk" "Microsoft.WindowsAppRuntime.Bootstrap.Net.dll" $dir
+Copy-NuGetAssembly "microsoft.windows.sdk.net.ref" "Microsoft.Windows.SDK.NET.dll" $dir
+Copy-NuGetAssembly "microsoft.windows.sdk.net.ref" "WinRT.Runtime.dll" $dir
 
 $appCfg = Join-Path $dir "KeyAutomator.Tests.runtimeconfig.json"
 $hostCfg = Join-Path $dir "testhost.runtimeconfig.json"
 if ((Test-Path -LiteralPath $appCfg) -and -not (Test-Path -LiteralPath $hostCfg)) {
     Copy-Item -LiteralPath $appCfg -Destination $hostCfg
     Write-Host "Copied testhost.runtimeconfig.json"
+}
+
+foreach ($name in @(
+        "CommunityToolkit.Mvvm.dll",
+        "Microsoft.Windows.SDK.NET.dll",
+        "WinRT.Runtime.dll",
+        "Microsoft.WindowsAppRuntime.Bootstrap.Net.dll",
+        "testhost.dll",
+        "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll"
+    )) {
+    $present = Test-Path -LiteralPath (Join-Path $dir $name)
+    Write-Host ("dep {0}: {1}" -f $name, $present)
 }
 
 $resultsDir = Join-Path $root "TestResults"

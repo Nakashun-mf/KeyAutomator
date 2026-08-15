@@ -40,15 +40,27 @@ if ($LASTEXITCODE -ne 0) {
 $resultsDir = Join-Path $root "TestResults"
 New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
 
-Write-Host "dotnet test --no-build"
-dotnet test $testProj `
-    -c $Configuration `
-    -p:Platform=$Platform `
-    -p:SelfContained=false `
-    -p:PublishSingleFile=false `
-    --no-build `
-    --logger "trx;LogFileName=KeyAutomator.Tests.trx" `
-    --results-directory $resultsDir
+$outRoot = Join-Path $root "KeyAutomator.Tests\bin\$Platform\$Configuration"
+$testhostCfg = Get-ChildItem -Path $outRoot -Recurse -Filter testhost.runtimeconfig.json -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+$testArgs = @(
+    $testProj,
+    "-c", $Configuration,
+    "-p:Platform=$Platform",
+    "-p:SelfContained=false",
+    "-p:PublishSingleFile=false",
+    "--logger", "trx;LogFileName=KeyAutomator.Tests.trx",
+    "--results-directory", $resultsDir
+)
+if ($testhostCfg) {
+    Write-Host "testhost: $($testhostCfg.FullName)"
+    $testArgs += "--no-build"
+} else {
+    Write-Host "testhost.runtimeconfig.json が無いため dotnet test で再ビルドします"
+}
+
+Write-Host "dotnet test $($testArgs -join ' ')"
+dotnet test @testArgs
 if ($LASTEXITCODE -ne 0) {
     throw "ユニットテストが失敗しました (exit $LASTEXITCODE)"
 }

@@ -64,10 +64,23 @@ if ((Test-Path -LiteralPath $appDeps) -and -not (Test-Path -LiteralPath $hostDep
 $resultsDir = Join-Path $root "TestResults"
 New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
 
-Write-Host "dotnet vstest $($dll.FullName)"
-dotnet vstest $dll.FullName `
-    --logger:"trx;LogFileName=KeyAutomator.Tests.trx" `
-    --ResultsDirectory:$resultsDir
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path -LiteralPath $vswhere)) {
+    throw "vswhere.exe が見つかりません。Visual Studio 付きの Windows runner が必要です。"
+}
+$vstest = & $vswhere -latest -products * -find "Common7\IDE\Extensions\TestPlatform\vstest.console.exe" |
+    Select-Object -First 1
+if (-not $vstest) {
+    $vstest = & $vswhere -latest -products * -find "**\vstest.console.exe" | Select-Object -First 1
+}
+if (-not $vstest) {
+    throw "vstest.console.exe が見つかりません"
+}
+
+Write-Host "vstest: $vstest"
+& $vstest $dll.FullName `
+    /Logger:"trx;LogFileName=KeyAutomator.Tests.trx" `
+    /ResultsDirectory:$resultsDir
 if ($LASTEXITCODE -ne 0) {
     throw "ユニットテストが失敗しました (exit $LASTEXITCODE)"
 }

@@ -227,7 +227,8 @@ When integrating Phi Silica, Windows Vision, or other Windows AI APIs (see
   (`.github/workflows/unit-tests.yml`) builds with MSBuild and runs
   `dotnet test --no-build` via `scripts/ci/Run-UnitTests.ps1`. Tests isolate
   `AppPaths` to a temp directory so they never rewrite the developer's real
-  `config.json`.
+  `config.json`. Do not add tests that call `KeySender.SendText` / `SendKey` /
+  `SendHotkey` / `SendMouse` — those inject input into the Windows runner.
 - **Verifying app behavior** (GUI, CLI `-id`/`-alias`/`-name` execution, key
   sending) must be done on Windows; it cannot be demonstrated from the Linux VM.
 

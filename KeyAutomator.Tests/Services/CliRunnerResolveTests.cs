@@ -17,6 +17,7 @@ public class CliRunnerResolveTests
     {
         Assert.IsFalse(CliRunner.IsCliMode([]));
         Assert.IsTrue(CliRunner.IsCliMode(["-1"]));
+        Assert.IsFalse(CliRunner.IsCliMode(null!));
     }
 
     [TestMethod]

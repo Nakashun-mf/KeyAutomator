@@ -62,6 +62,21 @@ dotnet run -c Release -p:Platform=x64 -- -1
 
 Linux 上では WinUI の XAML コンパイラが動かないため、`dotnet test` / `dotnet build` は失敗する（想定どおり）。検証は Windows か CI で行う。
 
+### 自動テストで守る範囲 / 守らない範囲
+
+法人向けに出す前提で、**ロジックは CI で落とす。実キー送信と画面の見た目は Windows 手動**。
+
+| 自動（CI / `KeyAutomator.Tests`） | 手動（Windows 実機） |
+|---|---|
+| CLI 解決（`-id` / `-alias` / `-name` / 短縮形 / 優先順位 / ヘルプ終了コード） | 実際の `SendInput`（文字・特殊キー・ホットキー・マウス） |
+| `config.json` / `settings.json` の往復・空配列・破損時に上書きしない | 前面ウィンドウへの入力、フォーカス移動 |
+| エイリアス・ホットキー・繰り返しブロックの検証 | GUI の見た目・キーボード操作・スクリーンリーダー |
+| ViewModel の新規 / 複製（alias を空にする） / 削除 / 保存失敗 | MSIX インストール後の起動確認（スモークは CI、日常操作は手動） |
+| サンプル JSON と内蔵サンプル・バージョン番号の一致 | SmartScreen / 証明書 / Store 申請そのもの |
+| カタログ上のキー名が `ResolveKey` できること | 高 DPI・複数ディスプレイ・IME |
+
+`SendInput` を CI で叩かないのは仕様。ランナーの入力を汚さず、利用者 PC と同じ「実フォーカス」も再現できない。
+
 ### ユニットテスト
 
 ローカル（Windows）:

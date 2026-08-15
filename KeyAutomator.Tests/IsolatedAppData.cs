@@ -1,4 +1,6 @@
+using KeyAutomator.Models;
 using KeyAutomator.Services;
+using KeyAutomator.ViewModels;
 
 namespace KeyAutomator.Tests;
 
@@ -49,5 +51,25 @@ public abstract class IsolatedDataTestBase
         _data?.Dispose();
         _data = null;
         UserDialog.ShowOkHandler = null;
+    }
+}
+
+/// <summary>ViewModel テスト用。コンストラクタの初回 Load 後に一覧を空にする。</summary>
+internal static class TestViewModels
+{
+    public static MainViewModel CreateEmpty()
+    {
+        var vm = new MainViewModel();
+        vm.Macros.Clear();
+        vm.SelectedMacro = null;
+        return vm;
+    }
+
+    public static MainViewModel CreateWithMacro(MacroItem macro)
+    {
+        var vm = CreateEmpty();
+        vm.Macros.Add(macro);
+        vm.SelectedMacro = macro;
+        return vm;
     }
 }

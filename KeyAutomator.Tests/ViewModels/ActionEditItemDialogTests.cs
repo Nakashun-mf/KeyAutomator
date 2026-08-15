@@ -65,7 +65,7 @@ public class ActionEditItemDialogTests
 }
 
 [TestClass]
-public class MainViewModelDialogTests
+public class MainViewModelDialogTests : IsolatedDataTestBase
 {
     [TestMethod]
     public void AddDialogAction_WhenMacroSelected_AddsDialogStep()

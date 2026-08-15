@@ -22,6 +22,26 @@ public class AtomicFileTests
     }
 
     [TestMethod]
+    public void WriteAllText_OverwritesExistingWithoutLeavingTemp()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "keyautomator-atomic-dir-" + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(dir, "config.json");
+        try
+        {
+            Directory.CreateDirectory(dir);
+            File.WriteAllText(path, "old");
+            AtomicFile.WriteAllText(path, "new-content");
+
+            Assert.AreEqual("new-content", File.ReadAllText(path));
+            Assert.AreEqual(0, Directory.GetFiles(dir, "*.tmp").Length);
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void BackupIfExists_CreatesTimestampedCopy()
     {
         var path = Path.Combine(Path.GetTempPath(), "keyautomator-bak-" + Guid.NewGuid().ToString("N") + ".json");

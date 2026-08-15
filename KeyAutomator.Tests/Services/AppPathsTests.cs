@@ -96,16 +96,43 @@ public class AppPathsTests
         var path = AppPaths.GetLocalDataDirectory();
         Assert.IsTrue(path.EndsWith("KeyAutomator", StringComparison.OrdinalIgnoreCase));
     }
+
+    [TestMethod]
+    public void SetDataDirectoryOverride_ConfigAndLogUseTempFolder()
+    {
+        using var data = new IsolatedAppData();
+
+        Assert.AreEqual(Path.Combine(data.Directory, "config.json"), AppPaths.ConfigPath);
+        Assert.AreEqual(Path.Combine(data.Directory, "settings.json"), AppPaths.SettingsPath);
+        Assert.AreEqual(Path.Combine(data.Directory, "error.log"), AppPaths.ErrorLogPath);
+    }
+
+    [TestMethod]
+    public void SetDataDirectoryOverride_Dispose_ClearsOverride()
+    {
+        string overridden;
+        using (var data = new IsolatedAppData())
+        {
+            overridden = AppPaths.ConfigPath;
+            StringAssert.Contains(overridden, data.Directory);
+        }
+
+        Assert.AreNotEqual(overridden, AppPaths.ConfigPath);
+    }
 }
 
 [TestClass]
-public class ErrorLoggerTests
+public class ErrorLoggerTests : IsolatedDataTestBase
 {
     [TestMethod]
-    public void Write_SetsLastWrittenPath()
+    public void Write_SetsLastWrittenPathUnderDataDirectory()
     {
         ErrorLogger.Write("unit-test-log-line");
+
         Assert.IsFalse(string.IsNullOrWhiteSpace(ErrorLogger.LastWrittenPath));
         Assert.IsTrue(File.Exists(ErrorLogger.LastWrittenPath));
+        Assert.IsTrue(
+            ErrorLogger.LastWrittenPath!.StartsWith(DataDirectory, StringComparison.OrdinalIgnoreCase));
+        StringAssert.Contains(File.ReadAllText(ErrorLogger.LastWrittenPath), "unit-test-log-line");
     }
 }

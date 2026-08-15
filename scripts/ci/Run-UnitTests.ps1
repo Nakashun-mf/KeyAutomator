@@ -28,6 +28,9 @@ msbuild $testProj `
     /p:Platform=$Platform `
     /p:GenerateAppxPackageOnBuild=false `
     /p:WindowsPackageType=None `
+    /p:SelfContained=false `
+    /p:PublishSingleFile=false `
+    /p:WindowsAppSDKSelfContained=false `
     /m `
     /v:minimal
 if ($LASTEXITCODE -ne 0) {
@@ -41,6 +44,8 @@ Write-Host "dotnet test --no-build"
 dotnet test $testProj `
     -c $Configuration `
     -p:Platform=$Platform `
+    -p:SelfContained=false `
+    -p:PublishSingleFile=false `
     --no-build `
     --logger "trx;LogFileName=KeyAutomator.Tests.trx" `
     --results-directory $resultsDir

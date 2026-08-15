@@ -86,6 +86,8 @@ function Copy-NuGetLib {
 Copy-NuGetLib "microsoft.testplatform.testhost" $dir
 Copy-NuGetLib "microsoft.testplatform.objectmodel" $dir
 Copy-NuGetLib "microsoft.testplatform.communicationutilities" $dir
+Copy-NuGetLib "mstest.testframework" $dir
+Copy-NuGetLib "mstest.testadapter" $dir
 Copy-NuGetLib "newtonsoft.json" $dir
 
 $appCfg = Join-Path $dir "KeyAutomator.Tests.runtimeconfig.json"

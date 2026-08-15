@@ -105,6 +105,7 @@ dotnet test $testProj `
     -c $Configuration `
     @commonProps `
     --no-build `
+    --test-adapter-path $dir `
     --logger "trx;LogFileName=KeyAutomator.Tests.trx" `
     --results-directory $resultsDir
 if ($LASTEXITCODE -ne 0) {

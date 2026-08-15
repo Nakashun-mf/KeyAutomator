@@ -83,6 +83,13 @@ function Copy-NuGetLib {
     Write-Host "skip $Package (no matching lib TFM)"
 }
 
+$appDll = Get-ChildItem -Path (Join-Path $root "bin\$Platform\$Configuration") -Recurse -Filter "KeyAutomator.dll" |
+    Select-Object -First 1
+if ($appDll) {
+    Write-Host "Copy app output from $($appDll.DirectoryName)"
+    Copy-Item -Path (Join-Path $appDll.DirectoryName "*") -Destination $dir -Force
+}
+
 Copy-NuGetLib "microsoft.testplatform.testhost" $dir
 Copy-NuGetLib "microsoft.testplatform.objectmodel" $dir
 Copy-NuGetLib "microsoft.testplatform.communicationutilities" $dir

@@ -114,7 +114,7 @@ CLI は管理画面を出さずに実行します。マクロに確認アクシ�
 ## 開発者向け
 
 ソースから自分で発行する場合は [README_DEVELOPER.md](README_DEVELOPER.md) を参照してください。  
-品質ゲート（ユニットテストと MSIX スモーク）の回し方と、自動テストで守る／守らない範囲は同ファイルにあります。PR では GitHub Actions の **Unit Tests** と **MSIX Sideload Smoke** の両方を通します。
+品質ゲート（ユニットテストと、MSIX スモーク内の UI E2E）の回し方は同ファイルにあります。PR では GitHub Actions の **Unit Tests** と **MSIX Sideload Smoke** の両方を通します。
 
 ```powershell
 git clone https://github.com/Nakashun-mf/KeyAutomator.git

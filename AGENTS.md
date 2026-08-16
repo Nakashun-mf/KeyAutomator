@@ -230,7 +230,7 @@ When integrating Phi Silica, Windows Vision, or other Windows AI APIs (see
   `config.json`. `KeySender.SendText` / `SendKey` / `SendHotkey` / `SendMouse`
   may be called only with `SendInputOverride` set (capture, no real SendInput).
   Never call them without the override — that injects input into the Windows runner.
-  GUI window smoke belongs in `scripts/ci/Smoke-MsixSideload.ps1`, not Linux.
+  GUI E2E belongs in `scripts/ci/Invoke-UiE2E.ps1` (called from MSIX smoke), not Linux.
 - **Linux cannot demonstrate GUI or real key sending.** Use Windows CI for those.
 
 

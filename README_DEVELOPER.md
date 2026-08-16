@@ -57,26 +57,26 @@ dotnet run -c Release -p:Platform=x64 -- -1
 
 | ゲート | 何を守るか | 実行場所 |
 |---|---|---|
-| ユニットテスト | CLI 解決、config/settings の読み書き、繰り返し、エイリアス検証など。実データの `config.json` は触らない | Windows（`KeyAutomator.Tests`） |
-| MSIX サイドロード スモーク | パッケージのビルド〜インストール通し | GitHub Actions `windows-latest` |
+| ユニットテスト | CLI・設定・バリデーション・キーエンコード（キャプチャ）。実データは触らない | Windows CI `Unit Tests` |
+| E2E / MSIX スモーク | インストール、未知 CLI、GUI で新規→保存→再起動 | Windows CI `MSIX Sideload Smoke` |
 
 Linux 上では WinUI の XAML コンパイラが動かないため、`dotnet test` / `dotnet build` は失敗する（想定どおり）。検証は Windows か CI で行う。
 
 ### 自動テストで守る範囲 / 守らない範囲
 
-法人向けに出す前提で、**ロジックとキーエンコードと GUI 起動は CI で落とす。** 実フォーカス先や IME の見た目だけが実機確認になる。
+件数は代表例＋ループ 1 本に畳んである。E2E は **キー送信（テスト実行）をしない** 業務フローだけを Windows CI で回す。
 
-| 自動（CI / `KeyAutomator.Tests` + MSIX スモーク） | まだ実機が必要なもの |
+| 自動 | 実機のまま |
 |---|---|
-| CLI 解決の全記法、破損 JSON、エイリアスの文字コード網羅（BMP 先頭〜かな） | IME 変換中の入力、実アプリへの貼り付け結果 |
-| キー／ホットキー／マウス／テキストの **SendInput 内容**（差し替えキャプチャ。実キーは送らない） | アクティブウィンドウが意図したアプリか（フォーカス競合） |
-| GUI 起動（ウィンドウタイトル）。UIA で新規ボタンを押せる場合は押す | 高 DPI・複数ディスプレイ・スクリーンリーダーの聞き取り |
-| 未知マクロ CLI がキー送信せず終わる | SmartScreen / 証明書 UI / Store 審査そのもの |
-| サンプル JSON とバージョン番号の一致 | |
+| 単体: CLI、破損 JSON、エイリアス代表例、SendInput キャプチャ | IME、実アプリへの入力、フォーカス競合 |
+| E2E: 起動 → 新規 → 名前変更 → 保存 → 再起動して残る | 高 DPI・複数ディスプレイ・スクリーンリーダーの聞き取り |
+| 未知マクロ CLI がキー送信せず終わる | SmartScreen / 証明書 UI / Store 審査 |
 
-件数は「メソッドを 5000 個書く」ではなく、**文字・キー・CLI の組み合わせを機械生成**する。同じ関数を 5000 回コピペしても品質は上がらない。会社がやるのもこの方式（プロパティテスト／データ駆動）である。
+ローカルで E2E だけ回す（インストール済みエイリアスが必要）:
 
-`SendInput` の中身は CI で検証する。本物のキーを GitHub runner に流し込むのはしない（他ジョブを壊す）。ウィンドウ起動と UIA は **MSIX スモーク（windows-latest）** で自動実行する。
+```powershell
+.\scripts\ci\Invoke-UiE2E.ps1 -AliasPath "$env:LOCALAPPDATA\Microsoft\WindowsApps\KeyAutomator.exe"
+```
 
 ### ユニットテスト
 

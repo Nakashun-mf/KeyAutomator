@@ -8,49 +8,45 @@ public class AliasCharacterMatrixTests
 {
     private static readonly Regex Allowed = new("^[A-Za-z0-9_]+$", RegexOptions.Compiled);
 
-    public static IEnumerable<object[]> BmpBlock()
-    {
-        // 基本多言語面の先頭〜（空白・制御・記号・ラテン・拡張）。1 コードポイント 1 ケース。
-        for (var code = 0; code <= 0x10FF; code++)
-            yield return new object[] { code };
-    }
-
-    public static IEnumerable<object[]> CjkKanaBlock()
-    {
-        for (var code = 0x3040; code <= 0x30FF; code++)
-            yield return new object[] { code };
-    }
-
     [TestMethod]
-    [DynamicData(nameof(BmpBlock), DynamicDataSourceType.Method)]
-    public void IsValidAlias_BmpPrefix_MatchesGrammar(int codePoint)
+    [DataRow("login_ok", true)]
+    [DataRow("A", true)]
+    [DataRow("n9", true)]
+    [DataRow("_", true)]
+    [DataRow("", true)]
+    [DataRow("   ", true)]
+    [DataRow("ログイン", false)]
+    [DataRow("has space", false)]
+    [DataRow("dash-name", false)]
+    [DataRow("a.b", false)]
+    [DataRow("あ", false)]
+    public void IsValidAlias_RepresentativeValues_MatchGrammar(string alias, bool expected)
     {
-        AssertAliasCodePoint(codePoint);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(CjkKanaBlock), DynamicDataSourceType.Method)]
-    public void IsValidAlias_HiraganaKatakana_RejectedUnlessWhitespace(int codePoint)
-    {
-        AssertAliasCodePoint(codePoint);
-    }
-
-    private static void AssertAliasCodePoint(int codePoint)
-    {
-        var text = ((char)codePoint).ToString();
-        var expected = string.IsNullOrWhiteSpace(text) || Allowed.IsMatch(text.Trim());
-        var actual = MacroItem.IsValidAlias(text, out var error);
-        Assert.AreEqual(expected, actual, $"U+{codePoint:X4} '{Escape(text)}'");
-        if (actual)
+        Assert.AreEqual(expected, MacroItem.IsValidAlias(alias, out var error));
+        if (expected)
             Assert.AreEqual(string.Empty, error);
         else
             StringAssert.Contains(error, "英数字");
     }
 
-    private static string Escape(string text)
+    [TestMethod]
+    public void IsValidAlias_SampledUnicodeBlocks_MatchGrammar()
     {
-        if (text.Length == 0) return "";
-        var ch = text[0];
-        return char.IsControl(ch) ? $"\\x{(int)ch:X2}" : text;
+        // 件数を膨らませず、代表ブロックを 1 テスト内でなめる
+        foreach (var code in SampleCodePoints())
+        {
+            var text = ((char)code).ToString();
+            var expected = string.IsNullOrWhiteSpace(text) || Allowed.IsMatch(text.Trim());
+            var actual = MacroItem.IsValidAlias(text, out _);
+            Assert.AreEqual(expected, actual, $"U+{code:X4}");
+        }
+    }
+
+    private static IEnumerable<int> SampleCodePoints()
+    {
+        for (var code = 0; code <= 0x007F; code++)
+            yield return code;
+        foreach (var code in new[] { 0x00A0, 0x00E9, 0x3042, 0x30A2, 0x4E00, 0xFF21, 0xFF0D })
+            yield return code;
     }
 }

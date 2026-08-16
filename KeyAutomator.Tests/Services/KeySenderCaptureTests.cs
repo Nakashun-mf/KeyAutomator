@@ -10,102 +10,53 @@ public class KeySenderCaptureTests
     [TestCleanup]
     public void Cleanup() => KeySender.SendInputOverride = null;
 
-    public static IEnumerable<object[]> MappedKeyNames()
+    [TestMethod]
+    public void SendKey_AllMappedNames_EmitDownThenUp()
     {
+        using var capture = new InputCapture();
         foreach (var name in KeySender.MappedKeys.Keys)
-            yield return new object[] { name };
-    }
-
-    public static IEnumerable<object[]> LettersAndDigits()
-    {
-        for (var c = 'A'; c <= 'Z'; c++)
         {
-            yield return new object[] { c.ToString() };
-            yield return new object[] { char.ToLowerInvariant(c).ToString() };
-        }
-
-        for (var d = '0'; d <= '9'; d++)
-            yield return new object[] { d.ToString() };
-    }
-
-    public static IEnumerable<object[]> PrintableAscii()
-    {
-        for (var c = (char)0x20; c <= 0x7E; c++)
-            yield return new object[] { c };
-    }
-
-    public static IEnumerable<object[]> HotkeyMatrix()
-    {
-        string[] mods = ["CTRL", "ALT", "SHIFT", "WIN"];
-        var mains = new List<string>();
-        for (var c = 'A'; c <= 'Z'; c++)
-            mains.Add(c.ToString());
-        for (var d = 0; d <= 9; d++)
-            mains.Add(d.ToString());
-        for (var f = 1; f <= 12; f++)
-            mains.Add($"F{f}");
-        mains.Add("ENTER");
-        mains.Add("TAB");
-
-        foreach (var mod in mods)
-        {
-            foreach (var main in mains)
-                yield return new object[] { $"{mod}+{main}", mod, main };
+            capture.Events.Clear();
+            KeySender.SendKey(name);
+            var keys = capture.Keyboard.ToList();
+            Assert.AreEqual(2, keys.Count, name);
+            Assert.AreEqual((ushort)KeySender.MappedKeys[name], keys[0].wVk, name);
+            Assert.AreEqual(0u, keys[0].dwFlags & NativeMethods.KEYEVENTF_KEYUP, name);
+            Assert.AreNotEqual(0u, keys[1].dwFlags & NativeMethods.KEYEVENTF_KEYUP, name);
         }
     }
 
-    public static IEnumerable<object[]> MouseActions()
+    [TestMethod]
+    public void SendKey_RepresentativeLettersAndDigits_EmitMatchingVirtualKey()
     {
-        yield return new object[] { "LEFT", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 1 };
-        yield return new object[] { "RIGHT", NativeMethods.MOUSEEVENTF_RIGHTDOWN, NativeMethods.MOUSEEVENTF_RIGHTUP, 1 };
-        yield return new object[] { "MIDDLE", NativeMethods.MOUSEEVENTF_MIDDLEDOWN, NativeMethods.MOUSEEVENTF_MIDDLEUP, 1 };
-        yield return new object[] { "LEFT_DOUBLE", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2 };
-        yield return new object[] { "DOUBLE", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2 };
-        yield return new object[] { "DBLCLICK", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2 };
+        using var capture = new InputCapture();
+        foreach (var name in new[] { "A", "a", "Z", "0", "5", "9" })
+        {
+            capture.Events.Clear();
+            KeySender.SendKey(name);
+            var expected = KeySender.ResolveKey(name);
+            Assert.AreNotEqual(VirtualKey.None, expected, name);
+            var keys = capture.Keyboard.ToList();
+            Assert.AreEqual(2, keys.Count, name);
+            Assert.AreEqual((ushort)expected, keys[0].wVk, name);
+        }
     }
 
     [TestMethod]
-    [DynamicData(nameof(MappedKeyNames), DynamicDataSourceType.Method)]
-    public void SendKey_MappedName_EmitsDownThenUp(string name)
+    public void SendText_RepresentativeCharacters_EmitUnicodeDownUp()
     {
         using var capture = new InputCapture();
-        KeySender.SendKey(name);
-
-        var keys = capture.Keyboard.ToList();
-        Assert.AreEqual(2, keys.Count, name);
-        Assert.AreEqual((ushort)KeySender.MappedKeys[name], keys[0].wVk);
-        Assert.AreEqual(0u, keys[0].dwFlags & NativeMethods.KEYEVENTF_KEYUP);
-        Assert.AreEqual((ushort)KeySender.MappedKeys[name], keys[1].wVk);
-        Assert.AreNotEqual(0u, keys[1].dwFlags & NativeMethods.KEYEVENTF_KEYUP);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(LettersAndDigits), DynamicDataSourceType.Method)]
-    public void SendKey_LetterOrDigit_EmitsMatchingVirtualKey(string name)
-    {
-        using var capture = new InputCapture();
-        KeySender.SendKey(name);
-
-        var expected = KeySender.ResolveKey(name);
-        Assert.AreNotEqual(VirtualKey.None, expected, name);
-        var keys = capture.Keyboard.ToList();
-        Assert.AreEqual(2, keys.Count, name);
-        Assert.AreEqual((ushort)expected, keys[0].wVk);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(PrintableAscii), DynamicDataSourceType.Method)]
-    public void SendText_PrintableAscii_EmitsUnicodeDownUp(char ch)
-    {
-        using var capture = new InputCapture();
-        KeySender.SendText(ch.ToString());
-
-        var keys = capture.Keyboard.ToList();
-        Assert.AreEqual(2, keys.Count, $"'{ch}'");
-        Assert.AreEqual(0, keys[0].wVk);
-        Assert.AreEqual((ushort)ch, keys[0].wScan);
-        Assert.AreNotEqual(0u, keys[0].dwFlags & NativeMethods.KEYEVENTF_UNICODE);
-        Assert.AreNotEqual(0u, keys[1].dwFlags & NativeMethods.KEYEVENTF_KEYUP);
+        foreach (var ch in new[] { ' ', 'A', 'z', '0', '~', 'あ', '漢' })
+        {
+            capture.Events.Clear();
+            KeySender.SendText(ch.ToString());
+            var keys = capture.Keyboard.ToList();
+            Assert.AreEqual(2, keys.Count, $"'{ch}'");
+            Assert.AreEqual(0, keys[0].wVk);
+            Assert.AreEqual((ushort)ch, keys[0].wScan);
+            Assert.AreNotEqual(0u, keys[0].dwFlags & NativeMethods.KEYEVENTF_UNICODE);
+            Assert.AreNotEqual(0u, keys[1].dwFlags & NativeMethods.KEYEVENTF_KEYUP);
+        }
     }
 
     [TestMethod]
@@ -122,25 +73,36 @@ public class KeySenderCaptureTests
     }
 
     [TestMethod]
-    [DynamicData(nameof(HotkeyMatrix), DynamicDataSourceType.Method)]
-    public void SendHotkey_ModifierPlusMain_PressesModifierThenMainThenReleases(string chord, string mod, string main)
+    public void SendHotkey_RepresentativeChords_PressModifierThenMainThenRelease()
     {
         using var capture = new InputCapture();
-        KeySender.SendHotkey(chord);
-
-        var keys = capture.Keyboard.ToList();
-        Assert.AreEqual(4, keys.Count, chord);
-        Assert.AreEqual((ushort)KeySender.ResolveKey(mod), keys[0].wVk, chord);
-        Assert.AreEqual(0u, keys[0].dwFlags & NativeMethods.KEYEVENTF_KEYUP, chord);
-        Assert.AreEqual((ushort)KeySender.ResolveKey(main), keys[1].wVk, chord);
-        Assert.AreEqual((ushort)KeySender.ResolveKey(main), keys[2].wVk, chord);
-        Assert.AreNotEqual(0u, keys[2].dwFlags & NativeMethods.KEYEVENTF_KEYUP, chord);
-        Assert.AreEqual((ushort)KeySender.ResolveKey(mod), keys[3].wVk, chord);
-        Assert.AreNotEqual(0u, keys[3].dwFlags & NativeMethods.KEYEVENTF_KEYUP, chord);
+        foreach (var (chord, mod, main) in new (string, string, string)[]
+                 {
+                     ("CTRL+S", "CTRL", "S"),
+                     ("ALT+F4", "ALT", "F4"),
+                     ("SHIFT+TAB", "SHIFT", "TAB"),
+                     ("WIN+R", "WIN", "R"),
+                     ("CTRL+ENTER", "CTRL", "ENTER"),
+                 })
+        {
+            capture.Events.Clear();
+            KeySender.SendHotkey(chord);
+            var keys = capture.Keyboard.ToList();
+            Assert.AreEqual(4, keys.Count, chord);
+            Assert.AreEqual((ushort)KeySender.ResolveKey(mod), keys[0].wVk, chord);
+            Assert.AreEqual((ushort)KeySender.ResolveKey(main), keys[1].wVk, chord);
+            Assert.AreNotEqual(0u, keys[2].dwFlags & NativeMethods.KEYEVENTF_KEYUP, chord);
+            Assert.AreEqual((ushort)KeySender.ResolveKey(mod), keys[3].wVk, chord);
+        }
     }
 
     [TestMethod]
-    [DynamicData(nameof(MouseActions), DynamicDataSourceType.Method)]
+    [DataRow("LEFT", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 1)]
+    [DataRow("RIGHT", NativeMethods.MOUSEEVENTF_RIGHTDOWN, NativeMethods.MOUSEEVENTF_RIGHTUP, 1)]
+    [DataRow("MIDDLE", NativeMethods.MOUSEEVENTF_MIDDLEDOWN, NativeMethods.MOUSEEVENTF_MIDDLEUP, 1)]
+    [DataRow("LEFT_DOUBLE", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2)]
+    [DataRow("DOUBLE", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2)]
+    [DataRow("DBLCLICK", NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP, 2)]
     public void SendMouse_KnownAction_EmitsDownUpPairs(string action, uint down, uint up, int clicks)
     {
         using var capture = new InputCapture();

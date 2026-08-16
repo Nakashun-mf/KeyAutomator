@@ -290,6 +290,7 @@
                                         <TextBox
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
+                                            AutomationProperties.AutomationId="MacroNameBox"
                                             AutomationProperties.Name="マクロ名"
                                             PlaceholderText="表示名"
                                             Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -669,6 +670,7 @@
                                 Spacing="8">
                                 <Button
                                     AccessKey="S"
+                                    AutomationProperties.AutomationId="SaveMacroButton"
                                     AutomationProperties.Name="保存"
                                     Click="SaveButton_Click"
                                     Content="保存"

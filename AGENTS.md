@@ -231,6 +231,8 @@ When integrating Phi Silica, Windows Vision, or other Windows AI APIs (see
   may be called only with `SendInputOverride` set (capture, no real SendInput).
   Never call them without the override — that injects input into the Windows runner.
   GUI E2E belongs in `scripts/ci/Invoke-UiE2E.ps1` (called from MSIX smoke), not Linux.
+  That script clicks New/Save only — never テスト実行 / real SendInput. Config is read
+  from the MSIX `Packages\<PFN>\LocalCache` path, not unpackaged `%LocalAppData%`.
 - **Linux cannot demonstrate GUI or real key sending.** Use Windows CI for those.
 
 

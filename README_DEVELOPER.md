@@ -58,24 +58,36 @@ dotnet run -c Release -p:Platform=x64 -- -1
 | ゲート | 何を守るか | 実行場所 |
 |---|---|---|
 | ユニットテスト | CLI・設定・バリデーション・キーエンコード（キャプチャ）。実データは触らない | Windows CI `Unit Tests` |
-| E2E / MSIX スモーク | インストール、未知 CLI、GUI で新規→保存→再起動 | Windows CI `MSIX Sideload Smoke` |
+| E2E / MSIX スモーク | インストール、未知 CLI、GUI で新規→保存→CLI→再起動 | Windows CI `MSIX Sideload Smoke` |
 
 Linux 上では WinUI の XAML コンパイラが動かないため、`dotnet test` / `dotnet build` は失敗する（想定どおり）。検証は Windows か CI で行う。
 
 ### 自動テストで守る範囲 / 守らない範囲
 
-件数は代表例＋ループ 1 本に畳んである。E2E は **キー送信（テスト実行）をしない** 業務フローだけを Windows CI で回す。
+件数は代表例＋ループ 1 本に畳んである（数千件の組み合わせ表は持たない）。
+
+E2E は **キー送信（テスト実行ボタン）をしない**。CI ランナー上で `SendInput` するとフォーカス先が不定で、入力漏れやハングの原因になる。代わりに次だけを Windows CI で回す。
+
+1. MSIX インストールとエイリアス起動
+2. GUI: 新規 → 名前変更 → 保存
+3. パッケージの `LocalCache` 上の `config.json` に名前が残ること
+4. 空手順マクロを CLI `-name` で実行し、キーを飛ばさず終了すること
+5. GUI 再起動後も一覧に残ること
 
 | 自動 | 実機のまま |
 |---|---|
 | 単体: CLI、破損 JSON、エイリアス代表例、SendInput キャプチャ | IME、実アプリへの入力、フォーカス競合 |
-| E2E: 起動 → 新規 → 名前変更 → 保存 → 再起動して残る | 高 DPI・複数ディスプレイ・スクリーンリーダーの聞き取り |
+| E2E: 起動 → 新規 → 保存 → CLI → 再起動 | 高 DPI・複数ディスプレイ・スクリーンリーダーの聞き取り |
 | 未知マクロ CLI がキー送信せず終わる | SmartScreen / 証明書 UI / Store 審査 |
+
+増やさないもの: 削除・複製・ダイアログ確認の UI 操作。ロジックは単体テスト側。手順付きマクロの実キー送信も自動にしない。
 
 ローカルで E2E だけ回す（インストール済みエイリアスが必要）:
 
 ```powershell
-.\scripts\ci\Invoke-UiE2E.ps1 -AliasPath "$env:LOCALAPPDATA\Microsoft\WindowsApps\KeyAutomator.exe"
+.\scripts\ci\Invoke-UiE2E.ps1 `
+  -AliasPath "$env:LOCALAPPDATA\Microsoft\WindowsApps\KeyAutomator.exe" `
+  -PackageFamilyName "pryzo.KeyAutomator_29frz59n2q2dp"
 ```
 
 ### ユニットテスト

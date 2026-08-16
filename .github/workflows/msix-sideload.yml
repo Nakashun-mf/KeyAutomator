@@ -74,10 +74,25 @@ jobs:
         if: failure()
         shell: pwsh
         run: |
-          $log = Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log"
-          if (Test-Path $log) {
-            Write-Host "----- error.log -----"
-            Get-Content $log -Tail 50 | ForEach-Object { Write-Host $_ }
+          $logs = @(
+            (Join-Path $env:LOCALAPPDATA "KeyAutomator\error.log")
+          )
+          $packages = Join-Path $env:LOCALAPPDATA "Packages"
+          if (Test-Path -LiteralPath $packages) {
+            Get-ChildItem -LiteralPath $packages -Directory -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -match "KeyAutomator" } |
+              ForEach-Object {
+                Write-Host "----- package $($_.Name) -----"
+                $logs += (Join-Path $_.FullName "LocalCache\Local\KeyAutomator\error.log")
+                Get-ChildItem -LiteralPath $_.FullName -Recurse -Filter "config.json" -ErrorAction SilentlyContinue |
+                  ForEach-Object { Write-Host "config.json $($_.FullName) $($_.Length)B" }
+              }
+          }
+          foreach ($log in $logs) {
+            if (Test-Path -LiteralPath $log) {
+              Write-Host "----- error.log $log -----"
+              Get-Content -LiteralPath $log -Tail 50 | ForEach-Object { Write-Host $_ }
+            }
           }
 
       - name: Cleanup cert files

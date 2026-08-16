@@ -132,8 +132,8 @@ Assert-Step "CLI 未知マクロはキー送信せず終了する" {
     }
 }
 
-Assert-Step "UI E2E（新規→保存→再起動）" {
-    .\scripts\ci\Invoke-UiE2E.ps1 -AliasPath $alias
+Assert-Step "UI E2E（新規→保存→CLI→再起動）" {
+    .\scripts\ci\Invoke-UiE2E.ps1 -AliasPath $alias -PackageFamilyName $pkg.PackageFamilyName
 }
 
 Assert-Step "クリーンアップ（アンインストール）" {

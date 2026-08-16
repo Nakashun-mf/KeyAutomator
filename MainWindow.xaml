@@ -95,6 +95,7 @@
                         x:Name="MacroList"
                         Grid.Row="1"
                         AllowDrop="True"
+                        AutomationProperties.AutomationId="MacroListView"
                         AutomationProperties.Name="マクロ一覧"
                         CanDragItems="True"
                         CanReorderItems="True"
@@ -151,6 +152,7 @@
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
                         <Button
                             AccessKey="N"
+                            AutomationProperties.AutomationId="NewMacroButton"
                             AutomationProperties.Name="新規作成"
                             Click="NewButton_Click"
                             Content="新規"

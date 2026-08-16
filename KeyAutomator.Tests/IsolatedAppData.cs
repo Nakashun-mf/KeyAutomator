@@ -51,6 +51,7 @@ public abstract class IsolatedDataTestBase
         _data?.Dispose();
         _data = null;
         UserDialog.ShowOkHandler = null;
+        KeySender.SendInputOverride = null;
     }
 }
 

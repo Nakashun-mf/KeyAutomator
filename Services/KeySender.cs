@@ -111,6 +111,14 @@ public static class KeySender
         VirtualKey.NumberPad8, VirtualKey.NumberPad9
     ];
 
+    /// <summary>
+    /// 単体テスト用。設定時は Win32 SendInput を呼ばず、キー間の待ちも入れない。
+    /// 本番コードからは使わない。
+    /// </summary>
+    internal static Func<NativeMethods.INPUT, uint>? SendInputOverride { get; set; }
+
+    internal static IReadOnlyDictionary<string, VirtualKey> MappedKeys => KeyMap;
+
     public static void ExecuteMacro(
         MacroItem macro,
         double? actionDelaySec = null,
@@ -298,7 +306,7 @@ public static class KeySender
 
     private static void Sleep(int milliseconds, CancellationToken cancellationToken)
     {
-        if (milliseconds <= 0) return;
+        if (milliseconds <= 0 || SendInputOverride is not null) return;
         const int slice = 50;
         var remaining = milliseconds;
         while (remaining > 0)
@@ -308,6 +316,13 @@ public static class KeySender
             Thread.Sleep(step);
             remaining -= step;
         }
+    }
+
+    private static void Pause(int milliseconds)
+    {
+        if (milliseconds <= 0 || SendInputOverride is not null)
+            return;
+        Thread.Sleep(milliseconds);
     }
 
     public static void SendText(string text) => SendText(text, CancellationToken.None);
@@ -348,9 +363,9 @@ public static class KeySender
         }
 
         SendVirtualKey(key, keyDown: true);
-        Thread.Sleep(20);
+        Pause(20);
         SendVirtualKey(key, keyDown: false);
-        Thread.Sleep(10);
+        Pause(10);
     }
 
     public static void SendHotkey(string hotkey)
@@ -397,18 +412,18 @@ public static class KeySender
         foreach (var mod in modifiers)
         {
             SendVirtualKey(mod, keyDown: true);
-            Thread.Sleep(10);
+            Pause(10);
         }
 
         SendVirtualKey(mainKey, keyDown: true);
-        Thread.Sleep(20);
+        Pause(20);
         SendVirtualKey(mainKey, keyDown: false);
-        Thread.Sleep(10);
+        Pause(10);
 
         for (var i = modifiers.Count - 1; i >= 0; i--)
         {
             SendVirtualKey(modifiers[i], keyDown: false);
-            Thread.Sleep(10);
+            Pause(10);
         }
     }
 
@@ -451,7 +466,7 @@ public static class KeySender
             case "DOUBLE":
             case "DBLCLICK":
                 Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
-                Thread.Sleep(40);
+                Pause(40);
                 Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
                 break;
             default:
@@ -463,9 +478,9 @@ public static class KeySender
     private static void Click(uint downFlag, uint upFlag)
     {
         SendMouseFlag(downFlag);
-        Thread.Sleep(30);
+        Pause(30);
         SendMouseFlag(upFlag);
-        Thread.Sleep(10);
+        Pause(10);
     }
 
     private static void SendMouseFlag(uint flags)
@@ -536,7 +551,9 @@ public static class KeySender
 
     private static void Send(NativeMethods.INPUT input)
     {
-        var sent = NativeMethods.SendInput(1, [input], Marshal.SizeOf<NativeMethods.INPUT>());
+        var sent = SendInputOverride is not null
+            ? SendInputOverride(input)
+            : NativeMethods.SendInput(1, [input], Marshal.SizeOf<NativeMethods.INPUT>());
         if (sent == 0)
             ErrorLogger.Write($"SendInput 失敗 (GetLastError={Marshal.GetLastWin32Error()})");
     }

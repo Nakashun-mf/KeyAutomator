@@ -326,7 +326,7 @@
                                             Grid.Column="2"
                                             Style="{StaticResource InlineLabelStyle}"
                                             Text="引数名"
-                                            ToolTipService.ToolTip="任意。CLI用です。空でOK。英数字と _ のみ。例: login_ok" />
+                                            ToolTipService.ToolTip="任意。CLI用です。空でOK。英数字と _ のみ。例: login_ok。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピーできます" />
                                         <TextBox
                                             Grid.Row="1"
                                             Grid.Column="3"
@@ -335,7 +335,7 @@
                                             FontFamily="Consolas"
                                             PlaceholderText="任意（CLI用・空でOK）"
                                             Text="{Binding EditAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            ToolTipService.ToolTip="空でも保存できます。使う場合のみ: KeyAutomator.exe -alias login_ok" />
+                                            ToolTipService.ToolTip="空でも保存できます。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピー。使う場合のみ: -alias login_ok" />
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -721,6 +721,14 @@
                         Content="設定フォルダ"
                         Style="{StaticResource SlimButtonStyle}"
                         ToolTipService.ToolTip="config.json や error.log があるフォルダをエクスプローラーで開きます" />
+                    <Button
+                        AutomationProperties.AutomationId="CopyCliLaunchPathButton"
+                        AutomationProperties.Name="CLI起動用パスをコピー"
+                        AutomationProperties.HelpText="マクロを選んでいるときはパスと引数をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。"
+                        Click="CopyCliLaunchPath_Click"
+                        Content="起動パスをコピー"
+                        Style="{StaticResource SlimButtonStyle}"
+                        ToolTipService.ToolTip="マクロを選んでいるときは「パス -alias 引数名」（引数名が空なら -id）をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。MSIX / ストア版は WindowsApps のエイリアスです。" />
                 </StackPanel>
                 <StackPanel
                     Grid.Column="1"

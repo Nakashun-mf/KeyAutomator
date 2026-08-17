@@ -77,6 +77,57 @@ public static class AppPaths
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "KeyAutomator");
 
+    /// <summary>CLI / タスク スケジューラから起動するときの exe 名。</summary>
+    public const string CliExecutableFileName = "KeyAutomator.exe";
+
+    /// <summary>
+    /// バッチやタスク スケジューラに貼る実行ファイルのフルパス。
+    /// パッケージ版は WindowsApps 実体ではなく AppExecutionAlias を返す。
+    /// </summary>
+    public static string GetCliLaunchPath() =>
+        ResolveCliLaunchPath(
+            IsRunningPackaged(),
+            Environment.ProcessPath,
+            GetAppExecutionAliasPath(),
+            File.Exists);
+
+    /// <summary>
+    /// MSIX / Store の AppExecutionAlias（%LocalAppData%\Microsoft\WindowsApps\KeyAutomator.exe）。
+    /// </summary>
+    public static string GetAppExecutionAliasPath() =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Microsoft",
+            "WindowsApps",
+            CliExecutableFileName);
+
+    /// <summary>コマンドラインに貼れるよう、パスを二重引用符で囲む。</summary>
+    public static string QuoteCliPath(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (path.Contains('"'))
+            throw new ArgumentException("パスにダブルクォートは含められません。", nameof(path));
+
+        return "\"" + path + "\"";
+    }
+
+    internal static string ResolveCliLaunchPath(
+        bool packaged,
+        string? processPath,
+        string aliasPath,
+        Func<string, bool> fileExists)
+    {
+        ArgumentNullException.ThrowIfNull(fileExists);
+
+        if (packaged && !string.IsNullOrWhiteSpace(aliasPath) && fileExists(aliasPath))
+            return aliasPath;
+
+        if (!string.IsNullOrWhiteSpace(processPath))
+            return processPath;
+
+        return Path.Combine(AppContext.BaseDirectory, CliExecutableFileName);
+    }
+
     /// <summary>
     /// インストール先・保護フォルダなど、ユーザーデータ向きでないパスかどうか。
     /// </summary>

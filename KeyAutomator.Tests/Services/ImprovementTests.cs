@@ -14,6 +14,8 @@ public class AtomicFileTests
         {
             AtomicFile.WriteAllText(path, "[{\"id\":1}]");
             Assert.AreEqual("[{\"id\":1}]", File.ReadAllText(path));
+            var bytes = File.ReadAllBytes(path);
+            Assert.IsFalse(bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF);
         }
         finally
         {
@@ -57,6 +59,13 @@ public class AtomicFileTests
         {
             if (File.Exists(path)) File.Delete(path);
         }
+    }
+
+    [TestMethod]
+    public void BackupIfExists_Missing_ReturnsEmpty()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "keyautomator-missing-" + Guid.NewGuid().ToString("N") + ".json");
+        Assert.AreEqual(string.Empty, AtomicFile.BackupIfExists(path));
     }
 }
 

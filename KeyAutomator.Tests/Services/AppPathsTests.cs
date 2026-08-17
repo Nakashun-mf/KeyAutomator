@@ -135,4 +135,20 @@ public class ErrorLoggerTests : IsolatedDataTestBase
             ErrorLogger.LastWrittenPath!.StartsWith(DataDirectory, StringComparison.OrdinalIgnoreCase));
         StringAssert.Contains(File.ReadAllText(ErrorLogger.LastWrittenPath), "unit-test-log-line");
     }
+
+    [TestMethod]
+    public void Write_DoesNotTouchUnpackagedLocalAppData()
+    {
+        ErrorLogger.Write("isolation-probe");
+
+        var realLog = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "KeyAutomator",
+            "error.log");
+        Assert.AreNotEqual(
+            Path.GetFullPath(realLog),
+            Path.GetFullPath(ErrorLogger.LastWrittenPath!));
+        Assert.IsTrue(
+            ErrorLogger.LastWrittenPath!.StartsWith(DataDirectory, StringComparison.OrdinalIgnoreCase));
+    }
 }

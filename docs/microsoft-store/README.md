@@ -50,6 +50,17 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 | WACK（任意だが推奨） | 未実施 | Windows App Certification Kit | **あなた（Windows）** |
 | 年齢区分 | 未実施 | IARC アンケート | 共同（回答例あり） |
 
+### 自動で固定している提出契約（CI）
+
+GitHub Actions の **Unit Tests** と **MSIX Sideload Smoke** がどちらも緑であること。特に:
+
+- マニフェストの Capability は `runFullTrust` のみ（ソースとインストール済みパッケージの両方）
+- 本番コードに HTTP / テレメトリ型が無い
+- Partner Center Identity と `Package.appxmanifest` が一致する
+- サンプルのパスワードらしき文字列はダミーだと分かる
+
+提出前にこの 2 ワークフローが落ちているパッケージは上げない。
+
 > Linux 上の Cloud Agent では WinUI / MSIX の実ビルド・スクリーンショット撮影はできません。Store パッケージ生成と画面キャプチャは **Windows PC** で行ってください。  
 > **Visual Studio は必須ではありません。** Partner Center + マニフェスト編集 + `dotnet` / 既存の PowerShell スクリプトで提出できます。
 

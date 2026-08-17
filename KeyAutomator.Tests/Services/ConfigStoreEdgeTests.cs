@@ -84,6 +84,16 @@ public class ConfigStoreEdgeTests : IsolatedDataTestBase
         Assert.ThrowsException<JsonException>(() => ConfigStore.Load());
         Assert.AreEqual("[1,2,3]", File.ReadAllText(ConfigStore.ConfigPath));
     }
+
+    [TestMethod]
+    public void Load_CorruptJson_ThrowsWithoutClobberingFile()
+    {
+        const string broken = "{broken";
+        File.WriteAllText(ConfigStore.ConfigPath, broken);
+
+        Assert.ThrowsException<JsonException>(() => ConfigStore.Load());
+        Assert.AreEqual(broken, File.ReadAllText(ConfigStore.ConfigPath));
+    }
 }
 
 [TestClass]

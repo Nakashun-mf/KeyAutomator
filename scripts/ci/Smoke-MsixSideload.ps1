@@ -78,6 +78,35 @@ if (-not (Test-Path -LiteralPath $installExe)) {
 }
 Write-Host "Install exe: $installExe"
 
+Assert-Step "提出用マニフェスト（runFullTrust のみ）" {
+    $manifestPath = Join-Path $pkg.InstallLocation "AppxManifest.xml"
+    if (-not (Test-Path -LiteralPath $manifestPath)) {
+        throw "インストール先に AppxManifest.xml がありません"
+    }
+
+    $xml = New-Object System.Xml.XmlDocument
+    $xml.Load($manifestPath)
+    $identity = $xml.Package.Identity
+    if ($identity.Name -ne "pryzo.KeyAutomator") {
+        throw "Identity Name が想定と違います: $($identity.Name)"
+    }
+    if ($identity.Publisher -ne "CN=4B1F058B-F39E-44DE-8373-4258152DED0F") {
+        throw "Identity Publisher が想定と違います: $($identity.Publisher)"
+    }
+
+    $declared = New-Object System.Collections.Generic.List[string]
+    foreach ($node in $xml.Package.Capabilities.ChildNodes) {
+        if ($node.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+        if ($node.LocalName -ne "Capability") { continue }
+        [void]$declared.Add($node.GetAttribute("Name"))
+    }
+    $joined = [string]::Join(",", $declared)
+    if ($declared.Count -ne 1 -or $declared[0] -ne "runFullTrust") {
+        throw "Capabilities は runFullTrust のみであるべきです: $joined"
+    }
+    Write-Host "Capabilities: $joined"
+}
+
 $alias = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\KeyAutomator.exe"
 $aliasReady = $false
 foreach ($i in 1..15) {

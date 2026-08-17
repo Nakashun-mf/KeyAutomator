@@ -53,18 +53,28 @@ dotnet run -c Release -p:Platform=x64 -- -1
 
 ## 品質ゲート（公開前に必ず通す）
 
-公開アプリとして、次の 2 系統をどちらも通す。
+Microsoft Store に出す前提で、次を **両方** 通す。件数を増やすより、壊れ方と提出契約を固定する。
 
 | ゲート | 何を守るか | 実行場所 |
 |---|---|---|
-| ユニットテスト | CLI・設定・バリデーション・キーエンコード（キャプチャ）。実データは触らない | Windows CI `Unit Tests` |
-| E2E / MSIX スモーク | インストール、未知 CLI、GUI で新規→保存→CLI→再起動 | Windows CI `MSIX Sideload Smoke` |
+| ユニットテスト | CLI・設定・破損耐性・SendInput キャプチャ・**Store 提出契約**（権限・通信なし・Identity・ダミーサンプル） | Windows CI `Unit Tests` |
+| E2E / MSIX スモーク | インストール、未知 CLI、GUI で新規→保存→CLI→再起動、**インストール済みマニフェストが runFullTrust のみ** | Windows CI `MSIX Sideload Smoke` |
 
 Linux 上では WinUI の XAML コンパイラが動かないため、`dotnet test` / `dotnet build` は失敗する（想定どおり）。検証は Windows か CI で行う。
 
 ### 自動テストで守る範囲 / 守らない範囲
 
 件数は代表例＋ループ 1 本に畳んである（数千件の組み合わせ表は持たない）。
+
+Store 提出で他社より安心できる、と説明するための自動チェック:
+
+- Capability は `runFullTrust` のみ（`internetClient` などを足したらテストが落ちる）
+- 本番コードに `HttpClient` / テレメトリ型が無い
+- `PRIVACY.md` と `runFullTrust` 正当化文が残っている
+- Partner Center Identity とマニフェストが一致する
+- サンプルのパスワードらしき文字列は `dummy` 等だと分かるものだけ
+- テストは開発者の `%LocalAppData%\KeyAutomator` を書き換えない
+- 設定の原子書き込み（途中クラッシュで JSON が空になりにくい）
 
 E2E は **キー送信（テスト実行ボタン）をしない**。CI ランナー上で `SendInput` するとフォーカス先が不定で、入力漏れやハングの原因になる。代わりに次だけを Windows CI で回す。
 

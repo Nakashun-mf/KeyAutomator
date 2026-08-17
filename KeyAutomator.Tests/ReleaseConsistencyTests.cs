@@ -12,11 +12,10 @@ public class ReleaseConsistencyTests
     [TestMethod]
     public void Version_CsprojManifestAndReadme_Match()
     {
-        var root = FindRepoRoot();
-        var csproj = File.ReadAllText(Path.Combine(root, "KeyAutomator.csproj"));
-        var readme = File.ReadAllText(Path.Combine(root, "README.md"));
-        var developer = File.ReadAllText(Path.Combine(root, "README_DEVELOPER.md"));
-        var manifest = XDocument.Load(Path.Combine(root, "Package.appxmanifest"));
+        var csproj = RepoFiles.Read("KeyAutomator.csproj");
+        var readme = RepoFiles.Read("README.md");
+        var developer = RepoFiles.Read("README_DEVELOPER.md");
+        var manifest = XDocument.Load(RepoFiles.Combine("Package.appxmanifest"));
 
         var version = Regex.Match(csproj, @"<Version>([^<]+)</Version>").Groups[1].Value;
         var assembly = Regex.Match(csproj, @"<AssemblyVersion>([^<]+)</AssemblyVersion>").Groups[1].Value;
@@ -36,8 +35,7 @@ public class ReleaseConsistencyTests
     [TestMethod]
     public void BuiltInSamples_MatchConfigSampleJson()
     {
-        var root = FindRepoRoot();
-        var json = File.ReadAllText(Path.Combine(root, "config.sample.json"));
+        var json = RepoFiles.Read("config.sample.json");
         var fromFile = JsonSerializer.Deserialize<List<MacroItem>>(json);
         var fromCode = BuiltInSamples.Create();
 
@@ -56,23 +54,5 @@ public class ReleaseConsistencyTests
                 Assert.AreEqual(fromFile[i].Actions[a].Value, fromCode[i].Actions[a].Value);
             }
         }
-    }
-
-    private static string FindRepoRoot()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            if (File.Exists(Path.Combine(dir.FullName, "KeyAutomator.csproj")) &&
-                File.Exists(Path.Combine(dir.FullName, "config.sample.json")))
-            {
-                return dir.FullName;
-            }
-
-            dir = dir.Parent;
-        }
-
-        Assert.Fail("リポジトリルート（KeyAutomator.csproj）が見つかりません");
-        return string.Empty;
     }
 }

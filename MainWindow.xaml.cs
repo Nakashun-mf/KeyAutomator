@@ -183,20 +183,16 @@ public sealed partial class MainWindow : Window
         try
         {
             var path = AppPaths.GetCliLaunchPath();
-            var quoted = AppPaths.QuoteCliPath(path);
-            var package = new DataPackage();
-            package.RequestedOperation = DataPackageOperation.Copy;
-            package.SetText(quoted);
-            Clipboard.SetContent(package);
-            Clipboard.Flush();
-
-            var example = CliRunner.FormatLaunchCommand(
+            var text = CliRunner.FormatLaunchCommand(
                 path,
                 _vm.SelectedMacro?.Alias,
                 _vm.SelectedMacro?.Id);
-            _vm.StatusMessage = example == quoted
-                ? $"コピーしました: {quoted}"
-                : $"コピーしました: {quoted}  例: {example}";
+            var package = new DataPackage();
+            package.RequestedOperation = DataPackageOperation.Copy;
+            package.SetText(text);
+            Clipboard.SetContent(package);
+            Clipboard.Flush();
+            _vm.StatusMessage = $"コピーしました: {text}";
         }
         catch (Exception ex)
         {

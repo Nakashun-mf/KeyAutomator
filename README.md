@@ -78,7 +78,7 @@ Windows の SmartScreen が出た場合は「詳細情報」→「実行」で�
 
 引数名（alias）は英数字と `_` のみ。表示名とは別です。
 
-画面下の **「起動パスをコピー」** で、今動かしている `KeyAutomator.exe` の場所をコピーできます（「設定フォルダ」＝config.json とは別です）。  
+画面下の **「起動パスをコピー」** で、今動かしている `KeyAutomator.exe` の場所をコピーできます。マクロを選んでいるときは引数もまとめます（引数名があれば `-alias`、空なら `-id`）。未選択ならパスだけです。「設定フォルダ」＝config.json とは別です。  
 MSIX / ストア版は `%LocalAppData%\Microsoft\WindowsApps\KeyAutomator.exe`（AppExecutionAlias）です。`WindowsApps` のインストール実体は直実行できません。
 
 成功時 Exit Code `0` / 失敗時 `1`（データフォルダの `error.log`。書けない場合は `%TEMP%\KeyAutomator-error.log`）
@@ -91,7 +91,7 @@ CLI は管理画面を出さずに実行します。マクロに確認アクシ�
 
 保存に成功すると、画面下部ステータスに **実際の保存パス** が表示されます。  
 「設定フォルダ」ボタンで、その場所をエクスプローラーで開けます（Program Files 配置時の LocalAppData 退避先もここから辿れます）。  
-CLI 用の exe 場所は隣の **「起動パスをコピー」** です。
+CLI 用の exe 場所は隣の **「起動パスをコピー」** です（選択中のマクロなら引数も一緒）。
 
 失敗時もステータスに **error.log のフルパス** を出します。
 

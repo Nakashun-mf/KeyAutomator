@@ -15,8 +15,9 @@ public static class CliRunner
             string.Equals(a, "help", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
-    /// 起動パスに引数を足した、貼り付け用のコマンド例。
-    /// 引数名があれば <c>-alias</c>、なければ ID。どちらも無ければパスのみ。
+    /// 起動パスに引数を足した、貼り付け用のコマンド。
+    /// GUI の「起動パスをコピー」がクリップボードへ入れる文字列。
+    /// 引数名があれば <c>-alias</c>、マクロ ID があれば <c>-id</c>、どちらも無ければパスのみ。
     /// </summary>
     public static string FormatLaunchCommand(string exePath, string? alias = null, int? id = null)
     {

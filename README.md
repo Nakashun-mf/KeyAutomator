@@ -2,7 +2,7 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.8.4  
+**バージョン:** 2.8.5  
 **UI:** WinUI 3（Fluent / Mica）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
@@ -78,6 +78,9 @@ Windows の SmartScreen が出た場合は「詳細情報」→「実行」で�
 
 引数名（alias）は英数字と `_` のみ。表示名とは別です。
 
+画面下の **「起動パスをコピー」** で、今動かしている `KeyAutomator.exe` の場所をコピーできます（「設定フォルダ」＝config.json とは別です）。  
+MSIX / ストア版は `%LocalAppData%\Microsoft\WindowsApps\KeyAutomator.exe`（AppExecutionAlias）です。`WindowsApps` のインストール実体は直実行できません。
+
 成功時 Exit Code `0` / 失敗時 `1`（データフォルダの `error.log`。書けない場合は `%TEMP%\KeyAutomator-error.log`）
 
 CLI は管理画面を出さずに実行します。マクロに確認アクション（dialog）が含まれる場合は、そのときだけメッセージボックスが出ます（完全な無人実行ではありません）。`-h` でも同じ注意を表示します。
@@ -87,7 +90,8 @@ CLI は管理画面を出さずに実行します。マクロに確認アクシ�
 書き込み可能なデータフォルダの `config.json` を使用します（通常は exe と同じ場所。Program Files 等で書けない場合は `%LocalAppData%\KeyAutomator`）。サンプルは `config.sample.json`。
 
 保存に成功すると、画面下部ステータスに **実際の保存パス** が表示されます。  
-「設定フォルダ」ボタンで、その場所をエクスプローラーで開けます（Program Files 配置時の LocalAppData 退避先もここから辿れます）。
+「設定フォルダ」ボタンで、その場所をエクスプローラーで開けます（Program Files 配置時の LocalAppData 退避先もここから辿れます）。  
+CLI 用の exe 場所は隣の **「起動パスをコピー」** です。
 
 失敗時もステータスに **error.log のフルパス** を出します。
 

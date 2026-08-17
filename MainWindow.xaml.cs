@@ -7,6 +7,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
 using Windows.System;
 
@@ -174,6 +175,33 @@ public sealed partial class MainWindow : Window
         {
             ErrorLogger.Write(ex, "設定フォルダを開く");
             _vm.StatusMessage = $"設定フォルダを開けませんでした: {AppPaths.DataDirectory}";
+        }
+    }
+
+    private void CopyCliLaunchPath_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var path = AppPaths.GetCliLaunchPath();
+            var quoted = AppPaths.QuoteCliPath(path);
+            var package = new DataPackage();
+            package.RequestedOperation = DataPackageOperation.Copy;
+            package.SetText(quoted);
+            Clipboard.SetContent(package);
+            Clipboard.Flush();
+
+            var example = CliRunner.FormatLaunchCommand(
+                path,
+                _vm.SelectedMacro?.Alias,
+                _vm.SelectedMacro?.Id);
+            _vm.StatusMessage = example == quoted
+                ? $"コピーしました: {quoted}"
+                : $"コピーしました: {quoted}  例: {example}";
+        }
+        catch (Exception ex)
+        {
+            ErrorLogger.Write(ex, "起動パスをコピー");
+            _vm.StatusMessage = "起動パスをコピーできませんでした";
         }
     }
 

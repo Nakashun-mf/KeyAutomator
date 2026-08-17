@@ -29,9 +29,11 @@ KeyAutomator 使い方（かんたん版）
 5. 「保存」を押す
 
 【5】コマンドライン（上級）
-・引数名（例: login_ok）を付けて保存すると、次のように実行できます
-  KeyAutomator.exe -alias login_ok
-  KeyAutomator.exe -login_ok
+・画面下の「起動パスをコピー」で、KeyAutomator.exe の場所をコピーできます
+  （「設定フォルダ」は config.json の場所で、こちらとは別です）
+・引数名（例: login_ok）を付けて保存すると、コピーしたパスに続けて実行できます
+  "（コピーしたパス）" -alias login_ok
+  "（コピーしたパス）" -login_ok
 ・確認ダイアログ（確認アクション）は CLI でも画面に出ます（完全な無人実行ではありません）
 
 【データのこと】
@@ -42,6 +44,7 @@ KeyAutomator 使い方（かんたん版）
 【困ったとき】
 ・保存先のパスは、画面いちばん下の文字に表示されます
 ・「設定フォルダ」ボタンで config.json / error.log の場所を開けます
+・「起動パスをコピー」で CLI 用の exe 場所をコピーできます（設定フォルダとは別です）
 ・詳しくは README.md / GitHub Releases を参照してください
 
 https://github.com/Nakashun-mf/KeyAutomator/releases/latest

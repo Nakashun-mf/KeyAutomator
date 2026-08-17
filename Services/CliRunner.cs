@@ -14,6 +14,24 @@ public static class CliRunner
             string.Equals(a, "-?", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(a, "help", StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// 起動パスに引数を足した、貼り付け用のコマンド例。
+    /// 引数名があれば <c>-alias</c>、なければ ID。どちらも無ければパスのみ。
+    /// </summary>
+    public static string FormatLaunchCommand(string exePath, string? alias = null, int? id = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(exePath);
+        var quoted = AppPaths.QuoteCliPath(exePath);
+        var trimmed = alias?.Trim();
+        if (!string.IsNullOrEmpty(trimmed))
+            return quoted + " -alias " + trimmed;
+
+        if (id is >= 1)
+            return quoted + " -id " + id.Value;
+
+        return quoted;
+    }
+
     public static string GetHelpText() =>
         """
         KeyAutomator — キー入力自動化

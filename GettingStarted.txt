@@ -40,7 +40,7 @@ KeyAutomator — Getting started
 [Data]
 - Macros and settings stay on this PC (nothing is sent to the internet)
 - If you put a password in a macro, it is stored as plain text in config.json
-- See PRIVACY.md (bundled or in the repository)
+- See PRIVACY.en.md (English) or PRIVACY.md (Japanese), bundled or in the repository
 
 [If something goes wrong]
 - The actual save path is shown in the status text at the bottom

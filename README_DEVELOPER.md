@@ -30,6 +30,10 @@ vb_auto-key/
 ├── SPEC.md
 ├── config.sample.json
 ├── README.md
+├── PRIVACY.md
+├── PRIVACY.en.md
+├── docs/releases/             # GitHub Release 用ノート
+├── docs/microsoft-store/      # Partner Center 文言・掲載画像
 └── README_DEVELOPER.md
 ```
 
@@ -79,7 +83,7 @@ Store 提出で他社より安心できる、と説明するための自動チ�
 
 - Capability は `runFullTrust` のみ（`internetClient` などを足したらテストが落ちる）
 - 本番コードに `HttpClient` / テレメトリ型が無い
-- `PRIVACY.md` と `runFullTrust` 正当化文が残っている
+- `PRIVACY.md` / `PRIVACY.en.md` と `runFullTrust` 正当化文が残っている
 - Partner Center Identity とマニフェストが一致する
 - サンプルのパスワードらしき文字列は `dummy` 等だと分かるものだけ
 - テストは開発者の `%LocalAppData%\KeyAutomator` を書き換えない
@@ -166,6 +170,7 @@ Copy-Item -Force .\使い方.txt $distDir\
 Copy-Item -Force .\GettingStarted.txt $distDir\
 Copy-Item -Force .\README.md $distDir\
 Copy-Item -Force .\PRIVACY.md $distDir\
+Copy-Item -Force .\PRIVACY.en.md $distDir\
 Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 ```
 
@@ -285,9 +290,18 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 - タグ `v*` の Release 公開時（または Actions の `Release` ワークフロー手動実行）に Windows 上で次をビルドして添付する
   - `KeyAutomator-v*-win-x64-single.zip`（単一 exe）
   - `KeyAutomator-v*-win-x64-msix.zip`（サイドロード用 MSIX + 署名証明書 + 入れ方）
+  - zip には `PRIVACY.md` / `PRIVACY.en.md` / `GettingStarted.txt` も含む
+- 手順の詳細: [docs/releases/README.md](docs/releases/README.md)
 - コミットメッセージは日本語（ファイル経由推奨）
 - `bin/`, `obj/`, `publish/`, `publish-sf/`, `dist/`, `config.json`, `settings.json`, `error.log` は `.gitignore` 対象
 
 ## バージョン更新
 
-`KeyAutomator.csproj` の Version 系と README の表記を揃えて更新してください。
+次を揃えて更新してください。
+
+- `KeyAutomator.csproj` の `Version` / `AssemblyVersion` / `FileVersion` / `InformationalVersion`
+- `Package.appxmanifest` の `Identity/@Version`（4 部。末尾 `0`）
+- `README.md` / `README_DEVELOPER.md` の表記
+- `docs/releases/vX.Y.Z.md`（ユニットテストが csproj の Version と一致することを確認する）
+
+GitHub Release の出し方は [docs/releases/README.md](docs/releases/README.md)。`scripts/Publish-GitHubRelease.ps1` は **main マージ後**に Windows 等で実行します（この Linux 環境の `gh` は読み取り専用のため Release は作れません）。

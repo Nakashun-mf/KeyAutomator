@@ -8,6 +8,8 @@
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
 
+リリース内容の詳細は [docs/releases/v2.8.6.md](docs/releases/v2.8.6.md) を参照してください。
+
 ## ダウンロード（推奨）
 
 ビルド済みの配布物は **GitHub Releases** から入手できます。
@@ -136,7 +138,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 - パスワード等を `config.json` に入れると平文で残ります（取り扱いに注意）
 - 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です
 
-保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（データの取り扱い）を参照してください。
+保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（日本語） / [PRIVACY.en.md](PRIVACY.en.md)（English）を参照してください。
 
 ## Microsoft Store
 

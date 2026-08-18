@@ -30,6 +30,9 @@ public class ReleaseConsistencyTests
 
         StringAssert.Contains(readme, version);
         StringAssert.Contains(developer, version);
+
+        var notesPath = RepoFiles.Combine("docs", "releases", $"v{version}.md");
+        Assert.IsTrue(File.Exists(notesPath), $"docs/releases/v{version}.md がありません");
     }
 
     [TestMethod]

@@ -2,13 +2,13 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.8.6  
+**バージョン:** 2.8.7  
 **UI:** WinUI 3（Fluent / Mica）  
 **表示言語:** 日本語 / English（Windows の表示言語、または画面右下で切替）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
 
-リリース内容の詳細は [docs/releases/v2.8.6.md](docs/releases/v2.8.6.md) を参照してください。
+リリース内容の詳細は [docs/releases/v2.8.7.md](docs/releases/v2.8.7.md) を参照してください。
 
 ## ダウンロード（推奨）
 

@@ -277,7 +277,7 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 - **Identity / Publisher** はサイドロード用の仮値。Store 提出前に VS の「ストアに関連付ける」で Partner Center の値へ更新する
 - 権限は必要最小限（`runFullTrust` のみ。キー送信に使用）
 - 未使用の Capability は追加しない
-- CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）。GUI の「起動パスをコピー」はこのエイリアスパスを返す。マクロ選択中は `-alias` / `-id` も付ける。
+- CLI 用に `AppExecutionAlias`（`KeyAutomator.exe`）を定義。インストール後は `%LocalAppData%\Microsoft\WindowsApps` 経由で `-h` / `-alias` を呼べる（`WindowsApps` 実体パスの直実行は ACL で失敗し得る）。GUI の「パス＋引数をコピー」（テスト実行の右）と「起動パスをコピー」（画面下）はこのエイリアスパスを返す。マクロ選択中は `-alias` / `-id` も付ける。
 - Store 提出の手順・文言: [docs/microsoft-store/README.md](docs/microsoft-store/README.md)
 
 ## アーキテクチャ

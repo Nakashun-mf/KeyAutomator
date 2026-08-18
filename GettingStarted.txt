@@ -31,7 +31,7 @@ KeyAutomator — Getting started
 5. Press Save
 
 [5] Command line (advanced)
-- Copy launch path at the bottom copies the KeyAutomator.exe location
+- Copy path + args (right of Test run) or Copy launch path (right of Settings folder) copies the KeyAutomator.exe location
   (Settings folder is where config.json lives; that is different)
 - With a macro selected, the path and argument are copied together
   With alias: "(path)" -alias login_ok
@@ -46,7 +46,7 @@ KeyAutomator — Getting started
 [If something goes wrong]
 - The actual save path is shown in the status text at the bottom
 - Settings folder opens config.json / error.log
-- Copy launch path copies the exe location for CLI (plus the argument when a macro is selected)
+- Copy path + args (right of Test run) or Copy launch path copies the exe location for CLI (plus the argument when a macro is selected)
 - See README.md / GitHub Releases
 
 https://github.com/Nakashun-mf/KeyAutomator/releases/latest

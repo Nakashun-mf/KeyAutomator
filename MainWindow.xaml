@@ -649,6 +649,15 @@
                                     Click="TestButton_Click"
                                     Content="{Binding TestButtonLabel}"
                                     Style="{StaticResource SlimButtonStyle}" />
+                                <Border
+                                    Width="1"
+                                    Margin="4,4"
+                                    Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                <Button
+                                    x:Uid="CopyLaunchInlineButton"
+                                    AutomationProperties.AutomationId="CopyCliLaunchPathInlineButton"
+                                    Click="CopyCliLaunchPath_Click"
+                                    Style="{StaticResource SlimButtonStyle}" />
                             </StackPanel>
                         </Grid>
                     </ContentControl>
@@ -663,6 +672,7 @@
             BorderThickness="0,1,0,0">
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -670,13 +680,8 @@
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Spacing="10"
+                    Spacing="8"
                     VerticalAlignment="Center">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{Binding StatusMessage}"
-                        TextTrimming="CharacterEllipsis" />
                     <Button
                         x:Uid="OpenFolderButton"
                         Click="OpenDataFolder_Click"
@@ -687,8 +692,15 @@
                         Click="CopyCliLaunchPath_Click"
                         Style="{StaticResource SlimButtonStyle}" />
                 </StackPanel>
-                <StackPanel
+                <TextBlock
                     Grid.Column="1"
+                    MinWidth="0"
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding StatusMessage}"
+                    TextTrimming="CharacterEllipsis" />
+                <StackPanel
+                    Grid.Column="2"
                     Orientation="Horizontal"
                     Spacing="10"
                     VerticalAlignment="Center">
@@ -727,7 +739,7 @@
                 </StackPanel>
 
                 <StackPanel
-                    Grid.Column="2"
+                    Grid.Column="3"
                     Orientation="Horizontal"
                     Spacing="10"
                     VerticalAlignment="Center">

@@ -260,8 +260,13 @@ jobs:
             throw "STORE_PACKAGE がありません"
           }
           if (-not $env:MS_STORE_PRODUCT_ID) { throw "MS_STORE_PRODUCT_ID が空です" }
+          $pkgDir = Split-Path -Parent $env:STORE_PACKAGE
+          if (-not (Test-Path -LiteralPath $pkgDir)) { throw "提出ディレクトリがありません: $pkgDir" }
+          Write-Host "Publishing from $pkgDir"
+          Get-ChildItem -LiteralPath $pkgDir | Select-Object Name, Length
+          # CLI の -i はファイルではなくディレクトリ（.msix / .msixupload を中から探す）
           # --noCommit は付けない。提出をコミットし、認定キューへ送る。
-          msstore publish -i "$env:STORE_PACKAGE" --appId "$env:MS_STORE_PRODUCT_ID"
+          msstore publish -i $pkgDir --appId $env:MS_STORE_PRODUCT_ID
 
       - name: Reset Store CLI credentials
         if: always()

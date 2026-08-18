@@ -154,7 +154,8 @@ public class StoreTrustTests
         StringAssert.Contains(yml, "secrets.AZURE_AD_APPLICATION_SECRET");
         StringAssert.Contains(yml, "secrets.SELLER_ID");
         StringAssert.Contains(yml, "--noCommit は付けない");
-        StringAssert.Contains(yml, "msstore publish -i \"$env:STORE_PACKAGE\"");
+        StringAssert.Contains(yml, "msstore publish -i $pkgDir");
+        StringAssert.Contains(yml, "Split-Path -Parent $env:STORE_PACKAGE");
         var storeScript = RepoFiles.Read("scripts", "ci", "Build-MsixStore.ps1");
         StringAssert.Contains(storeScript, "KeyAutomator_*");
         StringAssert.Contains(storeScript, ".msixupload / .msixbundle / .msix");

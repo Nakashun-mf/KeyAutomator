@@ -155,7 +155,8 @@ public class StoreTrustTests
         StringAssert.Contains(yml, "secrets.SELLER_ID");
         StringAssert.Contains(yml, "--noCommit は付けない");
         StringAssert.Contains(yml, "msstore publish -i $inputDir");
-        StringAssert.Contains(yml, "PathType Leaf");
+        StringAssert.Contains(yml, "KeyAutomatorStoreUpload");
+        StringAssert.Contains(yml, "--uploadTimeout 600");
         var storeScript = RepoFiles.Read("scripts", "ci", "Build-MsixStore.ps1");
         StringAssert.Contains(storeScript, "KeyAutomator_*");
         StringAssert.Contains(storeScript, ".msixupload / .msixbundle / .msix");

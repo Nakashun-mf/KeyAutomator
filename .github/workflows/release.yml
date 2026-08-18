@@ -261,13 +261,18 @@ jobs:
             throw "STORE_PACKAGE がありません"
           }
           if (-not $env:MS_STORE_PRODUCT_ID) { throw "MS_STORE_PRODUCT_ID が空です" }
-          # msstore -i はディレクトリ。ファイルパスなら親フォルダを渡す。
-          $inputDir = $pkg
-          if (Test-Path -LiteralPath $pkg -PathType Leaf) {
-            $inputDir = Split-Path -Parent $pkg
-          }
+          # _Test フォルダには Install.ps1 等がある。CLI はディレクトリ全体を zip するため、
+          # .msix / .msixsym だけを空フォルダへコピーしてから -i に渡す。
+          $inputDir = Join-Path $env:RUNNER_TEMP "KeyAutomatorStoreUpload"
+          if (Test-Path -LiteralPath $inputDir) { Remove-Item -Recurse -Force $inputDir }
+          New-Item -ItemType Directory -Force -Path $inputDir | Out-Null
+          Copy-Item -LiteralPath $pkg -Destination $inputDir
+          $sym = [System.IO.Path]::ChangeExtension($pkg, ".msixsym")
+          if (Test-Path -LiteralPath $sym) { Copy-Item -LiteralPath $sym -Destination $inputDir }
+          Get-ChildItem -LiteralPath $inputDir | Format-Table Name, Length
           # --noCommit は付けない。提出をコミットし、認定キューへ送る。
-          msstore publish -i $inputDir --appId "$env:MS_STORE_PRODUCT_ID"
+          # 66MB 超の blob アップロードは既定タイムアウトだと落ちることがある。
+          msstore publish -i $inputDir --appId "$env:MS_STORE_PRODUCT_ID" --uploadTimeout 600 --verbose
 
       - name: Reset Store CLI credentials
         if: always()

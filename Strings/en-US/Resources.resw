@@ -336,6 +336,18 @@
   <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>With a macro selected, copies “path -alias name” (or -id if the alias is empty). With none selected, copies the path only. Not the settings folder. MSIX / Store builds use the WindowsApps alias.</value>
   </data>
+  <data name="CopyLaunchInlineButton.Content" xml:space="preserve">
+    <value>Copy path + args</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Copy launch path and arguments</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve">
+    <value>To the right of Test run. Copies the exe path plus -alias or -id for the selected macro.</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Copies “path -alias name” for the selected macro (or -id if the alias is empty). Same as Copy launch path at the bottom.</value>
+  </data>
   <data name="ActionDelayLabel.Text" xml:space="preserve">
     <value>Step gap</value>
   </data>

@@ -186,11 +186,18 @@ public class StoreTrustTests
                      "NewMacroButton",
                      "SaveMacroButton",
                      "MacroNameBox",
-                     "MacroListView"
+                     "MacroListView",
+                     "CopyCliLaunchPathButton",
+                     "CopyCliLaunchPathInlineButton"
                  })
         {
             StringAssert.Contains(xaml, $"AutomationProperties.AutomationId=\"{id}\"");
         }
+
+        var testUid = xaml.IndexOf("x:Uid=\"TestButton\"", StringComparison.Ordinal);
+        var copyUid = xaml.IndexOf("x:Uid=\"CopyLaunchInlineButton\"", StringComparison.Ordinal);
+        Assert.IsTrue(testUid >= 0, "TestButton x:Uid is missing");
+        Assert.IsTrue(copyUid > testUid, "CopyLaunchInlineButton must sit after TestButton on the save bar");
     }
 
     [TestMethod]

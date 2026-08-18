@@ -336,6 +336,18 @@
   <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>マクロを選んでいるときは「パス -alias 引数名」（引数名が空なら -id）をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。MSIX / ストア版は WindowsApps のエイリアスです。</value>
   </data>
+  <data name="CopyLaunchInlineButton.Content" xml:space="preserve">
+    <value>パス＋引数をコピー</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>起動パスと引数をコピー</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve">
+    <value>テスト実行の右。選択中マクロの exe パスと -alias / -id をまとめてコピーします。</value>
+  </data>
+  <data name="CopyLaunchInlineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>選択中マクロの「パス -alias 引数名」（空なら -id）をまとめてコピーします。画面下の「起動パスをコピー」と同じ内容です。</value>
+  </data>
   <data name="ActionDelayLabel.Text" xml:space="preserve">
     <value>手順間隔</value>
   </data>

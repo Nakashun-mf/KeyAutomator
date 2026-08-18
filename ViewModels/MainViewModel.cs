@@ -25,14 +25,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _hasSelection;
     [ObservableProperty] private bool _hasMacroMultiSelection;
     [ObservableProperty] private bool _hasActionSelection;
-    [ObservableProperty] private string _statusMessage = "準備完了";
+    [ObservableProperty] private string _statusMessage = Loc.Get("Status_Ready");
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isIdle = true;
-    [ObservableProperty] private string _actionSummary = "手順はまだありません";
+    [ObservableProperty] private string _actionSummary = Loc.Get("Status_NoActions");
     [ObservableProperty] private bool _confirmBeforeDelete = true;
     [ObservableProperty] private double _actionDelaySec = AppSettings.DefaultActionDelaySec;
     [ObservableProperty] private bool _isDirty;
-    [ObservableProperty] private string _testButtonLabel = "テスト実行";
+    [ObservableProperty] private string _testButtonLabel = Loc.Get("Test_Run");
     [ObservableProperty] private bool _isMacroListEmpty = true;
 
     private AppSettings _settings = new();
@@ -139,14 +139,14 @@ public partial class MainViewModel : ObservableObject
     {
         if (Actions.Count == 0)
         {
-            ActionSummary = "手順はまだありません。下のボタンから追加してください。";
+            ActionSummary = Loc.Get("Status_NoActionsHint");
             return;
         }
 
         var loops = Actions.Count(a => a.IsRepeatType);
         ActionSummary = loops > 0
-            ? $"上から順に {Actions.Count} 手順（繰り返し {loops}）を実行します"
-            : $"上から順に {Actions.Count} 手順を実行します";
+            ? Loc.Format("Status_ActionSummaryWithLoops", Actions.Count, loops)
+            : Loc.Format("Status_ActionSummary", Actions.Count);
     }
 
     partial void OnSelectedMacroChanged(MacroItem? value)
@@ -225,8 +225,8 @@ public partial class MainViewModel : ObservableObject
                 Macros.Add(m);
 
             StatusMessage = AppPaths.IsUsingFallbackDirectory
-                ? $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath} ※設定はユーザーフォルダ側）"
-                : $"読込完了: {Macros.Count} 件（{ConfigStore.ConfigPath}）";
+                ? Loc.Format("Status_LoadedFallback", Macros.Count, ConfigStore.ConfigPath)
+                : Loc.Format("Status_Loaded", Macros.Count, ConfigStore.ConfigPath);
             SelectedMacro = Macros.FirstOrDefault();
             IsMacroListEmpty = Macros.Count == 0;
             ClearDirty();
@@ -243,8 +243,8 @@ public partial class MainViewModel : ObservableObject
             IsMacroListEmpty = true;
             var logHint = FormatLogHint();
             StatusMessage = string.IsNullOrEmpty(backup)
-                ? $"設定の読み込みに失敗しました（{ConfigStore.ConfigPath}）。破損ファイルは上書きしていません{logHint}"
-                : $"設定の読み込みに失敗しました。バックアップ: {Path.GetFileName(backup)}{logHint}";
+                ? Loc.Format("Status_LoadFailed", ConfigStore.ConfigPath, logHint)
+                : Loc.Format("Status_LoadFailedBackup", Path.GetFileName(backup), logHint);
             ClearDirty();
         }
     }
@@ -255,7 +255,7 @@ public partial class MainViewModel : ObservableObject
         var samples = ConfigStore.LoadSampleMacros();
         if (samples.Count == 0)
         {
-            StatusMessage = "サンプルマクロを取得できませんでした";
+            StatusMessage = Loc.Get("Status_SampleMissing");
             return false;
         }
 
@@ -269,7 +269,7 @@ public partial class MainViewModel : ObservableObject
         SelectedMacro = Macros.FirstOrDefault();
         IsMacroListEmpty = Macros.Count == 0;
         ClearDirty();
-        StatusMessage = $"サンプルを読み込みました: {Macros.Count} 件 → {ConfigStore.ConfigPath}";
+        StatusMessage = Loc.Format("Status_SampleLoaded", Macros.Count, ConfigStore.ConfigPath);
         return true;
     }
 
@@ -281,7 +281,7 @@ public partial class MainViewModel : ObservableObject
         var item = new MacroItem
         {
             Id = ConfigStore.NextId(Macros),
-            Name = "新しいマクロ",
+            Name = Loc.Get("Macro_DefaultName"),
             DelaySec = 3.0,
             Actions = []
         };
@@ -290,7 +290,7 @@ public partial class MainViewModel : ObservableObject
             return;
         SelectedMacro = item;
         ClearDirty();
-        StatusMessage = $"新規作成: ID {item.Id}";
+        StatusMessage = Loc.Format("Status_Created", item.Id);
     }
 
     [RelayCommand(CanExecute = nameof(CanCloneMacro))]
@@ -299,14 +299,14 @@ public partial class MainViewModel : ObservableObject
         if (SelectedMacro is null) return;
         var copy = SelectedMacro.Clone();
         copy.Id = ConfigStore.NextId(Macros);
-        copy.Name = SelectedMacro.Name + " (コピー)";
+        copy.Name = Loc.Format("Macro_CloneName", SelectedMacro.Name);
         copy.Alias = string.Empty;
         Macros.Add(copy);
         if (!Persist())
             return;
         SelectedMacro = copy;
         ClearDirty();
-        StatusMessage = $"複製: ID {copy.Id}";
+        StatusMessage = Loc.Format("Status_Cloned", copy.Id);
     }
 
     private bool CanCloneMacro() => SelectedMacro is not null && !IsBusy;
@@ -334,8 +334,8 @@ public partial class MainViewModel : ObservableObject
         SelectedMacro = Macros.FirstOrDefault();
         ClearDirty();
         StatusMessage = targets.Count == 1
-            ? $"削除: ID {targets[0].Id}"
-            : $"削除: {targets.Count} 件";
+            ? Loc.Format("Status_DeletedOne", targets[0].Id)
+            : Loc.Format("Status_DeletedMany", targets.Count);
     }
 
     public IReadOnlyList<MacroItem> GetMacrosPendingDelete() =>
@@ -354,20 +354,20 @@ public partial class MainViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(EditName))
         {
-            StatusMessage = "マクロ名を入力してください";
+            StatusMessage = Loc.Get("Status_NameRequired");
             return false;
         }
 
         if (Math.Abs(EditId - Math.Round(EditId)) > 0.001)
         {
-            StatusMessage = "ID は整数で入力してください";
+            StatusMessage = Loc.Get("Status_IdMustBeInteger");
             return false;
         }
 
         var id = (int)Math.Round(EditId);
         if (id < 1)
         {
-            StatusMessage = "ID は 1 以上にしてください";
+            StatusMessage = Loc.Get("Status_IdMustBePositive");
             return false;
         }
 
@@ -381,7 +381,7 @@ public partial class MainViewModel : ObservableObject
         var originalId = SelectedMacro.Id;
         if (Macros.Any(m => m.Id == id && m.Id != originalId))
         {
-            StatusMessage = $"ID {id} は既に使用されています";
+            StatusMessage = Loc.Format("Status_IdInUse", id);
             return false;
         }
 
@@ -389,7 +389,7 @@ public partial class MainViewModel : ObservableObject
             Macros.Any(m => m.Id != originalId &&
                             string.Equals(m.Alias, alias, StringComparison.OrdinalIgnoreCase)))
         {
-            StatusMessage = $"引数名「{alias}」は既に使用されています";
+            StatusMessage = Loc.Format("Status_AliasInUse", alias);
             return false;
         }
 
@@ -397,7 +397,7 @@ public partial class MainViewModel : ObservableObject
         {
             if (!action.TryValidate(out var actionError))
             {
-                StatusMessage = $"手順 {action.Step}: {actionError}";
+                StatusMessage = Loc.Format("Status_StepError", action.Step, actionError);
                 return false;
             }
         }
@@ -422,8 +422,8 @@ public partial class MainViewModel : ObservableObject
         // 空の手順で再保存されてデータが消えることがあるため、差し替えない。
         ClearDirty();
         StatusMessage = string.IsNullOrEmpty(alias)
-            ? $"保存しました → {ConfigStore.ConfigPath}"
-            : $"保存しました（引数: -alias {alias} / -{alias}）→ {ConfigStore.ConfigPath}";
+            ? Loc.Format("Status_Saved", ConfigStore.ConfigPath)
+            : Loc.Format("Status_SavedWithAlias", alias, ConfigStore.ConfigPath);
         return true;
     }
 
@@ -432,7 +432,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (SelectedMacro is null) return;
         LoadEditorFrom(SelectedMacro);
-        StatusMessage = "編集を破棄しました";
+        StatusMessage = Loc.Get("Status_Discarded");
     }
 
     [RelayCommand(CanExecute = nameof(CanEditMacro))]
@@ -483,7 +483,7 @@ public partial class MainViewModel : ObservableObject
             SelectedActions.Clear();
             SelectedActions.Add(start);
             SyncActionSelectionHighlight();
-            StatusMessage = "空の繰り返しブロックを挿入しました（「ここまで」までのあいだに手順を入れてください）";
+            StatusMessage = Loc.Get("Status_EmptyRepeatInserted");
             return;
         }
 
@@ -503,7 +503,7 @@ public partial class MainViewModel : ObservableObject
         SelectedActions.Clear();
         SelectedActions.Add(start);
         SyncActionSelectionHighlight();
-        StatusMessage = $"手順 {first + 1}〜{last + 1} を繰り返しで囲みました（回数は編集できます）";
+        StatusMessage = Loc.Format("Status_WrappedRepeat", first + 1, last + 1);
     }
 
     private void AddAction(string type, string value)
@@ -635,14 +635,14 @@ public partial class MainViewModel : ObservableObject
     {
         if (!Persist())
             return;
-        StatusMessage = "マクロの順序を保存しました";
+        StatusMessage = Loc.Get("Status_MacroOrderSaved");
     }
 
     /// <summary>手順 DnD 後に番号を振り直す</summary>
     public void OnActionsReordered()
     {
         UpdateActionSummary();
-        StatusMessage = "手順の順序を変更しました（保存で確定）";
+        StatusMessage = Loc.Get("Status_ActionOrderChanged");
         MarkDirty();
     }
 
@@ -657,7 +657,7 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorLogger.Write(ex, "保存失敗");
-            StatusMessage = $"保存に失敗しました: {ConfigStore.ConfigPath}{FormatLogHint()}";
+            StatusMessage = Loc.Format("Status_SaveFailed", ConfigStore.ConfigPath, FormatLogHint());
             return false;
         }
     }
@@ -665,8 +665,8 @@ public partial class MainViewModel : ObservableObject
     private static string FormatLogHint()
     {
         return ErrorLogger.LastWrittenPath is { Length: > 0 } path
-            ? $"（詳細: {path}）"
-            : "（ログを書き込めませんでした。書き込み可能なフォルダへ exe を置き直してください）";
+            ? Loc.Format("Status_LogHint", path)
+            : Loc.Get("Status_LogMissing");
     }
 
     partial void OnHasSelectionChanged(bool value) => NotifyEditCommands();
@@ -674,7 +674,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnIsBusyChanged(bool value)
     {
         IsIdle = !value;
-        TestButtonLabel = value ? "中断" : "テスト実行";
+        TestButtonLabel = value ? Loc.Get("Test_Stop") : Loc.Get("Test_Run");
         NotifyEditCommands();
         DeleteMacroCommand.NotifyCanExecuteChanged();
         CloneMacroCommand.NotifyCanExecuteChanged();

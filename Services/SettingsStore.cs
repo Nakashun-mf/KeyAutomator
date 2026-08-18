@@ -14,6 +14,13 @@ public sealed class AppSettings
     /// <summary>各アクション実行後に挟む待機秒数（最後の手順の後は除く）。</summary>
     [JsonPropertyName("action_delay_sec")]
     public double ActionDelaySec { get; set; } = DefaultActionDelaySec;
+
+    /// <summary>
+    /// UI 言語。空なら Windows の表示言語。
+    /// <c>en-US</c> / <c>ja-JP</c>。
+    /// </summary>
+    [JsonPropertyName("ui_language")]
+    public string UiLanguage { get; set; } = string.Empty;
 }
 
 public static class SettingsStore

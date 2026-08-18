@@ -14,6 +14,7 @@ public class SettingsStoreTests : IsolatedDataTestBase
 
         Assert.IsTrue(settings.ConfirmBeforeDelete);
         Assert.AreEqual(AppSettings.DefaultActionDelaySec, settings.ActionDelaySec);
+        Assert.AreEqual(string.Empty, settings.UiLanguage);
         Assert.IsTrue(File.Exists(SettingsStore.SettingsPath));
     }
 
@@ -23,13 +24,15 @@ public class SettingsStoreTests : IsolatedDataTestBase
         SettingsStore.Save(new AppSettings
         {
             ConfirmBeforeDelete = false,
-            ActionDelaySec = 0.5
+            ActionDelaySec = 0.5,
+            UiLanguage = "en-US"
         });
 
         var loaded = SettingsStore.Load();
 
         Assert.IsFalse(loaded.ConfirmBeforeDelete);
         Assert.AreEqual(0.5, loaded.ActionDelaySec);
+        Assert.AreEqual("en-US", loaded.UiLanguage);
     }
 
     [TestMethod]

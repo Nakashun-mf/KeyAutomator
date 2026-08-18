@@ -11,9 +11,14 @@ namespace KeyAutomator.ViewModels;
 public sealed class ActionTypeOption
 {
     public required string Code { get; init; }
-    public required string Label { get; init; }
-    public required string Hint { get; init; }
-    public required string Placeholder { get; init; }
+    public required string LabelKey { get; init; }
+    public required string HintKey { get; init; }
+    public string PlaceholderKey { get; init; } = string.Empty;
+
+    public string Label => Loc.Get(LabelKey);
+    public string Hint => Loc.Get(HintKey);
+    public string Placeholder =>
+        PlaceholderKey.Length == 0 ? string.Empty : Loc.Get(PlaceholderKey);
 
     public override string ToString() => Label;
 }
@@ -21,7 +26,16 @@ public sealed class ActionTypeOption
 public sealed class SpecialKeyOption
 {
     public required string Code { get; init; }
-    public required string Label { get; init; }
+    public required string FixedLabel { get; init; }
+    public string? LabelKey { get; init; }
+    public string? LabelArg { get; init; }
+
+    public string Label =>
+        LabelKey is null
+            ? FixedLabel
+            : LabelArg is null
+                ? Loc.Get(LabelKey)
+                : Loc.Format(LabelKey, LabelArg);
 
     public override string ToString() => Label;
 }
@@ -29,7 +43,9 @@ public sealed class SpecialKeyOption
 public sealed class MouseActionOption
 {
     public required string Code { get; init; }
-    public required string Label { get; init; }
+    public required string LabelKey { get; init; }
+
+    public string Label => Loc.Get(LabelKey);
 
     public override string ToString() => Label;
 }
@@ -38,10 +54,10 @@ public static class MouseActionCatalog
 {
     public static IReadOnlyList<MouseActionOption> All { get; } =
     [
-        new() { Code = "LEFT", Label = "左クリック" },
-        new() { Code = "RIGHT", Label = "右クリック" },
-        new() { Code = "MIDDLE", Label = "中クリック" },
-        new() { Code = "LEFT_DOUBLE", Label = "左ダブルクリック" }
+        new() { Code = "LEFT", LabelKey = "Mouse_LEFT" },
+        new() { Code = "RIGHT", LabelKey = "Mouse_RIGHT" },
+        new() { Code = "MIDDLE", LabelKey = "Mouse_MIDDLE" },
+        new() { Code = "LEFT_DOUBLE", LabelKey = "Mouse_LEFT_DOUBLE" }
     ];
 
     public static MouseActionOption Get(string? code) =>
@@ -59,58 +75,54 @@ public static class ActionTypeCatalog
         new()
         {
             Code = "text",
-            Label = "テキスト入力",
-            Hint = "文字列をそのまま入力します（日本語・記号OK）",
-            Placeholder = "例: user_admin"
+            LabelKey = "ActionType_text",
+            HintKey = "ActionHint_text",
+            PlaceholderKey = "ActionPlaceholder_text"
         },
         new()
         {
             Code = "key",
-            Label = "特殊キー",
-            Hint = "一覧からキーを1つ選んでください",
-            Placeholder = ""
+            LabelKey = "ActionType_key",
+            HintKey = "ActionHint_key"
         },
         new()
         {
             Code = "hotkey",
-            Label = "ショートカット",
-            Hint = "同時押しするキーをプルダウンで追加してください",
-            Placeholder = ""
+            LabelKey = "ActionType_hotkey",
+            HintKey = "ActionHint_hotkey"
         },
         new()
         {
             Code = "mouse",
-            Label = "マウスクリック",
-            Hint = "いまマウスがある位置をクリックします（座標指定はできません）",
-            Placeholder = ""
+            LabelKey = "ActionType_mouse",
+            HintKey = "ActionHint_mouse"
         },
         new()
         {
             Code = "wait",
-            Label = "待機",
-            Hint = "次の操作まで待ちます（秒・小数可）",
-            Placeholder = "例: 0.5"
+            LabelKey = "ActionType_wait",
+            HintKey = "ActionHint_wait",
+            PlaceholderKey = "ActionPlaceholder_wait"
         },
         new()
         {
             Code = "dialog",
-            Label = "確認ダイアログ",
-            Hint = "メッセージを表示し、OK を押すまで次へ進みません",
-            Placeholder = "例: 入力先ウィンドウをアクティブにして OK"
+            LabelKey = "ActionType_dialog",
+            HintKey = "ActionHint_dialog",
+            PlaceholderKey = "ActionPlaceholder_dialog"
         },
         new()
         {
             Code = RepeatBlock.StartType,
-            Label = "繰り返し",
-            Hint = "ここから「ここまで」までの手順を指定回数繰り返します（ネスト可）",
-            Placeholder = "例: 3"
+            LabelKey = "ActionType_repeat",
+            HintKey = "ActionHint_repeat",
+            PlaceholderKey = "ActionPlaceholder_repeat"
         },
         new()
         {
             Code = RepeatBlock.EndType,
-            Label = "ここまで",
-            Hint = "繰り返しブロックの終わりです",
-            Placeholder = ""
+            LabelKey = "ActionType_end_repeat",
+            HintKey = "ActionHint_end_repeat"
         }
     ];
 
@@ -127,7 +139,11 @@ public static class SpecialKeyCatalog
     private static IReadOnlyList<SpecialKeyOption> Build()
     {
         var list = new List<SpecialKeyOption>();
-        void Add(string code, string label) => list.Add(new SpecialKeyOption { Code = code, Label = label });
+        void Add(string code, string label) =>
+            list.Add(new SpecialKeyOption { Code = code, FixedLabel = label });
+
+        void AddLoc(string code, string key, string arg) =>
+            list.Add(new SpecialKeyOption { Code = code, FixedLabel = arg, LabelKey = key, LabelArg = arg });
 
         Add("CTRL", "Ctrl");
         Add("SHIFT", "Shift");
@@ -160,12 +176,12 @@ public static class SpecialKeyCatalog
             Add($"F{f}", $"F{f}");
 
         for (var n = 0; n <= 9; n++)
-            Add($"NUMPAD{n}", $"テンキー {n}");
-        Add("MULTIPLY", "テンキー *");
-        Add("ADD", "テンキー +");
-        Add("SUBTRACT", "テンキー -");
-        Add("DECIMAL", "テンキー .");
-        Add("DIVIDE", "テンキー /");
+            AddLoc($"NUMPAD{n}", "Key_NumpadDigit", n.ToString(CultureInfo.InvariantCulture));
+        AddLoc("MULTIPLY", "Key_NumpadSymbol", "*");
+        AddLoc("ADD", "Key_NumpadSymbol", "+");
+        AddLoc("SUBTRACT", "Key_NumpadSymbol", "-");
+        AddLoc("DECIMAL", "Key_NumpadSymbol", ".");
+        AddLoc("DIVIDE", "Key_NumpadSymbol", "/");
 
         Add("OEM_PLUS", "= +");
         Add("OEM_MINUS", "- _");
@@ -484,7 +500,7 @@ public partial class ActionEditItem : ObservableObject
             if (!double.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out _) &&
                 !double.TryParse(Value, out _))
             {
-                error = "待機秒数は数値で入力してください";
+                error = Loc.Get("Error_WaitNumeric");
                 return false;
             }
         }
@@ -492,7 +508,7 @@ public partial class ActionEditItem : ObservableObject
         {
             if (!RepeatBlock.TryParseCount(Value, out _))
             {
-                error = $"繰り返し回数は 1〜{RepeatBlock.MaxCount} の整数で指定してください";
+                error = Loc.Format("Error_RepeatCount", RepeatBlock.MaxCount);
                 return false;
             }
         }
@@ -505,14 +521,14 @@ public partial class ActionEditItem : ObservableObject
         error = string.Empty;
         if (string.IsNullOrWhiteSpace(hotkey))
         {
-            error = "ショートカットが空です";
+            error = Loc.Get("Error_HotkeyEmpty");
             return false;
         }
 
         var parts = hotkey.Split(['+', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (parts.Length == 0)
         {
-            error = "ショートカットが空です";
+            error = Loc.Get("Error_HotkeyEmpty");
             return false;
         }
 
@@ -525,7 +541,7 @@ public partial class ActionEditItem : ObservableObject
             {
                 if (!modifiers.Add(normalized))
                 {
-                    error = $"修飾キーが重複しています: {normalized}";
+                    error = Loc.Format("Error_ModifierDuplicate", normalized);
                     return false;
                 }
             }
@@ -533,7 +549,7 @@ public partial class ActionEditItem : ObservableObject
             {
                 if (hasMain)
                 {
-                    error = "メインキーは1つだけ指定してください";
+                    error = Loc.Get("Error_MainKeyOnce");
                     return false;
                 }
 
@@ -543,7 +559,7 @@ public partial class ActionEditItem : ObservableObject
 
         if (!hasMain)
         {
-            error = "修飾キー以外のキーを1つ含めてください";
+            error = Loc.Get("Error_NeedMainKey");
             return false;
         }
 

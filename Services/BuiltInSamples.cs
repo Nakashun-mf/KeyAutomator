@@ -60,6 +60,26 @@ public static class BuiltInSamples
     public static List<MacroItem> Create()
     {
         var list = JsonSerializer.Deserialize<List<MacroItem>>(SampleJson, JsonOptions);
-        return list ?? [];
+        if (list is null)
+            return [];
+
+        foreach (var item in list)
+        {
+            item.Name = item.Alias switch
+            {
+                "login_ok" => Loc.Get("Sample_LoginName"),
+                "select_copy" => Loc.Get("Sample_SelectCopyName"),
+                "enter_x3" => Loc.Get("Sample_EnterX3Name"),
+                _ => item.Name
+            };
+
+            foreach (var action in item.Actions)
+            {
+                if (string.Equals(action.Type, "dialog", StringComparison.OrdinalIgnoreCase))
+                    action.Value = Loc.Get("Sample_LoginDialog");
+            }
+        }
+
+        return list;
     }
 }

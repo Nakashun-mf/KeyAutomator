@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>KeyAutomator</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Register keyboard macros and send them to the active window after a delay.</value>
+  </data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve">
+    <value>Keyboard macros</value>
+  </data>
+  <data name="LanguageLabel.Text" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LanguageBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Display language</value>
+  </data>
+  <data name="Language_System" xml:space="preserve">
+    <value>Match Windows</value>
+  </data>
+  <data name="Language_Japanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+  <data name="Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="MacroListHeading.Text" xml:space="preserve">
+    <value>Macros</value>
+  </data>
+  <data name="MacroListHint.Text" xml:space="preserve">
+    <value>Select to edit on the right / Ctrl+Shift to multi-select / drag to reorder</value>
+  </data>
+  <data name="MacroList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Macro list</value>
+  </data>
+  <data name="MacroList.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ctrl / Shift to multi-select. Drag to reorder.</value>
+  </data>
+  <data name="NewMacroButton.Content" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="NewMacroButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>New macro</value>
+  </data>
+  <data name="LoadSampleButton.Content" xml:space="preserve">
+    <value>Samples</value>
+  </data>
+  <data name="LoadSampleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Load sample macros</value>
+  </data>
+  <data name="LoadSampleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Load sample macros</value>
+  </data>
+  <data name="CloneButton.Content" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="CloneButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="DeleteMacroButton.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteMacroButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="EmptyTitle.Text" xml:space="preserve">
+    <value>Select a macro</value>
+  </data>
+  <data name="EmptyHint.Text" xml:space="preserve">
+    <value>Pick one from the list on the left, or choose New. First time here? Try the samples.</value>
+  </data>
+  <data name="EmptyNewButton.Content" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="EmptyNewButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>New macro</value>
+  </data>
+  <data name="EmptyLoadSampleButton.Content" xml:space="preserve">
+    <value>Load samples</value>
+  </data>
+  <data name="EmptyLoadSampleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Load sample macros</value>
+  </data>
+  <data name="EmptyLoadSampleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Loads a login example and a copy example (asks first if macros already exist).</value>
+  </data>
+  <data name="EmptyTestHint.Text" xml:space="preserve">
+    <value>Switch to the target window before running a test</value>
+  </data>
+  <data name="EditHeading.Text" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="LabelId.Text" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="EditIdBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Macro ID</value>
+  </data>
+  <data name="LabelName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="EditNameBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Macro name</value>
+  </data>
+  <data name="EditNameBox.PlaceholderText" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="LabelDelay.Text" xml:space="preserve">
+    <value>Start after</value>
+  </data>
+  <data name="LabelDelay.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Seconds to wait after Test or CLI start before typing. Switch to the target window during this time.</value>
+  </data>
+  <data name="EditDelayBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Seconds before start</value>
+  </data>
+  <data name="EditDelayBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Seconds before start. Switch to the target window during this time.</value>
+  </data>
+  <data name="SecondsLabel.Text" xml:space="preserve">
+    <value>sec</value>
+  </data>
+  <data name="LabelAlias.Text" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="LabelAlias.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Optional. For CLI. Letters, digits, and _ only. Example: login_ok. Copy Launch path copies the path and argument together.</value>
+  </data>
+  <data name="EditAliasBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>CLI alias (optional)</value>
+  </data>
+  <data name="EditAliasBox.PlaceholderText" xml:space="preserve">
+    <value>Optional (CLI; can be empty)</value>
+  </data>
+  <data name="EditAliasBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Can be empty. Copy Launch path copies path plus -alias (or -id). Use -alias login_ok only when you need it.</value>
+  </data>
+  <data name="ActionsHeading.Text" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="AddTextButton.Content" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="AddTextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add text</value>
+  </data>
+  <data name="AddKeyButton.Content" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="AddKeyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add special key</value>
+  </data>
+  <data name="AddHotkeyButton.Content" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="AddHotkeyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add shortcut</value>
+  </data>
+  <data name="AddMouseButton.Content" xml:space="preserve">
+    <value>Mouse</value>
+  </data>
+  <data name="AddMouseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add mouse click</value>
+  </data>
+  <data name="AddWaitButton.Content" xml:space="preserve">
+    <value>Wait</value>
+  </data>
+  <data name="AddWaitButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add wait</value>
+  </data>
+  <data name="AddDialogButton.Content" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="AddDialogButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add confirmation dialog</value>
+  </data>
+  <data name="AddDialogButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Shows a message and continues after OK</value>
+  </data>
+  <data name="WrapRepeatButton.Content" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="WrapRepeatButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Wrap in repeat</value>
+  </data>
+  <data name="WrapRepeatButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Wrap selected steps in a repeat block (inserts an empty block if nothing is selected)</value>
+  </data>
+  <data name="MoveUpButton.Content" xml:space="preserve">
+    <value>↑</value>
+  </data>
+  <data name="MoveUpButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="MoveUpButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="MoveDownButton.Content" xml:space="preserve">
+    <value>↓</value>
+  </data>
+  <data name="MoveDownButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="MoveDownButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="RemoveActionButton.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="RemoveActionButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Delete action</value>
+  </data>
+  <data name="ColType.Text" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ColValue.Text" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ActionList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Action list</value>
+  </data>
+  <data name="ActionList.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ctrl / Shift to multi-select. Drag to reorder steps.</value>
+  </data>
+  <data name="ActionTypeBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Action type</value>
+  </data>
+  <data name="SpecialKeyBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Special key</value>
+  </data>
+  <data name="MouseActionBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Mouse action</value>
+  </data>
+  <data name="HotkeyPartBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Chord key</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.Content" xml:space="preserve">
+    <value>×</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove key</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Remove this key</value>
+  </data>
+  <data name="AddHotkeyPartButton.Content" xml:space="preserve">
+    <value>＋</value>
+  </data>
+  <data name="AddHotkeyPartButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add key</value>
+  </data>
+  <data name="AddHotkeyPartButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Add a key to the chord</value>
+  </data>
+  <data name="RepeatCountBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Repeat count</value>
+  </data>
+  <data name="RepeatTimesLabel.Text" xml:space="preserve">
+    <value>times</value>
+  </data>
+  <data name="EndRepeatLabel.Text" xml:space="preserve">
+    <value>──────── end ────────</value>
+  </data>
+  <data name="EndRepeatLabel.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>End of repeat</value>
+  </data>
+  <data name="ActionValueBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Action value</value>
+  </data>
+  <data name="SaveButton.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SaveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="DiscardButton.Content" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="DiscardButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="TestButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Test run or stop</value>
+  </data>
+  <data name="TestButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Switch to the target window during the start delay. You can stop a run in progress.</value>
+  </data>
+  <data name="OpenFolderButton.Content" xml:space="preserve">
+    <value>Settings folder</value>
+  </data>
+  <data name="OpenFolderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Open settings folder</value>
+  </data>
+  <data name="OpenFolderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Opens the folder that contains config.json and error.log in File Explorer</value>
+  </data>
+  <data name="CopyLaunchPathButton.Content" xml:space="preserve">
+    <value>Copy launch path</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Copy CLI launch path</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve">
+    <value>With a macro selected, copies the path and argument together. With none selected, copies the path only. This is not the settings folder.</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>With a macro selected, copies “path -alias name” (or -id if the alias is empty). With none selected, copies the path only. Not the settings folder. MSIX / Store builds use the WindowsApps alias.</value>
+  </data>
+  <data name="ActionDelayLabel.Text" xml:space="preserve">
+    <value>Step gap</value>
+  </data>
+  <data name="ActionDelayBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Seconds between steps</value>
+  </data>
+  <data name="ActionDelayBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Automatic wait inserted between steps (0 disables it)</value>
+  </data>
+  <data name="ConfirmDeleteLabel.Text" xml:space="preserve">
+    <value>Confirm before delete</value>
+  </data>
+  <data name="ConfirmDeleteSwitch.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Confirm before delete</value>
+  </data>
+  <data name="ConfirmDeleteSwitch.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>When off, macros and steps are deleted without a confirmation prompt</value>
+  </data>
+  <data name="ActionType_text" xml:space="preserve">
+    <value>Type text</value>
+  </data>
+  <data name="ActionHint_text" xml:space="preserve">
+    <value>Types the string as-is (Japanese and symbols are fine)</value>
+  </data>
+  <data name="ActionPlaceholder_text" xml:space="preserve">
+    <value>Example: user_admin</value>
+  </data>
+  <data name="ActionType_key" xml:space="preserve">
+    <value>Special key</value>
+  </data>
+  <data name="ActionHint_key" xml:space="preserve">
+    <value>Pick one key from the list</value>
+  </data>
+  <data name="ActionType_hotkey" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="ActionHint_hotkey" xml:space="preserve">
+    <value>Add keys to press together from the dropdowns</value>
+  </data>
+  <data name="ActionType_mouse" xml:space="preserve">
+    <value>Mouse click</value>
+  </data>
+  <data name="ActionHint_mouse" xml:space="preserve">
+    <value>Clicks at the current pointer position (coordinates cannot be set)</value>
+  </data>
+  <data name="ActionType_wait" xml:space="preserve">
+    <value>Wait</value>
+  </data>
+  <data name="ActionHint_wait" xml:space="preserve">
+    <value>Waits before the next step (seconds; decimals allowed)</value>
+  </data>
+  <data name="ActionPlaceholder_wait" xml:space="preserve">
+    <value>Example: 0.5</value>
+  </data>
+  <data name="ActionType_dialog" xml:space="preserve">
+    <value>Confirmation dialog</value>
+  </data>
+  <data name="ActionHint_dialog" xml:space="preserve">
+    <value>Shows a message and does not continue until you press OK</value>
+  </data>
+  <data name="ActionPlaceholder_dialog" xml:space="preserve">
+    <value>Example: Activate the target window, then press OK</value>
+  </data>
+  <data name="ActionType_repeat" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="ActionHint_repeat" xml:space="preserve">
+    <value>Repeats the steps until End the given number of times (nesting allowed)</value>
+  </data>
+  <data name="ActionPlaceholder_repeat" xml:space="preserve">
+    <value>Example: 3</value>
+  </data>
+  <data name="ActionType_end_repeat" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ActionHint_end_repeat" xml:space="preserve">
+    <value>Marks the end of a repeat block</value>
+  </data>
+  <data name="Mouse_LEFT" xml:space="preserve">
+    <value>Left click</value>
+  </data>
+  <data name="Mouse_RIGHT" xml:space="preserve">
+    <value>Right click</value>
+  </data>
+  <data name="Mouse_MIDDLE" xml:space="preserve">
+    <value>Middle click</value>
+  </data>
+  <data name="Mouse_LEFT_DOUBLE" xml:space="preserve">
+    <value>Left double-click</value>
+  </data>
+  <data name="Key_NumpadDigit" xml:space="preserve">
+    <value>Numpad {0}</value>
+  </data>
+  <data name="Key_NumpadSymbol" xml:space="preserve">
+    <value>Numpad {0}</value>
+  </data>
+  <data name="Macro_DelayLabel" xml:space="preserve">
+    <value>Starts in {0} sec</value>
+  </data>
+  <data name="Macro_NoActions" xml:space="preserve">
+    <value>No steps</value>
+  </data>
+  <data name="Macro_ActionCount" xml:space="preserve">
+    <value>{0} steps</value>
+  </data>
+  <data name="Macro_NoAlias" xml:space="preserve">
+    <value>No CLI alias (optional)</value>
+  </data>
+  <data name="Macro_Alias" xml:space="preserve">
+    <value>CLI alias: {0}</value>
+  </data>
+  <data name="Macro_DefaultName" xml:space="preserve">
+    <value>New macro</value>
+  </data>
+  <data name="Macro_CloneName" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="Error_AliasCharset" xml:space="preserve">
+    <value>Aliases may only use letters, digits, and _</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Status_NoActions" xml:space="preserve">
+    <value>No steps yet</value>
+  </data>
+  <data name="Status_NoActionsHint" xml:space="preserve">
+    <value>No steps yet. Add some with the buttons below.</value>
+  </data>
+  <data name="Status_ActionSummary" xml:space="preserve">
+    <value>Runs {0} steps from the top</value>
+  </data>
+  <data name="Status_ActionSummaryWithLoops" xml:space="preserve">
+    <value>Runs {0} steps from the top ({1} repeats)</value>
+  </data>
+  <data name="Test_Run" xml:space="preserve">
+    <value>Test run</value>
+  </data>
+  <data name="Test_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Status_LoadedFallback" xml:space="preserve">
+    <value>Loaded {0} macros ({1}; settings are in the user folder)</value>
+  </data>
+  <data name="Status_Loaded" xml:space="preserve">
+    <value>Loaded {0} macros ({1})</value>
+  </data>
+  <data name="Status_LoadFailed" xml:space="preserve">
+    <value>Could not load settings ({0}). The damaged file was not overwritten{1}</value>
+  </data>
+  <data name="Status_LoadFailedBackup" xml:space="preserve">
+    <value>Could not load settings. Backup: {0}{1}</value>
+  </data>
+  <data name="Status_SampleMissing" xml:space="preserve">
+    <value>Could not load sample macros</value>
+  </data>
+  <data name="Status_SampleLoaded" xml:space="preserve">
+    <value>Loaded samples: {0} macros → {1}</value>
+  </data>
+  <data name="Status_Created" xml:space="preserve">
+    <value>Created: ID {0}</value>
+  </data>
+  <data name="Status_Cloned" xml:space="preserve">
+    <value>Duplicated: ID {0}</value>
+  </data>
+  <data name="Status_DeletedOne" xml:space="preserve">
+    <value>Deleted: ID {0}</value>
+  </data>
+  <data name="Status_DeletedMany" xml:space="preserve">
+    <value>Deleted: {0} macros</value>
+  </data>
+  <data name="Status_NameRequired" xml:space="preserve">
+    <value>Enter a macro name</value>
+  </data>
+  <data name="Status_IdMustBeInteger" xml:space="preserve">
+    <value>ID must be a whole number</value>
+  </data>
+  <data name="Status_IdMustBePositive" xml:space="preserve">
+    <value>ID must be 1 or greater</value>
+  </data>
+  <data name="Status_IdInUse" xml:space="preserve">
+    <value>ID {0} is already in use</value>
+  </data>
+  <data name="Status_AliasInUse" xml:space="preserve">
+    <value>Alias "{0}" is already in use</value>
+  </data>
+  <data name="Status_StepError" xml:space="preserve">
+    <value>Step {0}: {1}</value>
+  </data>
+  <data name="Status_Saved" xml:space="preserve">
+    <value>Saved → {0}</value>
+  </data>
+  <data name="Status_SavedWithAlias" xml:space="preserve">
+    <value>Saved (args: -alias {0} / -{0}) → {1}</value>
+  </data>
+  <data name="Status_Discarded" xml:space="preserve">
+    <value>Edits discarded</value>
+  </data>
+  <data name="Status_EmptyRepeatInserted" xml:space="preserve">
+    <value>Inserted an empty repeat block (add steps before End)</value>
+  </data>
+  <data name="Status_WrappedRepeat" xml:space="preserve">
+    <value>Wrapped steps {0}–{1} in a repeat (you can edit the count)</value>
+  </data>
+  <data name="Status_MacroOrderSaved" xml:space="preserve">
+    <value>Macro order saved</value>
+  </data>
+  <data name="Status_ActionOrderChanged" xml:space="preserve">
+    <value>Step order changed (save to keep it)</value>
+  </data>
+  <data name="Status_SaveFailed" xml:space="preserve">
+    <value>Save failed: {0}{1}</value>
+  </data>
+  <data name="Status_LogHint" xml:space="preserve">
+    <value> (details: {0})</value>
+  </data>
+  <data name="Status_LogMissing" xml:space="preserve">
+    <value> (could not write a log; move the exe to a writable folder)</value>
+  </data>
+  <data name="Status_FolderOpened" xml:space="preserve">
+    <value>Opened settings folder: {0}</value>
+  </data>
+  <data name="Status_FolderOpenFailed" xml:space="preserve">
+    <value>Could not open settings folder: {0}</value>
+  </data>
+  <data name="Status_Copied" xml:space="preserve">
+    <value>Copied: {0}</value>
+  </data>
+  <data name="Status_CopyFailed" xml:space="preserve">
+    <value>Could not copy the launch path</value>
+  </data>
+  <data name="Status_DeleteError" xml:space="preserve">
+    <value>An error occurred while deleting</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>Stopping…</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Running… (Stop to cancel)</value>
+  </data>
+  <data name="Status_RunStopped" xml:space="preserve">
+    <value>Run stopped</value>
+  </data>
+  <data name="Status_RunDone" xml:space="preserve">
+    <value>Test run finished</value>
+  </data>
+  <data name="Status_RunErrorLog" xml:space="preserve">
+    <value>Run error (details: {0})</value>
+  </data>
+  <data name="Status_RunErrorNoLog" xml:space="preserve">
+    <value>Run error (could not write a log)</value>
+  </data>
+  <data name="Status_LanguageRestart" xml:space="preserve">
+    <value>Language will apply after the window reloads</value>
+  </data>
+  <data name="Dialog_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Dialog_Discard" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="Dialog_Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="Dialog_UnsavedTitle" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="Dialog_UnsavedBody" xml:space="preserve">
+    <value>You have unsaved edits. What do you want to do?</value>
+  </data>
+  <data name="Dialog_LoadSampleTitle" xml:space="preserve">
+    <value>Load samples</value>
+  </data>
+  <data name="Dialog_LoadSampleBody" xml:space="preserve">
+    <value>Replace the current macro list with {0} samples?
+Unsaved changes will be lost.</value>
+  </data>
+  <data name="Dialog_DeleteMacroTitle" xml:space="preserve">
+    <value>Delete macros</value>
+  </data>
+  <data name="Dialog_DeleteMacroOne" xml:space="preserve">
+    <value>Delete ID {0} "{1}"?</value>
+  </data>
+  <data name="Dialog_DeleteMacroMany" xml:space="preserve">
+    <value>Delete the {0} selected macros?</value>
+  </data>
+  <data name="Dialog_DeleteActionTitle" xml:space="preserve">
+    <value>Delete steps</value>
+  </data>
+  <data name="Dialog_DeleteActionOne" xml:space="preserve">
+    <value>Delete step {0} ({1})?</value>
+  </data>
+  <data name="Dialog_DeleteActionMany" xml:space="preserve">
+    <value>Delete the {0} selected steps?</value>
+  </data>
+  <data name="Dialog_TestTitle" xml:space="preserve">
+    <value>Test run</value>
+  </data>
+  <data name="Dialog_TestBody" xml:space="preserve">
+    <value>Important: after you press Run, click the window you want to type into and bring it to the front during the countdown.
+Starts in: {0} sec
+If this app stays in front, input goes here.
+To send keys to an elevated app, run this app elevated too.
+You can stop a run with Stop.</value>
+  </data>
+  <data name="Dialog_RunErrorTitle" xml:space="preserve">
+    <value>Run error</value>
+  </data>
+  <data name="Dialog_DefaultMessage" xml:space="preserve">
+    <value>Press OK to continue to the next step.</value>
+  </data>
+  <data name="Error_WaitNumeric" xml:space="preserve">
+    <value>Wait time must be a number of seconds</value>
+  </data>
+  <data name="Error_RepeatCount" xml:space="preserve">
+    <value>Repeat count must be an integer from 1 to {0}</value>
+  </data>
+  <data name="Error_HotkeyEmpty" xml:space="preserve">
+    <value>Shortcut is empty</value>
+  </data>
+  <data name="Error_ModifierDuplicate" xml:space="preserve">
+    <value>Duplicate modifier: {0}</value>
+  </data>
+  <data name="Error_MainKeyOnce" xml:space="preserve">
+    <value>Specify only one main key</value>
+  </data>
+  <data name="Error_NeedMainKey" xml:space="preserve">
+    <value>Include one key that is not a modifier</value>
+  </data>
+  <data name="Error_RepeatCountAtStep" xml:space="preserve">
+    <value>Step {0}: repeat count must be an integer from 1 to {1}</value>
+  </data>
+  <data name="Error_OrphanEndRepeat" xml:space="preserve">
+    <value>Step {0}: End has no matching Repeat</value>
+  </data>
+  <data name="Error_UnclosedRepeat" xml:space="preserve">
+    <value>{0} Repeat block(s) are unclosed (add End)</value>
+  </data>
+  <data name="Sample_LoginName" xml:space="preserve">
+    <value>Login and type fixed data</value>
+  </data>
+  <data name="Sample_SelectCopyName" xml:space="preserve">
+    <value>Select all and copy</value>
+  </data>
+  <data name="Sample_EnterX3Name" xml:space="preserve">
+    <value>Enter 3 times</value>
+  </data>
+  <data name="Sample_LoginDialog" xml:space="preserve">
+    <value>Press OK after you confirm login succeeded</value>
+  </data>
+  <data name="Cli_Help" xml:space="preserve">
+    <value>KeyAutomator — keyboard automation
+
+Usage:
+  KeyAutomator.exe                 Start the GUI
+  KeyAutomator.exe -1              Run ID=1
+  KeyAutomator.exe -id 1           Same
+  KeyAutomator.exe -alias NAME     Run by alias
+  KeyAutomator.exe -NAME           Same (short form)
+  KeyAutomator.exe -name "Name"    Run by display name
+  KeyAutomator.exe -h              Show this help
+
+Exit codes: 0 success / 1 failure
+Log: error.log (writable data folder; if the exe folder is protected, %LocalAppData%\KeyAutomator)
+
+Notes:
+  - CLI runs the macro without the management window
+  - Macros with a confirm (dialog) action still show a message box in CLI
+    (this is not fully unattended)
+</value>
+  </data>
+  <data name="Cli_MacroNotFound" xml:space="preserve">
+    <value>Macro not found. Use -h for usage.</value>
+  </data>
+</root>

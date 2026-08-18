@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.8.5
+**バージョン:** 2.8.6
 
 ## 開発環境
 
@@ -22,7 +22,9 @@ vb_auto-key/
 ├── MainWindow.xaml(.cs)       # Fluent UI 管理画面
 ├── ViewModels/MainViewModel.cs
 ├── Models/MacroModels.cs
-├── Services/                  # Config / Settings / Paths / SendInput / Repeat / CLI / Log / Dialog
+├── Strings/en-US/Resources.resw
+├── Strings/ja-JP/Resources.resw
+├── Services/                  # Config / Settings / Paths / Loc / SendInput / Repeat / CLI / Log / Dialog
 ├── KeyAutomator.Tests/        # MSTest ユニットテスト
 ├── Assets/
 ├── SPEC.md
@@ -30,6 +32,13 @@ vb_auto-key/
 ├── README.md
 └── README_DEVELOPER.md
 ```
+
+## 表示言語（日本語 / English）
+
+- 既定は Windows の表示言語。日本語以外は English にフォールバックする。
+- 画面右下の「言語」で `Windows に合わせる` / `日本語` / `English` を固定できる（`settings.json` の `ui_language`）。
+- UI 文字列は `Strings/en-US/Resources.resw` と `Strings/ja-JP/Resources.resw`。XAML は `x:Uid`、C# / CLI は `Loc.Get` / `Loc.Format`。
+- ユニットテストは `TestStartup` で `ja-JP` に固定する（既存の日本語アサートを維持）。英語は `LocTests` で別途確認。
 
 ## ビルド
 
@@ -146,7 +155,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.8.5"
+$ver = "2.8.6"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
@@ -154,6 +163,7 @@ New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
 Copy-Item -Force .\config.sample.json $distDir\
 Copy-Item -Force .\使い方.txt $distDir\
+Copy-Item -Force .\GettingStarted.txt $distDir\
 Copy-Item -Force .\README.md $distDir\
 Copy-Item -Force .\PRIVACY.md $distDir\
 Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force

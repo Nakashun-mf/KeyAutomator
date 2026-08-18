@@ -140,5 +140,6 @@ public class SettingsStoreEdgeTests : IsolatedDataTestBase
 
         Assert.IsFalse(loaded.ConfirmBeforeDelete);
         Assert.AreEqual(AppSettings.DefaultActionDelaySec, loaded.ActionDelaySec);
+        Assert.AreEqual(string.Empty, loaded.UiLanguage);
     }
 }

@@ -6,7 +6,7 @@ namespace KeyAutomator.Services;
 /// </summary>
 public static class UserDialog
 {
-    public const string DefaultMessage = "OKを押すと次の手順へ進みます。";
+    public static string DefaultMessage => Loc.Get("Dialog_DefaultMessage");
     public const string Caption = "KeyAutomator";
 
     /// <summary>単体テスト用。設定時は MessageBox の代わりに呼ばれる。</summary>

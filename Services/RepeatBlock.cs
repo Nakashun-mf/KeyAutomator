@@ -98,7 +98,7 @@ public static class RepeatBlock
             {
                 if (!TryParseCount(actions[i].Value, out _))
                 {
-                    error = $"手順 {i + 1}: 繰り返し回数は 1〜{MaxCount} の整数で指定してください";
+                    error = Loc.Format("Error_RepeatCountAtStep", i + 1, MaxCount);
                     return false;
                 }
 
@@ -108,7 +108,7 @@ public static class RepeatBlock
             {
                 if (open == 0)
                 {
-                    error = $"手順 {i + 1}: 「ここまで」に対応する「繰り返し」がありません";
+                    error = Loc.Format("Error_OrphanEndRepeat", i + 1);
                     return false;
                 }
 
@@ -118,7 +118,7 @@ public static class RepeatBlock
 
         if (open > 0)
         {
-            error = $"「繰り返し」が {open} 個閉じられていません（「ここまで」を追加してください）";
+            error = Loc.Format("Error_UnclosedRepeat", open);
             return false;
         }
 

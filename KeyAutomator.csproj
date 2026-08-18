@@ -78,8 +78,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PRIResource Include="Strings\en-US\Resources.resw" />
-    <PRIResource Include="Strings\ja-JP\Resources.resw" />
     <EmbeddedResource Include="Strings\en-US\Resources.resw" LogicalName="KeyAutomator.Loc.en-US.resw" />
     <EmbeddedResource Include="Strings\ja-JP\Resources.resw" LogicalName="KeyAutomator.Loc.ja-JP.resw" />
   </ItemGroup>

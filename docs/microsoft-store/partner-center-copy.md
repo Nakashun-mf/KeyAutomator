@@ -5,7 +5,8 @@ Partner Center の各欄に **そのまま貼れる下書き**です。公開者
 プレースホルダ:
 
 - `{SUPPORT_URL}` … 例: `https://github.com/Nakashun-mf/KeyAutomator/issues`
-- `{PRIVACY_URL}` … 例: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md`
+- `{PRIVACY_URL}` … 日本語: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md`  
+  英語: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.en.md`
 - `{PUBLISHER_DISPLAY_NAME}` … Partner Center の公開者表示名
 
 ---
@@ -51,6 +52,7 @@ KeyAutomator は、定型のキー入力やショートカット、マウスク�
 ・テキスト／特殊キー／ショートカット／マウスクリック／ウェイト／確認ダイアログ
 ・手順の繰り返し（ネスト可）
 ・コマンドラインからの実行（管理画面を出さずにマクロ実行）
+・日本語 / English の表示（Windows に合わせる、または画面から固定）
 
 【向いている使い方】
 ・同じフォーム入力や検証手順の繰り返し
@@ -80,6 +82,7 @@ Features:
 • Text, special keys, shortcuts, mouse clicks, waits, and confirmation dialogs
 • Nested repeats
 • Command-line execution without opening the management UI
+• Japanese and English UI (follows Windows, or lock in the app)
 
 Privacy:
 • No network upload of macros or personal data
@@ -98,8 +101,16 @@ Privacy: {PRIVACY_URL}
 
 ## プライバシーポリシー URL
 
+**日本語ストア一覧:**
+
 ```text
-{PRIVACY_URL}
+https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md
+```
+
+**English store listing:**
+
+```text
+https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.en.md
 ```
 
 必須。公開ページが 404 だと認定で落ちることがあります。提出前にブラウザで開けて確認してください。
@@ -217,7 +228,18 @@ Publisher: {PUBLISHER_DISPLAY_NAME}
 
 ## スクリーンショットのキャプション例
 
-1. `マクロ一覧と編集画面`
-2. `手順の追加（テキスト／キー／ショートカット）`
-3. `テスト実行前のウェイト設定`
+ファイルは [listing-assets/README.md](listing-assets/README.md) を参照。Partner Center には言語ごとにアップロードします。
+
+**日本語:**
+
+1. `マクロ一覧と編集画面`（`screenshot_ja_01_macros.png`）
+2. `手順の追加（テキスト／キー／ショートカット）`（`screenshot_ja_02_steps.png`）
+3. `テスト実行前のウェイト設定`（`screenshot_ja_03_testrun.png`）
 4. `CLI ヘルプ（KeyAutomator.exe -h）` ※任意
+
+**English:**
+
+1. `Macro list and editor` (`screenshot_en_01_macros.png`)
+2. `Add steps (text / key / shortcut)` (`screenshot_en_02_steps.png`)
+3. `Start-after delay before a test run` (`screenshot_en_03_testrun.png`)
+4. `CLI help (KeyAutomator.exe -h)` (optional)

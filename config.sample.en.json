@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Login and type fixed data",
+    "alias": "login_ok",
+    "delay_sec": 3.0,
+    "actions": [
+      { "type": "text", "value": "user_admin" },
+      { "type": "key", "value": "TAB" },
+      { "type": "text", "value": "dummy_secret_do_not_use" },
+      { "type": "key", "value": "ENTER" },
+      { "type": "dialog", "value": "Press OK after you confirm login succeeded" },
+      { "type": "wait", "value": "1.0" },
+      { "type": "hotkey", "value": "CTRL+S" }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Select all and copy",
+    "alias": "select_copy",
+    "delay_sec": 2.0,
+    "actions": [
+      { "type": "hotkey", "value": "CTRL+A" },
+      { "type": "hotkey", "value": "CTRL+C" }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Enter 3 times",
+    "alias": "enter_x3",
+    "delay_sec": 2.0,
+    "actions": [
+      { "type": "repeat", "value": "3" },
+      { "type": "key", "value": "ENTER" },
+      { "type": "end_repeat", "value": "" }
+    ]
+  }
+]

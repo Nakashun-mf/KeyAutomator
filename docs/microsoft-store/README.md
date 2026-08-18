@@ -43,8 +43,8 @@ KeyAutomator は既に MSIX サイドロード経路があります。Store 公�
 | アプリ名予約 | 未実施 | 「KeyAutomator」等を予約 | **あなた** |
 | Identity / Publisher | Partner Center 値を転記済み（`pryzo.KeyAutomator`） | 変更時は [product-identity.md](product-identity.md) とマニフェストを同期 | 共同 |
 | Store 用ビルド | `Build-MsixStore.ps1` / サイドロード Release MSIX | Windows で **Release** の `.msix` または `.msixupload` | **あなた（Windows）** |
-| プライバシーポリシー URL | リポジトリの `PRIVACY.md` | **HTTPS の公開 URL** を Partner Center に登録 | **あなた**（下記） |
-| スクリーンショット | 未作成 | 1366×768 以上を 1 枚以上 | **あなた（Windows）** |
+| プライバシーポリシー URL | `PRIVACY.md` / `PRIVACY.en.md` | 言語ごとの **HTTPS 公開 URL** を Partner Center に登録 | **あなた**（下記） |
+| スクリーンショット | `listing-assets/screenshot_{ja,en}_*.png`（1920×1080） | 実機キャプチャへ差し替え推奨。Partner Center へアップロード | 共同（素材は本フォルダ） |
 | ストア説明文 | 下書きあり | Partner Center に転記 | 共同（文面は本フォルダ） |
 | `runFullTrust` 説明 | 下書きあり | Submission options に転記 | 共同 |
 | WACK（任意だが推奨） | 未実施 | Windows App Certification Kit | **あなた（Windows）** |
@@ -175,10 +175,11 @@ Visual Studio がある場合のみ、ウィザードでも可（必須ではな
 Partner Center は **ブラウザで開ける HTTPS URL** を要求します。例:
 
 ```text
-https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md
+日本語: https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md
+English: https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.en.md
 ```
 
-より体裁を整えたい場合は GitHub Pages や自前サイトへ `PRIVACY.md` 相当を置く。
+ストアの言語ごとに URL を分けて登録してください。より体裁を整えたい場合は GitHub Pages や自前サイトへ相当ページを置く。
 
 ### 7. 認定・公開
 
@@ -195,7 +196,7 @@ KeyAutomator は **キー入力の送信（SendInput）** を行います。
 
 - **キーロガーではありません**（キー取得・記録はしない）
 - 送信先は「その時点のアクティブウィンドウ」
-- ネットワーク通信・利用状況送信なし（`PRIVACY.md`）
+- ネットワーク通信・利用状況送信なし（`PRIVACY.md` / `PRIVACY.en.md`）
 
 認定では「自動化＝不正ツール」と誤解されないよう、ストア説明と認定メモで用途を明確にしてください（文面は `partner-center-copy.md` に用意済み）。
 
@@ -217,12 +218,12 @@ Store 更新のたびに **前より大きいバージョン**が必要です。
 - Partner Center の文言推敲・日本語／英語併記
 - 不合格理由への対応案（マニフェスト・説明・権限）
 - Store 用ビルド手順の修正
-- `PRIVACY.md` / README の追記
+- `PRIVACY.md` / `PRIVACY.en.md` / README の追記
 
 あなた側で必要なこと:
 
 - Partner Center ログインと提出操作
-- Windows 上での関連付け・パッケージ生成・スクリーンショット
+- Windows 上での関連付け・パッケージ生成・（任意）実機スクリーンショットの差し替え
 - （任意）サポート用メールアドレスの用意
 
 不合格レポートやスクショを共有してもらえれば、次の修正案を出します。

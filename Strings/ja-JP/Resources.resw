@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>KeyAutomator</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>キー入力マクロを登録し、アクティブウィンドウへ自動入力するデスクトップアプリ</value>
+  </data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve">
+    <value>キー入力マクロ</value>
+  </data>
+  <data name="LanguageLabel.Text" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="LanguageBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>表示言語</value>
+  </data>
+  <data name="Language_System" xml:space="preserve">
+    <value>Windows に合わせる</value>
+  </data>
+  <data name="Language_Japanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+  <data name="Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="MacroListHeading.Text" xml:space="preserve">
+    <value>マクロ一覧</value>
+  </data>
+  <data name="MacroListHint.Text" xml:space="preserve">
+    <value>選ぶと右で編集 / Ctrl・Shiftで複数選択 / ドラッグで並べ替え</value>
+  </data>
+  <data name="MacroList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>マクロ一覧</value>
+  </data>
+  <data name="MacroList.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ctrl / Shift で複数選択。ドラッグで並べ替えできます</value>
+  </data>
+  <data name="NewMacroButton.Content" xml:space="preserve">
+    <value>新規</value>
+  </data>
+  <data name="NewMacroButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>新規作成</value>
+  </data>
+  <data name="LoadSampleButton.Content" xml:space="preserve">
+    <value>サンプル</value>
+  </data>
+  <data name="LoadSampleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>サンプルマクロを読み込む</value>
+  </data>
+  <data name="LoadSampleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>サンプルマクロを読み込みます</value>
+  </data>
+  <data name="CloneButton.Content" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="CloneButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="DeleteMacroButton.Content" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="DeleteMacroButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="EmptyTitle.Text" xml:space="preserve">
+    <value>マクロを選んでください</value>
+  </data>
+  <data name="EmptyHint.Text" xml:space="preserve">
+    <value>左の一覧から選ぶか、「新規」で作成します。はじめてならサンプルから試せます。</value>
+  </data>
+  <data name="EmptyNewButton.Content" xml:space="preserve">
+    <value>新規</value>
+  </data>
+  <data name="EmptyNewButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>新規マクロ</value>
+  </data>
+  <data name="EmptyLoadSampleButton.Content" xml:space="preserve">
+    <value>サンプルを読み込む</value>
+  </data>
+  <data name="EmptyLoadSampleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>サンプルマクロを読み込む</value>
+  </data>
+  <data name="EmptyLoadSampleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>ログイン例とコピー例を読み込みます（既存がある場合は確認します）</value>
+  </data>
+  <data name="EmptyTestHint.Text" xml:space="preserve">
+    <value>テスト実行の前に、入力先ウィンドウへ切り替えてください</value>
+  </data>
+  <data name="EditHeading.Text" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="LabelId.Text" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="EditIdBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>マクロID</value>
+  </data>
+  <data name="LabelName.Text" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="EditNameBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>マクロ名</value>
+  </data>
+  <data name="EditNameBox.PlaceholderText" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="LabelDelay.Text" xml:space="preserve">
+    <value>開始まで</value>
+  </data>
+  <data name="LabelDelay.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>テスト実行・CLI実行のあと、入力が始まるまでの秒数。このあいだに入力先ウィンドウへ切り替えてください</value>
+  </data>
+  <data name="EditDelayBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>開始までの秒数</value>
+  </data>
+  <data name="EditDelayBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>開始までの秒数。このあいだに入力先ウィンドウへ切り替えてください</value>
+  </data>
+  <data name="SecondsLabel.Text" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="LabelAlias.Text" xml:space="preserve">
+    <value>引数名</value>
+  </data>
+  <data name="LabelAlias.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>任意。CLI用です。空でOK。英数字と _ のみ。例: login_ok。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピーできます</value>
+  </data>
+  <data name="EditAliasBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>引数名エイリアス（任意）</value>
+  </data>
+  <data name="EditAliasBox.PlaceholderText" xml:space="preserve">
+    <value>任意（CLI用・空でOK）</value>
+  </data>
+  <data name="EditAliasBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>空でも保存できます。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピー。使う場合のみ: -alias login_ok</value>
+  </data>
+  <data name="ActionsHeading.Text" xml:space="preserve">
+    <value>実行手順</value>
+  </data>
+  <data name="AddTextButton.Content" xml:space="preserve">
+    <value>テキスト</value>
+  </data>
+  <data name="AddTextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>テキスト追加</value>
+  </data>
+  <data name="AddKeyButton.Content" xml:space="preserve">
+    <value>キー</value>
+  </data>
+  <data name="AddKeyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>特殊キー追加</value>
+  </data>
+  <data name="AddHotkeyButton.Content" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="AddHotkeyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>ショートカット追加</value>
+  </data>
+  <data name="AddMouseButton.Content" xml:space="preserve">
+    <value>マウス</value>
+  </data>
+  <data name="AddMouseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>マウスクリック追加</value>
+  </data>
+  <data name="AddWaitButton.Content" xml:space="preserve">
+    <value>待つ</value>
+  </data>
+  <data name="AddWaitButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>ウェイト追加</value>
+  </data>
+  <data name="AddDialogButton.Content" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="AddDialogButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>確認ダイアログ追加</value>
+  </data>
+  <data name="AddDialogButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>メッセージを表示し、OK で次へ進む</value>
+  </data>
+  <data name="WrapRepeatButton.Content" xml:space="preserve">
+    <value>繰り返し</value>
+  </data>
+  <data name="WrapRepeatButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>繰り返しで囲む</value>
+  </data>
+  <data name="WrapRepeatButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>選択した手順を繰り返しブロックで囲みます（未選択なら空ブロックを挿入）</value>
+  </data>
+  <data name="MoveUpButton.Content" xml:space="preserve">
+    <value>↑</value>
+  </data>
+  <data name="MoveUpButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>上へ</value>
+  </data>
+  <data name="MoveUpButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>上へ</value>
+  </data>
+  <data name="MoveDownButton.Content" xml:space="preserve">
+    <value>↓</value>
+  </data>
+  <data name="MoveDownButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>下へ</value>
+  </data>
+  <data name="MoveDownButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>下へ</value>
+  </data>
+  <data name="RemoveActionButton.Content" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="RemoveActionButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>アクション削除</value>
+  </data>
+  <data name="ColType.Text" xml:space="preserve">
+    <value>種類</value>
+  </data>
+  <data name="ColValue.Text" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="ActionList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>アクション一覧</value>
+  </data>
+  <data name="ActionList.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ctrl / Shift で複数選択。ドラッグで手順を並べ替えできます</value>
+  </data>
+  <data name="ActionTypeBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>アクション種別</value>
+  </data>
+  <data name="SpecialKeyBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>特殊キー選択</value>
+  </data>
+  <data name="MouseActionBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>マウス操作選択</value>
+  </data>
+  <data name="HotkeyPartBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>同時押しキー</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.Content" xml:space="preserve">
+    <value>×</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>キーを外す</value>
+  </data>
+  <data name="RemoveHotkeyPartButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>このキーを外す</value>
+  </data>
+  <data name="AddHotkeyPartButton.Content" xml:space="preserve">
+    <value>＋</value>
+  </data>
+  <data name="AddHotkeyPartButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>キーを追加</value>
+  </data>
+  <data name="AddHotkeyPartButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>同時押しするキーを追加</value>
+  </data>
+  <data name="RepeatCountBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>繰り返し回数</value>
+  </data>
+  <data name="RepeatTimesLabel.Text" xml:space="preserve">
+    <value>回くりかえす</value>
+  </data>
+  <data name="EndRepeatLabel.Text" xml:space="preserve">
+    <value>──────── ここまで ────────</value>
+  </data>
+  <data name="EndRepeatLabel.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>繰り返しここまで</value>
+  </data>
+  <data name="ActionValueBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>アクション設定値</value>
+  </data>
+  <data name="SaveButton.Content" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="SaveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="DiscardButton.Content" xml:space="preserve">
+    <value>破棄</value>
+  </data>
+  <data name="DiscardButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>破棄</value>
+  </data>
+  <data name="TestButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>テスト実行または中断</value>
+  </data>
+  <data name="TestButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>開始までの秒数のあいだに入力先ウィンドウへ切り替えてください。実行中は中断できます。</value>
+  </data>
+  <data name="OpenFolderButton.Content" xml:space="preserve">
+    <value>設定フォルダ</value>
+  </data>
+  <data name="OpenFolderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>設定フォルダを開く</value>
+  </data>
+  <data name="OpenFolderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>config.json や error.log があるフォルダをエクスプローラーで開きます</value>
+  </data>
+  <data name="CopyLaunchPathButton.Content" xml:space="preserve">
+    <value>起動パスをコピー</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>CLI起動用パスをコピー</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve">
+    <value>マクロを選んでいるときはパスと引数をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。</value>
+  </data>
+  <data name="CopyLaunchPathButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>マクロを選んでいるときは「パス -alias 引数名」（引数名が空なら -id）をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。MSIX / ストア版は WindowsApps のエイリアスです。</value>
+  </data>
+  <data name="ActionDelayLabel.Text" xml:space="preserve">
+    <value>手順間隔</value>
+  </data>
+  <data name="ActionDelayBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>手順間隔秒</value>
+  </data>
+  <data name="ActionDelayBox.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>各手順のあいだに自動で挟む待機秒数（0 で無効）</value>
+  </data>
+  <data name="ConfirmDeleteLabel.Text" xml:space="preserve">
+    <value>削除前に確認</value>
+  </data>
+  <data name="ConfirmDeleteSwitch.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>削除前に確認</value>
+  </data>
+  <data name="ConfirmDeleteSwitch.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>オフにすると、マクロ／手順の削除確認を出さずに削除します</value>
+  </data>
+  <data name="ActionType_text" xml:space="preserve">
+    <value>テキスト入力</value>
+  </data>
+  <data name="ActionHint_text" xml:space="preserve">
+    <value>文字列をそのまま入力します（日本語・記号OK）</value>
+  </data>
+  <data name="ActionPlaceholder_text" xml:space="preserve">
+    <value>例: user_admin</value>
+  </data>
+  <data name="ActionType_key" xml:space="preserve">
+    <value>特殊キー</value>
+  </data>
+  <data name="ActionHint_key" xml:space="preserve">
+    <value>一覧からキーを1つ選んでください</value>
+  </data>
+  <data name="ActionType_hotkey" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="ActionHint_hotkey" xml:space="preserve">
+    <value>同時押しするキーをプルダウンで追加してください</value>
+  </data>
+  <data name="ActionType_mouse" xml:space="preserve">
+    <value>マウスクリック</value>
+  </data>
+  <data name="ActionHint_mouse" xml:space="preserve">
+    <value>いまマウスがある位置をクリックします（座標指定はできません）</value>
+  </data>
+  <data name="ActionType_wait" xml:space="preserve">
+    <value>待機</value>
+  </data>
+  <data name="ActionHint_wait" xml:space="preserve">
+    <value>次の操作まで待ちます（秒・小数可）</value>
+  </data>
+  <data name="ActionPlaceholder_wait" xml:space="preserve">
+    <value>例: 0.5</value>
+  </data>
+  <data name="ActionType_dialog" xml:space="preserve">
+    <value>確認ダイアログ</value>
+  </data>
+  <data name="ActionHint_dialog" xml:space="preserve">
+    <value>メッセージを表示し、OK を押すまで次へ進みません</value>
+  </data>
+  <data name="ActionPlaceholder_dialog" xml:space="preserve">
+    <value>例: 入力先ウィンドウをアクティブにして OK</value>
+  </data>
+  <data name="ActionType_repeat" xml:space="preserve">
+    <value>繰り返し</value>
+  </data>
+  <data name="ActionHint_repeat" xml:space="preserve">
+    <value>ここから「ここまで」までの手順を指定回数繰り返します（ネスト可）</value>
+  </data>
+  <data name="ActionPlaceholder_repeat" xml:space="preserve">
+    <value>例: 3</value>
+  </data>
+  <data name="ActionType_end_repeat" xml:space="preserve">
+    <value>ここまで</value>
+  </data>
+  <data name="ActionHint_end_repeat" xml:space="preserve">
+    <value>繰り返しブロックの終わりです</value>
+  </data>
+  <data name="Mouse_LEFT" xml:space="preserve">
+    <value>左クリック</value>
+  </data>
+  <data name="Mouse_RIGHT" xml:space="preserve">
+    <value>右クリック</value>
+  </data>
+  <data name="Mouse_MIDDLE" xml:space="preserve">
+    <value>中クリック</value>
+  </data>
+  <data name="Mouse_LEFT_DOUBLE" xml:space="preserve">
+    <value>左ダブルクリック</value>
+  </data>
+  <data name="Key_NumpadDigit" xml:space="preserve">
+    <value>テンキー {0}</value>
+  </data>
+  <data name="Key_NumpadSymbol" xml:space="preserve">
+    <value>テンキー {0}</value>
+  </data>
+  <data name="Macro_DelayLabel" xml:space="preserve">
+    <value>開始まで {0} 秒</value>
+  </data>
+  <data name="Macro_NoActions" xml:space="preserve">
+    <value>手順なし</value>
+  </data>
+  <data name="Macro_ActionCount" xml:space="preserve">
+    <value>{0} 手順</value>
+  </data>
+  <data name="Macro_NoAlias" xml:space="preserve">
+    <value>CLI引数なし（任意）</value>
+  </data>
+  <data name="Macro_Alias" xml:space="preserve">
+    <value>CLI引数: {0}</value>
+  </data>
+  <data name="Macro_DefaultName" xml:space="preserve">
+    <value>新しいマクロ</value>
+  </data>
+  <data name="Macro_CloneName" xml:space="preserve">
+    <value>{0} (コピー)</value>
+  </data>
+  <data name="Error_AliasCharset" xml:space="preserve">
+    <value>引数名は英数字と _ のみ使えます</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>準備完了</value>
+  </data>
+  <data name="Status_NoActions" xml:space="preserve">
+    <value>手順はまだありません</value>
+  </data>
+  <data name="Status_NoActionsHint" xml:space="preserve">
+    <value>手順はまだありません。下のボタンから追加してください。</value>
+  </data>
+  <data name="Status_ActionSummary" xml:space="preserve">
+    <value>上から順に {0} 手順を実行します</value>
+  </data>
+  <data name="Status_ActionSummaryWithLoops" xml:space="preserve">
+    <value>上から順に {0} 手順（繰り返し {1}）を実行します</value>
+  </data>
+  <data name="Test_Run" xml:space="preserve">
+    <value>テスト実行</value>
+  </data>
+  <data name="Test_Stop" xml:space="preserve">
+    <value>中断</value>
+  </data>
+  <data name="Status_LoadedFallback" xml:space="preserve">
+    <value>読込完了: {0} 件（{1} ※設定はユーザーフォルダ側）</value>
+  </data>
+  <data name="Status_Loaded" xml:space="preserve">
+    <value>読込完了: {0} 件（{1}）</value>
+  </data>
+  <data name="Status_LoadFailed" xml:space="preserve">
+    <value>設定の読み込みに失敗しました（{0}）。破損ファイルは上書きしていません{1}</value>
+  </data>
+  <data name="Status_LoadFailedBackup" xml:space="preserve">
+    <value>設定の読み込みに失敗しました。バックアップ: {0}{1}</value>
+  </data>
+  <data name="Status_SampleMissing" xml:space="preserve">
+    <value>サンプルマクロを取得できませんでした</value>
+  </data>
+  <data name="Status_SampleLoaded" xml:space="preserve">
+    <value>サンプルを読み込みました: {0} 件 → {1}</value>
+  </data>
+  <data name="Status_Created" xml:space="preserve">
+    <value>新規作成: ID {0}</value>
+  </data>
+  <data name="Status_Cloned" xml:space="preserve">
+    <value>複製: ID {0}</value>
+  </data>
+  <data name="Status_DeletedOne" xml:space="preserve">
+    <value>削除: ID {0}</value>
+  </data>
+  <data name="Status_DeletedMany" xml:space="preserve">
+    <value>削除: {0} 件</value>
+  </data>
+  <data name="Status_NameRequired" xml:space="preserve">
+    <value>マクロ名を入力してください</value>
+  </data>
+  <data name="Status_IdMustBeInteger" xml:space="preserve">
+    <value>ID は整数で入力してください</value>
+  </data>
+  <data name="Status_IdMustBePositive" xml:space="preserve">
+    <value>ID は 1 以上にしてください</value>
+  </data>
+  <data name="Status_IdInUse" xml:space="preserve">
+    <value>ID {0} は既に使用されています</value>
+  </data>
+  <data name="Status_AliasInUse" xml:space="preserve">
+    <value>引数名「{0}」は既に使用されています</value>
+  </data>
+  <data name="Status_StepError" xml:space="preserve">
+    <value>手順 {0}: {1}</value>
+  </data>
+  <data name="Status_Saved" xml:space="preserve">
+    <value>保存しました → {0}</value>
+  </data>
+  <data name="Status_SavedWithAlias" xml:space="preserve">
+    <value>保存しました（引数: -alias {0} / -{0}）→ {1}</value>
+  </data>
+  <data name="Status_Discarded" xml:space="preserve">
+    <value>編集を破棄しました</value>
+  </data>
+  <data name="Status_EmptyRepeatInserted" xml:space="preserve">
+    <value>空の繰り返しブロックを挿入しました（「ここまで」までのあいだに手順を入れてください）</value>
+  </data>
+  <data name="Status_WrappedRepeat" xml:space="preserve">
+    <value>手順 {0}〜{1} を繰り返しで囲みました（回数は編集できます）</value>
+  </data>
+  <data name="Status_MacroOrderSaved" xml:space="preserve">
+    <value>マクロの順序を保存しました</value>
+  </data>
+  <data name="Status_ActionOrderChanged" xml:space="preserve">
+    <value>手順の順序を変更しました（保存で確定）</value>
+  </data>
+  <data name="Status_SaveFailed" xml:space="preserve">
+    <value>保存に失敗しました: {0}{1}</value>
+  </data>
+  <data name="Status_LogHint" xml:space="preserve">
+    <value>（詳細: {0}）</value>
+  </data>
+  <data name="Status_LogMissing" xml:space="preserve">
+    <value>（ログを書き込めませんでした。書き込み可能なフォルダへ exe を置き直してください）</value>
+  </data>
+  <data name="Status_FolderOpened" xml:space="preserve">
+    <value>設定フォルダを開きました: {0}</value>
+  </data>
+  <data name="Status_FolderOpenFailed" xml:space="preserve">
+    <value>設定フォルダを開けませんでした: {0}</value>
+  </data>
+  <data name="Status_Copied" xml:space="preserve">
+    <value>コピーしました: {0}</value>
+  </data>
+  <data name="Status_CopyFailed" xml:space="preserve">
+    <value>起動パスをコピーできませんでした</value>
+  </data>
+  <data name="Status_DeleteError" xml:space="preserve">
+    <value>削除中にエラーが発生しました</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>中断しています…</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>実行中…（中断ボタンで停止）</value>
+  </data>
+  <data name="Status_RunStopped" xml:space="preserve">
+    <value>実行を中断しました</value>
+  </data>
+  <data name="Status_RunDone" xml:space="preserve">
+    <value>テスト実行完了</value>
+  </data>
+  <data name="Status_RunErrorLog" xml:space="preserve">
+    <value>実行エラー（詳細: {0}）</value>
+  </data>
+  <data name="Status_RunErrorNoLog" xml:space="preserve">
+    <value>実行エラー（ログを書き込めませんでした）</value>
+  </data>
+  <data name="Status_LanguageRestart" xml:space="preserve">
+    <value>言語を切り替えたのでウィンドウを再読み込みします</value>
+  </data>
+  <data name="Dialog_Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Dialog_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Dialog_Discard" xml:space="preserve">
+    <value>破棄</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Run" xml:space="preserve">
+    <value>実行</value>
+  </data>
+  <data name="Dialog_Load" xml:space="preserve">
+    <value>読み込む</value>
+  </data>
+  <data name="Dialog_UnsavedTitle" xml:space="preserve">
+    <value>未保存の変更</value>
+  </data>
+  <data name="Dialog_UnsavedBody" xml:space="preserve">
+    <value>編集中の内容が保存されていません。どうしますか？</value>
+  </data>
+  <data name="Dialog_LoadSampleTitle" xml:space="preserve">
+    <value>サンプルを読み込む</value>
+  </data>
+  <data name="Dialog_LoadSampleBody" xml:space="preserve">
+    <value>現在のマクロ一覧をサンプル（{0}件）で置き換えます。よろしいですか？
+（置き換え前に保存していない変更は失われます）</value>
+  </data>
+  <data name="Dialog_DeleteMacroTitle" xml:space="preserve">
+    <value>マクロを削除</value>
+  </data>
+  <data name="Dialog_DeleteMacroOne" xml:space="preserve">
+    <value>ID {0}「{1}」を削除しますか？</value>
+  </data>
+  <data name="Dialog_DeleteMacroMany" xml:space="preserve">
+    <value>選択した {0} 件のマクロを削除しますか？</value>
+  </data>
+  <data name="Dialog_DeleteActionTitle" xml:space="preserve">
+    <value>手順を削除</value>
+  </data>
+  <data name="Dialog_DeleteActionOne" xml:space="preserve">
+    <value>手順 {0}（{1}）を削除しますか？</value>
+  </data>
+  <data name="Dialog_DeleteActionMany" xml:space="preserve">
+    <value>選択した {0} 件の手順を削除しますか？</value>
+  </data>
+  <data name="Dialog_TestTitle" xml:space="preserve">
+    <value>テスト実行</value>
+  </data>
+  <data name="Dialog_TestBody" xml:space="preserve">
+    <value>【重要】「実行」を押したあと、カウント中に入力したいウィンドウをクリックして前面にしてください。
+開始まで: {0} 秒
+このアプリが前面のままだと、ここへ入力されてしまいます。
+管理者権限のアプリへ送る場合は、本アプリも管理者実行が必要です。
+実行中は「中断」で止められます。</value>
+  </data>
+  <data name="Dialog_RunErrorTitle" xml:space="preserve">
+    <value>実行エラー</value>
+  </data>
+  <data name="Dialog_DefaultMessage" xml:space="preserve">
+    <value>OKを押すと次の手順へ進みます。</value>
+  </data>
+  <data name="Error_WaitNumeric" xml:space="preserve">
+    <value>待機秒数は数値で入力してください</value>
+  </data>
+  <data name="Error_RepeatCount" xml:space="preserve">
+    <value>繰り返し回数は 1〜{0} の整数で指定してください</value>
+  </data>
+  <data name="Error_HotkeyEmpty" xml:space="preserve">
+    <value>ショートカットが空です</value>
+  </data>
+  <data name="Error_ModifierDuplicate" xml:space="preserve">
+    <value>修飾キーが重複しています: {0}</value>
+  </data>
+  <data name="Error_MainKeyOnce" xml:space="preserve">
+    <value>メインキーは1つだけ指定してください</value>
+  </data>
+  <data name="Error_NeedMainKey" xml:space="preserve">
+    <value>修飾キー以外のキーを1つ含めてください</value>
+  </data>
+  <data name="Error_RepeatCountAtStep" xml:space="preserve">
+    <value>手順 {0}: 繰り返し回数は 1〜{1} の整数で指定してください</value>
+  </data>
+  <data name="Error_OrphanEndRepeat" xml:space="preserve">
+    <value>手順 {0}: 「ここまで」に対応する「繰り返し」がありません</value>
+  </data>
+  <data name="Error_UnclosedRepeat" xml:space="preserve">
+    <value>「繰り返し」が {0} 個閉じられていません（「ここまで」を追加してください）</value>
+  </data>
+  <data name="Sample_LoginName" xml:space="preserve">
+    <value>ログイン&amp;定型データ入力</value>
+  </data>
+  <data name="Sample_SelectCopyName" xml:space="preserve">
+    <value>全選択＆コピー</value>
+  </data>
+  <data name="Sample_EnterX3Name" xml:space="preserve">
+    <value>Enterを3回</value>
+  </data>
+  <data name="Sample_LoginDialog" xml:space="preserve">
+    <value>ログイン完了を確認したら OK を押してください</value>
+  </data>
+  <data name="Cli_Help" xml:space="preserve">
+    <value>KeyAutomator — キー入力自動化
+
+使い方:
+  KeyAutomator.exe                 GUI を起動
+  KeyAutomator.exe -1              ID=1 を実行
+  KeyAutomator.exe -id 1           同上
+  KeyAutomator.exe -alias NAME     引数名で実行
+  KeyAutomator.exe -NAME           同上（短縮）
+  KeyAutomator.exe -name "表示名"  表示名で実行
+  KeyAutomator.exe -h              このヘルプ
+
+終了コード: 成功 0 / 失敗 1
+ログ: error.log（書き込み可能なデータフォルダ。保護フォルダ時は %LocalAppData%\KeyAutomator）
+
+注意:
+  - CLI では管理画面を出さずにマクロを実行します
+  - 確認アクション(dialog) があるマクロは、CLI でもメッセージボックスが出ます
+    （完全な無人実行ではありません）
+</value>
+  </data>
+  <data name="Cli_MacroNotFound" xml:space="preserve">
+    <value>指定マクロが見つかりません。-h で使い方を表示します。</value>
+  </data>
+  <data name="Log_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Log_OpenFolder" xml:space="preserve">
+    <value>設定フォルダを開く</value>
+  </data>
+  <data name="Log_CopyLaunchPath" xml:space="preserve">
+    <value>起動パスをコピー</value>
+  </data>
+  <data name="Log_DeleteMacro" xml:space="preserve">
+    <value>マクロ削除</value>
+  </data>
+  <data name="Log_DeleteAction" xml:space="preserve">
+    <value>手順削除</value>
+  </data>
+  <data name="Log_TestRun" xml:space="preserve">
+    <value>テスト実行</value>
+  </data>
+  <data name="Log_GuiLoad" xml:space="preserve">
+    <value>GUI 読み込み</value>
+  </data>
+  <data name="Log_SaveFailed" xml:space="preserve">
+    <value>保存失敗</value>
+  </data>
+  <data name="Log_SettingsLoadFailed" xml:space="preserve">
+    <value>settings.json 読み込み失敗</value>
+  </data>
+  <data name="Log_SettingsSaveFailed" xml:space="preserve">
+    <value>settings.json 保存失敗</value>
+  </data>
+  <data name="Log_CliMacroNotFound" xml:space="preserve">
+    <value>指定マクロが見つかりません: {0}</value>
+  </data>
+  <data name="Log_CliCancelled" xml:space="preserve">
+    <value>CLI実行がキャンセルされました</value>
+  </data>
+  <data name="Log_CliError" xml:space="preserve">
+    <value>CLI実行エラー</value>
+  </data>
+  <data name="Log_ConfigLoadFailed" xml:space="preserve">
+    <value>config.json 読み込み失敗</value>
+  </data>
+  <data name="Log_InvalidRepeatCount" xml:space="preserve">
+    <value>repeat の回数が不正です: '{0}'</value>
+  </data>
+  <data name="Log_MissingEndRepeat" xml:space="preserve">
+    <value>repeat に対応する end_repeat がありません（手順 {0}）</value>
+  </data>
+  <data name="Log_OrphanEndRepeat" xml:space="preserve">
+    <value>対応する repeat のない end_repeat です（手順 {0}）</value>
+  </data>
+  <data name="Log_InvalidWait" xml:space="preserve">
+    <value>wait の値が不正です: '{0}'</value>
+  </data>
+  <data name="Log_UnknownActionType" xml:space="preserve">
+    <value>未知のアクション種別: {0}</value>
+  </data>
+  <data name="Log_UnknownKey" xml:space="preserve">
+    <value>未対応のキー名: {0}</value>
+  </data>
+  <data name="Log_InvalidHotkeyMain" xml:space="preserve">
+    <value>ホットキーのメインキーが不正: {0}</value>
+  </data>
+  <data name="Log_UnknownMouse" xml:space="preserve">
+    <value>未対応のマウス操作: {0}</value>
+  </data>
+  <data name="Log_SendInputFailed" xml:space="preserve">
+    <value>SendInput 失敗 (GetLastError={0})</value>
+  </data>
+  <data name="Ex_ConfigUnreadable" xml:space="preserve">
+    <value>config.json の内容を解釈できませんでした</value>
+  </data>
+  <data name="Ex_ConfigNotCreated" xml:space="preserve">
+    <value>保存先にファイルが作成されませんでした: {0}</value>
+  </data>
+  <data name="Ex_ConfigEmptyAfterSave" xml:space="preserve">
+    <value>保存後の config.json が空です: {0}</value>
+  </data>
+  <data name="Ex_PathContainsQuote" xml:space="preserve">
+    <value>パスにダブルクォートは含められません。</value>
+  </data>
+</root>

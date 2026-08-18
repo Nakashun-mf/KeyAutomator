@@ -5,7 +5,7 @@
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  
 キー送信は Win32 `SendInput`（Unicode / Virtual-Key）を使用します。
 
-**バージョン:** 2.8.5
+**バージョン:** 2.8.6
 
 ## 開発環境
 
@@ -22,14 +22,29 @@ vb_auto-key/
 ├── MainWindow.xaml(.cs)       # Fluent UI 管理画面
 ├── ViewModels/MainViewModel.cs
 ├── Models/MacroModels.cs
-├── Services/                  # Config / Settings / Paths / SendInput / Repeat / CLI / Log / Dialog
+├── Strings/en-US/Resources.resw
+├── Strings/ja-JP/Resources.resw
+├── Services/                  # Config / Settings / Paths / Loc / SendInput / Repeat / CLI / Log / Dialog
 ├── KeyAutomator.Tests/        # MSTest ユニットテスト
 ├── Assets/
 ├── SPEC.md
 ├── config.sample.json
+├── config.sample.en.json
 ├── README.md
+├── PRIVACY.md
+├── PRIVACY.en.md
+├── docs/releases/             # GitHub Release 用ノート
+├── docs/microsoft-store/      # Partner Center 文言・掲載画像
 └── README_DEVELOPER.md
 ```
+
+## 表示言語（日本語 / English）
+
+- 既定は Windows の表示言語。日本語以外は English にフォールバックする。
+- 画面右下の「言語」で `Windows に合わせる` / `日本語` / `English` を固定できる（`settings.json` の `ui_language`）。
+- UI 文字列は `Strings/en-US/Resources.resw` と `Strings/ja-JP/Resources.resw`。XAML は `x:Uid`、C# / CLI は `Loc.Get` / `Loc.Format`。
+- 初回サンプル名・確認ダイアログ、`error.log`、例外メッセージも同じテーブル。`config.sample.json`（日本語）と `config.sample.en.json`（English）を同梱し、読み込み時に UI 言語で上書きする。
+- ユニットテストは `TestStartup` で `ja-JP` に固定する（既存の日本語アサートを維持）。英語は `LocTests` で別途確認。
 
 ## ビルド
 
@@ -70,7 +85,7 @@ Store 提出で他社より安心できる、と説明するための自動チ�
 
 - Capability は `runFullTrust` のみ（`internetClient` などを足したらテストが落ちる）
 - 本番コードに `HttpClient` / テレメトリ型が無い
-- `PRIVACY.md` と `runFullTrust` 正当化文が残っている
+- `PRIVACY.md` / `PRIVACY.en.md` と `runFullTrust` 正当化文が残っている
 - Partner Center Identity とマニフェストが一致する
 - サンプルのパスワードらしき文字列は `dummy` 等だと分かるものだけ
 - テストは開発者の `%LocalAppData%\KeyAutomator` を書き換えない
@@ -146,16 +161,19 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 持ち運び用 zip の例:
 
 ```powershell
-$ver = "2.8.5"
+$ver = "2.8.6"
 $distName = "KeyAutomator-v$ver-win-x64-single"
 $distDir = ".\dist\$distName"
 Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
 Copy-Item -Force .\config.sample.json $distDir\
+Copy-Item -Force .\config.sample.en.json $distDir\
 Copy-Item -Force .\使い方.txt $distDir\
+Copy-Item -Force .\GettingStarted.txt $distDir\
 Copy-Item -Force .\README.md $distDir\
 Copy-Item -Force .\PRIVACY.md $distDir\
+Copy-Item -Force .\PRIVACY.en.md $distDir\
 Compress-Archive -Path $distDir -DestinationPath ".\dist\$distName.zip" -Force
 ```
 
@@ -275,10 +293,19 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
 - タグ `v*` の Release 公開時（または Actions の `Release` ワークフロー手動実行）に Windows 上で次をビルドして添付する
   - `KeyAutomator-v*-win-x64-single.zip`（単一 exe）
   - `KeyAutomator-v*-win-x64-msix.zip`（サイドロード用 MSIX + 署名証明書 + 入れ方）
+  - zip には `PRIVACY.md` / `PRIVACY.en.md` / `GettingStarted.txt` も含む
 - 同じ Release 公開で Microsoft Store へも `.msixupload` を自動提出する（認定待ち。Secrets はリポジトリに書かない）
+- 手順の詳細: [docs/releases/README.md](docs/releases/README.md)
 - コミットメッセージは日本語（ファイル経由推奨）
 - `bin/`, `obj/`, `publish/`, `publish-sf/`, `dist/`, `config.json`, `settings.json`, `error.log` は `.gitignore` 対象
 
 ## バージョン更新
 
-`KeyAutomator.csproj` の Version 系と README の表記を揃えて更新してください。
+次を揃えて更新してください。
+
+- `KeyAutomator.csproj` の `Version` / `AssemblyVersion` / `FileVersion` / `InformationalVersion`
+- `Package.appxmanifest` の `Identity/@Version`（4 部。末尾 `0`）
+- `README.md` / `README_DEVELOPER.md` の表記
+- `docs/releases/vX.Y.Z.md`（ユニットテストが csproj の Version と一致することを確認する）
+
+GitHub Release の出し方は [docs/releases/README.md](docs/releases/README.md)。`scripts/Publish-GitHubRelease.ps1` は **main マージ後**に Windows 等で実行します（この Linux 環境の `gh` は読み取り専用のため Release は作れません）。

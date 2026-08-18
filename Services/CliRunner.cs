@@ -33,27 +33,7 @@ public static class CliRunner
         return quoted;
     }
 
-    public static string GetHelpText() =>
-        """
-        KeyAutomator — キー入力自動化
-
-        使い方:
-          KeyAutomator.exe                 GUI を起動
-          KeyAutomator.exe -1              ID=1 を実行
-          KeyAutomator.exe -id 1           同上
-          KeyAutomator.exe -alias NAME     引数名で実行
-          KeyAutomator.exe -NAME           同上（短縮）
-          KeyAutomator.exe -name "表示名"  表示名で実行
-          KeyAutomator.exe -h              このヘルプ
-
-        終了コード: 成功 0 / 失敗 1
-        ログ: error.log（書き込み可能なデータフォルダ。保護フォルダ時は %LocalAppData%\\KeyAutomator）
-
-        注意:
-          - CLI では管理画面を出さずにマクロを実行します
-          - 確認アクション(dialog) があるマクロは、CLI でもメッセージボックスが出ます
-            （完全な無人実行ではありません）
-        """;
+    public static string GetHelpText() => Loc.Get("Cli_Help").Replace("\r\n", "\n", StringComparison.Ordinal).Trim();
 
     public static int Run(string[] args)
     {
@@ -68,8 +48,8 @@ public static class CliRunner
             var macro = ResolveMacro(args);
             if (macro is null)
             {
-                ErrorLogger.Write($"指定マクロが見つかりません: {string.Join(' ', args)}");
-                TryWriteToConsole("指定マクロが見つかりません。-h で使い方を表示します。");
+                ErrorLogger.Write(Loc.Format("Log_CliMacroNotFound", string.Join(' ', args)));
+                TryWriteToConsole(Loc.Get("Cli_MacroNotFound"));
                 return 1;
             }
 
@@ -78,12 +58,12 @@ public static class CliRunner
         }
         catch (OperationCanceledException)
         {
-            ErrorLogger.Write("CLI実行がキャンセルされました");
+            ErrorLogger.Write(Loc.Get("Log_CliCancelled"));
             return 1;
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "CLI実行エラー");
+            ErrorLogger.Write(ex, Loc.Get("Log_CliError"));
             return 1;
         }
     }
@@ -97,7 +77,7 @@ public static class CliRunner
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "config.json 読み込み失敗");
+            ErrorLogger.Write(ex, Loc.Get("Log_ConfigLoadFailed"));
             return null;
         }
 

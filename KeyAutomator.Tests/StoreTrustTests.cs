@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using KeyAutomator.Services;
@@ -83,6 +84,52 @@ public class StoreTrustTests
         StringAssert.Contains(privacy, "キーロガーではありません");
         StringAssert.Contains(privacy, "runFullTrust");
         StringAssert.Contains(privacy, "未使用の Capability は追加していません");
+        StringAssert.Contains(privacy, "表示言語");
+        StringAssert.Contains(privacy, "PRIVACY.en.md");
+    }
+
+    [TestMethod]
+    public void PrivacyPolicy_EnglishExistsAndDeniesNetworkAndKeylogging()
+    {
+        var privacy = RepoFiles.Read("PRIVACY.en.md");
+        StringAssert.Contains(privacy, "does **not** send personal data");
+        StringAssert.Contains(privacy, "not a keylogger");
+        StringAssert.Contains(privacy, "runFullTrust");
+        StringAssert.Contains(privacy, "Unused capabilities are not added");
+        StringAssert.Contains(privacy, "display language");
+        StringAssert.Contains(privacy, "PRIVACY.md");
+    }
+
+    [TestMethod]
+    public void ReleaseWorkflow_CopiesEnglishPrivacyIntoZip()
+    {
+        var yml = RepoFiles.Read(".github", "workflows", "release.yml");
+        StringAssert.Contains(yml, "PRIVACY.en.md");
+        StringAssert.Contains(yml, "config.sample.en.json");
+    }
+
+    [TestMethod]
+    public void StoreListingScreenshots_ExistAtDesktopMinimumSize()
+    {
+        var names = new[]
+        {
+            "screenshot_ja_01_macros.png",
+            "screenshot_ja_02_steps.png",
+            "screenshot_ja_03_testrun.png",
+            "screenshot_en_01_macros.png",
+            "screenshot_en_02_steps.png",
+            "screenshot_en_03_testrun.png"
+        };
+
+        foreach (var name in names)
+        {
+            var path = RepoFiles.Combine("docs", "microsoft-store", "listing-assets", name);
+            Assert.IsTrue(File.Exists(path), $"{name} がありません");
+            var (width, height) = ReadPngSize(path);
+            Assert.IsTrue(
+                width >= 1366 && height >= 768,
+                $"{name} が {width}x{height} です（Desktop 最小は 1366x768）");
+        }
     }
 
     [TestMethod]
@@ -195,4 +242,18 @@ public class StoreTrustTests
 
     private static bool ContainsAsTypeName(string source, string typeName) =>
         Regex.IsMatch(source, $@"\b{Regex.Escape(typeName)}\b");
+
+    private static (int Width, int Height) ReadPngSize(string path)
+    {
+        var header = new byte[24];
+        using var stream = File.OpenRead(path);
+        stream.ReadExactly(header);
+        Assert.AreEqual(0x89, header[0]);
+        Assert.AreEqual((byte)'P', header[1]);
+        Assert.AreEqual((byte)'N', header[2]);
+        Assert.AreEqual((byte)'G', header[3]);
+        var width = BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(16, 4));
+        var height = BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(20, 4));
+        return (width, height);
+    }
 }

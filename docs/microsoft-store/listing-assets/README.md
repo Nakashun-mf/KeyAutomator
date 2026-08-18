@@ -2,6 +2,8 @@
 
 Partner Center の「ストア一覧」に使う画像です。
 
+Desktop スクリーンショットの公式要件: **1366×768 以上**（PNG、50MB 未満）。本フォルダの画面イメージは **1920×1080** です。
+
 ## ロゴ（用意済み・Partner Center へアップロード）
 
 | ファイル | サイズ | 用途 |
@@ -13,16 +15,25 @@ Partner Center の「ストア一覧」に使う画像です。
 
 形式: PNG / 各 5MB 未満 / アスペクト比 1:1
 
-## スクリーンショット（未作成・Windows で撮影）
+## スクリーンショット（日英 3 枚ずつ）
 
-| 種類 | 推奨サイズ | 枚数 |
+| ファイル | 言語 | キャプション（Partner Center） |
 |---|---|---|
-| スクリーンショット | **1920×1080** または **1366×768** | 1 枚以上（3〜4 枚推奨） |
-
-### 撮影のヒント
-
-1. サンプルマクロが入った状態のメイン画面
-2. アクション編集（テキスト＋ショートカットが見える状態）
-3. テスト実行前（ウェイト秒数が見える状態）
+| [screenshot_ja_01_macros.png](screenshot_ja_01_macros.png) | 日本語 | マクロ一覧と編集画面 |
+| [screenshot_ja_02_steps.png](screenshot_ja_02_steps.png) | 日本語 | 手順の追加（テキスト／キー／ショートカット） |
+| [screenshot_ja_03_testrun.png](screenshot_ja_03_testrun.png) | 日本語 | テスト実行前のウェイト設定 |
+| [screenshot_en_01_macros.png](screenshot_en_01_macros.png) | English | Macro list and editor |
+| [screenshot_en_02_steps.png](screenshot_en_02_steps.png) | English | Add steps (text / key / shortcut) |
+| [screenshot_en_03_testrun.png](screenshot_en_03_testrun.png) | English | Start-after delay before a test run |
 
 個人情報・実パスワードは写さないでください。
+
+### 実機キャプチャへの差し替え（推奨）
+
+上記 PNG は **掲載用の UI モック** です（Linux 上では WinUI を起動できないため）。認定前に Windows で実画面を撮り直すとより安全です。
+
+1. 表示言語を日本語または English に固定する
+2. サンプルマクロが入ったメイン画面
+3. 手順（テキスト＋ショートカット）が見える編集状態
+4. テスト実行前（開始までの秒数が見える状態）
+5. 1920×1080（または 1366×768 以上）の PNG で上書きする

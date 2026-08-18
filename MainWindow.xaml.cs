@@ -19,6 +19,7 @@ public sealed partial class MainWindow : Window
     private bool _syncingMacroSelection;
     private bool _syncingActionSelection;
     private bool _isHandlingDelete;
+    private bool _languageReady;
     private CancellationTokenSource? _runCts;
 
     public MainWindow()
@@ -32,6 +33,7 @@ public sealed partial class MainWindow : Window
         RootGrid.DataContext = _vm;
         VersionText.Text = $"v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "2.0.0"}";
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        PopulateLanguageBox();
 
         ActionList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(ActionList_KeyDown), handledEventsToo: true);
         MacroList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(MacroList_KeyDown), handledEventsToo: true);
@@ -80,8 +82,8 @@ public sealed partial class MainWindow : Window
         {
             Title = title,
             Content = message,
-            PrimaryButtonText = "削除",
-            CloseButtonText = "キャンセル",
+            PrimaryButtonText = Loc.Get("Dialog_Delete"),
+            CloseButtonText = Loc.Get("Dialog_Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot
         };
@@ -93,11 +95,11 @@ public sealed partial class MainWindow : Window
     {
         var dialog = new ContentDialog
         {
-            Title = "未保存の変更",
-            Content = "編集中の内容が保存されていません。どうしますか？",
-            PrimaryButtonText = "保存",
-            SecondaryButtonText = "破棄",
-            CloseButtonText = "キャンセル",
+            Title = Loc.Get("Dialog_UnsavedTitle"),
+            Content = Loc.Get("Dialog_UnsavedBody"),
+            PrimaryButtonText = Loc.Get("Dialog_Save"),
+            SecondaryButtonText = Loc.Get("Dialog_Discard"),
+            CloseButtonText = Loc.Get("Dialog_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = Content.XamlRoot
         };
@@ -136,10 +138,10 @@ public sealed partial class MainWindow : Window
         {
             var confirm = new ContentDialog
             {
-                Title = "サンプルを読み込む",
-                Content = "現在のマクロ一覧をサンプル（2件）で置き換えます。よろしいですか？\n（置き換え前に保存していない変更は失われます）",
-                PrimaryButtonText = "読み込む",
-                CloseButtonText = "キャンセル",
+                Title = Loc.Get("Dialog_LoadSampleTitle"),
+                Content = Loc.Format("Dialog_LoadSampleBody", BuiltInSamples.Create().Count),
+                PrimaryButtonText = Loc.Get("Dialog_Load"),
+                CloseButtonText = Loc.Get("Dialog_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
                 XamlRoot = Content.XamlRoot
             };
@@ -169,12 +171,12 @@ public sealed partial class MainWindow : Window
                 FileName = AppPaths.DataDirectory,
                 UseShellExecute = true
             });
-            _vm.StatusMessage = $"設定フォルダを開きました: {AppPaths.DataDirectory}";
+            _vm.StatusMessage = Loc.Format("Status_FolderOpened", AppPaths.DataDirectory);
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "設定フォルダを開く");
-            _vm.StatusMessage = $"設定フォルダを開けませんでした: {AppPaths.DataDirectory}";
+            ErrorLogger.Write(ex, Loc.Get("Log_OpenFolder"));
+            _vm.StatusMessage = Loc.Format("Status_FolderOpenFailed", AppPaths.DataDirectory);
         }
     }
 
@@ -192,12 +194,12 @@ public sealed partial class MainWindow : Window
             package.SetText(text);
             Clipboard.SetContent(package);
             Clipboard.Flush();
-            _vm.StatusMessage = $"コピーしました: {text}";
+            _vm.StatusMessage = Loc.Format("Status_Copied", text);
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "起動パスをコピー");
-            _vm.StatusMessage = "起動パスをコピーできませんでした";
+            ErrorLogger.Write(ex, Loc.Get("Log_CopyLaunchPath"));
+            _vm.StatusMessage = Loc.Get("Status_CopyFailed");
         }
     }
 
@@ -221,10 +223,10 @@ public sealed partial class MainWindow : Window
         try
         {
             var message = targets.Count == 1
-                ? $"ID {targets[0].Id}「{targets[0].Name}」を削除しますか？"
-                : $"選択した {targets.Count} 件のマクロを削除しますか？";
+                ? Loc.Format("Dialog_DeleteMacroOne", targets[0].Id, targets[0].Name)
+                : Loc.Format("Dialog_DeleteMacroMany", targets.Count);
 
-            var ok = await ConfirmDeleteAsync("マクロを削除", message);
+            var ok = await ConfirmDeleteAsync(Loc.Get("Dialog_DeleteMacroTitle"), message);
             if (!ok) return;
 
             _vm.DeleteSelectedMacros();
@@ -232,8 +234,8 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "マクロ削除");
-            _vm.StatusMessage = "削除中にエラーが発生しました";
+            ErrorLogger.Write(ex, Loc.Get("Log_DeleteMacro"));
+            _vm.StatusMessage = Loc.Get("Status_DeleteError");
         }
         finally
         {
@@ -393,17 +395,17 @@ public sealed partial class MainWindow : Window
         try
         {
             var message = targets.Count == 1
-                ? $"手順 {targets[0].Step}（{targets[0].TypeLabel}）を削除しますか？"
-                : $"選択した {targets.Count} 件の手順を削除しますか？";
+                ? Loc.Format("Dialog_DeleteActionOne", targets[0].Step, targets[0].TypeLabel)
+                : Loc.Format("Dialog_DeleteActionMany", targets.Count);
 
-            var ok = await ConfirmDeleteAsync("手順を削除", message);
+            var ok = await ConfirmDeleteAsync(Loc.Get("Dialog_DeleteActionTitle"), message);
             if (ok)
                 _vm.RemoveSelectedActions();
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "手順削除");
-            _vm.StatusMessage = "削除中にエラーが発生しました";
+            ErrorLogger.Write(ex, Loc.Get("Log_DeleteAction"));
+            _vm.StatusMessage = Loc.Get("Status_DeleteError");
         }
         finally
         {
@@ -428,7 +430,7 @@ public sealed partial class MainWindow : Window
         if (_vm.IsBusy)
         {
             _runCts?.Cancel();
-            _vm.StatusMessage = "中断しています…";
+            _vm.StatusMessage = Loc.Get("Status_Stopping");
             return;
         }
 
@@ -437,14 +439,12 @@ public sealed partial class MainWindow : Window
 
         var confirm = new ContentDialog
         {
-            Title = "テスト実行",
-            Content = "【重要】「実行」を押したあと、カウント中に入力したいウィンドウをクリックして前面にしてください。\n"
-                + $"開始まで: {macro.DelaySec:0.##} 秒\n"
-                + "このアプリが前面のままだと、ここへ入力されてしまいます。\n"
-                + "管理者権限のアプリへ送る場合は、本アプリも管理者実行が必要です。\n"
-                + "実行中は「中断」で止められます。",
-            PrimaryButtonText = "実行",
-            CloseButtonText = "キャンセル",
+            Title = Loc.Get("Dialog_TestTitle"),
+            Content = Loc.Format(
+                "Dialog_TestBody",
+                macro.DelaySec.ToString("0.##", System.Globalization.CultureInfo.CurrentCulture)),
+            PrimaryButtonText = Loc.Get("Dialog_Run"),
+            CloseButtonText = Loc.Get("Dialog_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = Content.XamlRoot
         };
@@ -455,28 +455,28 @@ public sealed partial class MainWindow : Window
         _runCts = new CancellationTokenSource();
         var token = _runCts.Token;
         _vm.IsBusy = true;
-        _vm.StatusMessage = "実行中…（中断ボタンで停止）";
+        _vm.StatusMessage = Loc.Get("Status_Running");
         try
         {
             // ウィンドウは隠さず、ダイアログ／フォーカスの問題を避ける
             await Task.Run(() => KeySender.ExecuteMacro(macro, _vm.ActionDelaySec, token), token);
-            _vm.StatusMessage = token.IsCancellationRequested ? "実行を中断しました" : "テスト実行完了";
+            _vm.StatusMessage = token.IsCancellationRequested ? Loc.Get("Status_RunStopped") : Loc.Get("Status_RunDone");
         }
         catch (OperationCanceledException)
         {
-            _vm.StatusMessage = "実行を中断しました";
+            _vm.StatusMessage = Loc.Get("Status_RunStopped");
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "テスト実行");
+            ErrorLogger.Write(ex, Loc.Get("Log_TestRun"));
             _vm.StatusMessage = ErrorLogger.LastWrittenPath is { Length: > 0 } path
-                ? $"実行エラー（詳細: {path}）"
-                : "実行エラー（ログを書き込めませんでした）";
+                ? Loc.Format("Status_RunErrorLog", path)
+                : Loc.Get("Status_RunErrorNoLog");
             var err = new ContentDialog
             {
-                Title = "実行エラー",
+                Title = Loc.Get("Dialog_RunErrorTitle"),
                 Content = ex.Message,
-                CloseButtonText = "OK",
+                CloseButtonText = Loc.Get("Dialog_Ok"),
                 XamlRoot = Content.XamlRoot
             };
             await err.ShowAsync();
@@ -488,5 +488,54 @@ public sealed partial class MainWindow : Window
             _runCts?.Dispose();
             _runCts = null;
         }
+    }
+
+    private void PopulateLanguageBox()
+    {
+        LanguageBox.Items.Clear();
+        LanguageBox.Items.Add(new ComboBoxItem { Tag = Loc.SystemPreference, Content = Loc.Get("Language_System") });
+        LanguageBox.Items.Add(new ComboBoxItem { Tag = Loc.Japanese, Content = Loc.Get("Language_Japanese") });
+        LanguageBox.Items.Add(new ComboBoxItem { Tag = Loc.English, Content = Loc.Get("Language_English") });
+
+        var current = Loc.Preference;
+        foreach (ComboBoxItem item in LanguageBox.Items)
+        {
+            if (string.Equals(item.Tag as string, current, StringComparison.OrdinalIgnoreCase))
+            {
+                LanguageBox.SelectedItem = item;
+                break;
+            }
+        }
+
+        LanguageBox.SelectedItem ??= LanguageBox.Items[0];
+        _languageReady = true;
+    }
+
+    private async void LanguageBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_languageReady || _vm.IsBusy)
+            return;
+        if (LanguageBox.SelectedItem is not ComboBoxItem selected)
+            return;
+
+        var tag = selected.Tag as string ?? Loc.SystemPreference;
+        if (string.Equals(tag, Loc.Preference, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (!await EnsureCanLeaveEditorAsync())
+        {
+            _languageReady = false;
+            PopulateLanguageBox();
+            return;
+        }
+
+        var settings = SettingsStore.Load();
+        settings.UiLanguage = tag;
+        SettingsStore.Save(settings);
+        _languageReady = false;
+        Loc.Initialize(tag);
+
+        if (Application.Current is App app)
+            app.RestartMainWindow();
     }
 }

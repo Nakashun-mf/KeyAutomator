@@ -14,10 +14,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>2.8.5</Version>
-    <AssemblyVersion>2.8.5.0</AssemblyVersion>
-    <FileVersion>2.8.5.0</FileVersion>
-    <InformationalVersion>2.8.5</InformationalVersion>
+    <Version>2.8.6</Version>
+    <AssemblyVersion>2.8.6.0</AssemblyVersion>
+    <FileVersion>2.8.6.0</FileVersion>
+    <InformationalVersion>2.8.6</InformationalVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <Description>KeyAutomator - keyboard macro automation (WinUI 3)</Description>
     <!-- 既定: GitHub Releases 向けの単一 exe（非パッケージ） -->
     <WindowsPackageType>None</WindowsPackageType>
@@ -75,6 +76,11 @@
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\en-US\Resources.resw" LogicalName="KeyAutomator.Loc.en-US.resw" />
+    <EmbeddedResource Include="Strings\ja-JP\Resources.resw" LogicalName="KeyAutomator.Loc.ja-JP.resw" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />

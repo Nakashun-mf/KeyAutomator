@@ -10,6 +10,8 @@ public static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        Loc.InitializeFromSettings();
+
         if (CliRunner.IsCliMode(args))
         {
             // WinExe でも呼び出し元へ確実にコードを返す

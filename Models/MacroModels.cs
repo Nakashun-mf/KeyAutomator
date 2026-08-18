@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using KeyAutomator.Services;
 
 namespace KeyAutomator.Models;
 
@@ -30,14 +32,20 @@ public sealed partial class MacroItem : ObservableObject
     private List<ActionItem> _actions = [];
 
     [JsonIgnore]
-    public string DelayLabel => $"開始まで {DelaySec:0.##} 秒";
+    public string DelayLabel =>
+        Loc.Format("Macro_DelayLabel", DelaySec.ToString("0.##", CultureInfo.CurrentCulture));
 
     [JsonIgnore]
-    public string ActionCountLabel => Actions.Count == 0 ? "手順なし" : $"{Actions.Count} 手順";
+    public string ActionCountLabel =>
+        Actions.Count == 0
+            ? Loc.Get("Macro_NoActions")
+            : Loc.Format("Macro_ActionCount", Actions.Count);
 
     [JsonIgnore]
     public string AliasLabel =>
-        string.IsNullOrWhiteSpace(Alias) ? "CLI引数なし（任意）" : $"CLI引数: {Alias}";
+        string.IsNullOrWhiteSpace(Alias)
+            ? Loc.Get("Macro_NoAlias")
+            : Loc.Format("Macro_Alias", Alias);
 
     partial void OnDelaySecChanged(double value) => OnPropertyChanged(nameof(DelayLabel));
 
@@ -63,7 +71,7 @@ public sealed partial class MacroItem : ObservableObject
         var trimmed = alias.Trim();
         if (!AliasPattern.IsMatch(trimmed))
         {
-            error = "引数名は英数字と _ のみ使えます";
+            error = Loc.Get("Error_AliasCharset");
             return false;
         }
 

@@ -95,10 +95,10 @@ public class ErrorLoggerExceptionTests : IsolatedDataTestBase
     [TestMethod]
     public void Write_Exception_IncludesContextAndType()
     {
-        ErrorLogger.Write(new InvalidOperationException("boom"), "保存失敗");
+        ErrorLogger.Write(new InvalidOperationException("boom"), Loc.Get("Log_SaveFailed"));
 
         var text = File.ReadAllText(ErrorLogger.LastWrittenPath!);
-        StringAssert.Contains(text, "保存失敗");
+        StringAssert.Contains(text, Loc.Get("Log_SaveFailed"));
         StringAssert.Contains(text, "InvalidOperationException");
         StringAssert.Contains(text, "boom");
     }

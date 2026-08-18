@@ -57,8 +57,8 @@
 
         <TitleBar
             x:Name="AppTitleBar"
-            Title="KeyAutomator"
-            Subtitle="キー入力マクロ">
+            x:Uid="AppTitleBar"
+            Title="KeyAutomator">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
             </TitleBar.IconSource>
@@ -85,26 +85,25 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Spacing="2">
-                        <TextBlock FontSize="22" FontWeight="SemiBold" Text="マクロ一覧" />
+                        <TextBlock x:Uid="MacroListHeading" FontSize="22" FontWeight="SemiBold" />
                         <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="選ぶと右で編集 / Ctrl・Shiftで複数選択 / ドラッグで並べ替え" />
+                            x:Uid="MacroListHint"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
                     <ListView
                         x:Name="MacroList"
+                        x:Uid="MacroList"
                         Grid.Row="1"
                         AllowDrop="True"
                         AutomationProperties.AutomationId="MacroListView"
-                        AutomationProperties.Name="マクロ一覧"
                         CanDragItems="True"
                         CanReorderItems="True"
                         DragItemsCompleted="MacroList_DragItemsCompleted"
                         ItemsSource="{Binding Macros}"
                         SelectionChanged="MacroList_SelectionChanged"
                         SelectionMode="Extended"
-                        IsEnabled="{Binding IsIdle}"
-                        ToolTipService.ToolTip="Ctrl / Shift で複数選択。ドラッグで並べ替えできます">
+                        IsEnabled="{Binding IsIdle}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Padding="4,8" ColumnSpacing="12">
@@ -151,26 +150,21 @@
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
                         <Button
+                            x:Uid="NewMacroButton"
                             AccessKey="N"
                             AutomationProperties.AutomationId="NewMacroButton"
-                            AutomationProperties.Name="新規作成"
                             Click="NewButton_Click"
-                            Content="新規"
                             Style="{StaticResource AccentButtonStyle}" />
                         <Button
-                            AutomationProperties.Name="サンプルマクロを読み込む"
-                            Click="LoadSampleButton_Click"
-                            Content="サンプル"
-                            ToolTipService.ToolTip="サンプルマクロを読み込みます" />
+                            x:Uid="LoadSampleButton"
+                            Click="LoadSampleButton_Click" />
                         <Button
-                            AutomationProperties.Name="複製"
+                            x:Uid="CloneButton"
                             Click="CloneButton_Click"
-                            Content="複製"
                             IsEnabled="{Binding HasSelection}" />
                         <Button
-                            AutomationProperties.Name="削除"
+                            x:Uid="DeleteMacroButton"
                             Click="DeleteButton_Click"
-                            Content="削除"
                             IsEnabled="{Binding HasSelection}" />
                     </StackPanel>
                 </Grid>
@@ -196,36 +190,33 @@
                             Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                             Glyph="&#xE8A5;" />
                         <TextBlock
+                            x:Uid="EmptyTitle"
                             HorizontalAlignment="Center"
                             FontSize="18"
-                            FontWeight="SemiBold"
-                            Text="マクロを選んでください" />
+                            FontWeight="SemiBold" />
                         <TextBlock
+                            x:Uid="EmptyHint"
                             HorizontalAlignment="Center"
                             TextWrapping="WrapWholeWords"
                             MaxWidth="360"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="左の一覧から選ぶか、「新規」で作成します。はじめてならサンプルから試せます。" />
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <StackPanel
                             HorizontalAlignment="Center"
                             Orientation="Horizontal"
                             Spacing="8">
                             <Button
-                                AutomationProperties.Name="新規マクロ"
+                                x:Uid="EmptyNewButton"
                                 Click="NewButton_Click"
-                                Content="新規"
                                 Style="{StaticResource AccentButtonStyle}" />
                             <Button
-                                AutomationProperties.Name="サンプルマクロを読み込む"
-                                Click="LoadSampleButton_Click"
-                                Content="サンプルを読み込む"
-                                ToolTipService.ToolTip="ログイン例とコピー例を読み込みます（既存がある場合は確認します）" />
+                                x:Uid="EmptyLoadSampleButton"
+                                Click="LoadSampleButton_Click" />
                         </StackPanel>
                         <TextBlock
+                            x:Uid="EmptyTestHint"
                             HorizontalAlignment="Center"
                             FontSize="12"
-                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                            Text="テスト実行の前に、入力先ウィンドウへ切り替えてください" />
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
 
                     <!-- 編集本体 -->
@@ -250,11 +241,11 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
+                                    x:Uid="EditHeading"
                                     VerticalAlignment="Top"
                                     Margin="0,8,0,0"
                                     FontSize="18"
-                                    FontWeight="SemiBold"
-                                    Text="編集" />
+                                    FontWeight="SemiBold" />
 
                                 <Border
                                     Grid.Column="1"
@@ -274,68 +265,62 @@
                                         </Grid.RowDefinitions>
 
                                         <!-- 1行目: ID / 名前 -->
-                                        <TextBlock Style="{StaticResource InlineLabelStyle}" Text="ID" />
+                                        <TextBlock x:Uid="LabelId" Style="{StaticResource InlineLabelStyle}" />
                                         <NumberBox
+                                            x:Uid="EditIdBox"
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
-                                            AutomationProperties.Name="マクロID"
                                             Minimum="1"
                                             SpinButtonPlacementMode="Compact"
                                             Value="{Binding EditId, Mode=TwoWay}" />
 
                                         <TextBlock
+                                            x:Uid="LabelName"
                                             Grid.Column="2"
-                                            Style="{StaticResource InlineLabelStyle}"
-                                            Text="名前" />
+                                            Style="{StaticResource InlineLabelStyle}" />
                                         <TextBox
+                                            x:Uid="EditNameBox"
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
                                             AutomationProperties.AutomationId="MacroNameBox"
-                                            AutomationProperties.Name="マクロ名"
-                                            PlaceholderText="表示名"
                                             Text="{Binding EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <!-- 2行目: 開始まで / 引数名 -->
                                         <TextBlock
+                                            x:Uid="LabelDelay"
                                             Grid.Row="1"
-                                            Style="{StaticResource InlineLabelStyle}"
-                                            Text="開始まで"
-                                            ToolTipService.ToolTip="テスト実行・CLI実行のあと、入力が始まるまでの秒数。このあいだに入力先ウィンドウへ切り替えてください" />
+                                            Style="{StaticResource InlineLabelStyle}" />
                                         <Grid Grid.Row="1" Grid.Column="1" ColumnSpacing="6">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <NumberBox
+                                                x:Uid="EditDelayBox"
                                                 VerticalAlignment="Center"
-                                                AutomationProperties.Name="開始までの秒数"
                                                 Minimum="0"
                                                 SmallChange="0.5"
                                                 SpinButtonPlacementMode="Compact"
-                                                ToolTipService.ToolTip="開始までの秒数。このあいだに入力先ウィンドウへ切り替えてください"
                                                 Value="{Binding EditDelaySec, Mode=TwoWay}" />
                                             <TextBlock
+                                                x:Uid="SecondsLabel"
                                                 Grid.Column="1"
                                                 Style="{StaticResource InlineLabelStyle}"
-                                                Margin="0"
-                                                Text="秒" />
+                                                Margin="0" />
                                         </Grid>
 
                                         <TextBlock
+                                            x:Uid="LabelAlias"
                                             Grid.Row="1"
                                             Grid.Column="2"
-                                            Style="{StaticResource InlineLabelStyle}"
-                                            Text="引数名"
-                                            ToolTipService.ToolTip="任意。CLI用です。空でOK。英数字と _ のみ。例: login_ok。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピーできます" />
+                                            Style="{StaticResource InlineLabelStyle}" />
                                         <TextBox
+                                            x:Uid="EditAliasBox"
                                             Grid.Row="1"
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
-                                            AutomationProperties.Name="引数名エイリアス（任意）"
                                             FontFamily="Consolas"
-                                            PlaceholderText="任意（CLI用・空でOK）"
-                                            Text="{Binding EditAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            ToolTipService.ToolTip="空でも保存できます。選んでいるマクロは下の「起動パスをコピー」でパスと引数をまとめてコピー。使う場合のみ: -alias login_ok" />
+                                            Text="{Binding EditAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -344,9 +329,9 @@
                             <Grid Grid.Row="1">
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <TextBlock
+                                        x:Uid="ActionsHeading"
                                         Style="{StaticResource SectionTitleStyle}"
-                                        VerticalAlignment="Center"
-                                        Text="実行手順" />
+                                        VerticalAlignment="Center" />
                                     <TextBlock
                                         Margin="8,0,0,0"
                                         VerticalAlignment="Center"
@@ -359,65 +344,51 @@
                                     Orientation="Horizontal"
                                     Spacing="4">
                                     <Button
-                                        AutomationProperties.Name="テキスト追加"
+                                        x:Uid="AddTextButton"
                                         Click="AddText_Click"
-                                        Content="テキスト"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="特殊キー追加"
+                                        x:Uid="AddKeyButton"
                                         Click="AddKey_Click"
-                                        Content="キー"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="ショートカット追加"
+                                        x:Uid="AddHotkeyButton"
                                         Click="AddHotkey_Click"
-                                        Content="ショートカット"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="マウスクリック追加"
+                                        x:Uid="AddMouseButton"
                                         Click="AddMouse_Click"
-                                        Content="マウス"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="ウェイト追加"
+                                        x:Uid="AddWaitButton"
                                         AutomationProperties.AutomationId="AddWaitActionButton"
                                         Click="AddWait_Click"
-                                        Content="待つ"
                                         Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="確認ダイアログ追加"
+                                        x:Uid="AddDialogButton"
                                         AutomationProperties.AutomationId="AddDialogActionButton"
                                         Click="AddDialog_Click"
-                                        Content="確認"
-                                        Style="{StaticResource SlimButtonStyle}"
-                                        ToolTipService.ToolTip="メッセージを表示し、OK で次へ進む" />
+                                        Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="繰り返しで囲む"
+                                        x:Uid="WrapRepeatButton"
                                         AutomationProperties.AutomationId="WrapInRepeatButton"
                                         Click="WrapInRepeat_Click"
-                                        Content="繰り返し"
-                                        Style="{StaticResource SlimButtonStyle}"
-                                        ToolTipService.ToolTip="選択した手順を繰り返しブロックで囲みます（未選択なら空ブロックを挿入）" />
+                                        Style="{StaticResource SlimButtonStyle}" />
                                     <Border
                                         Width="1"
                                         Margin="4,2"
                                         Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                                     <Button
-                                        AutomationProperties.Name="上へ"
+                                        x:Uid="MoveUpButton"
                                         Click="MoveUp_Click"
-                                        Content="↑"
-                                        Style="{StaticResource SlimButtonStyle}"
-                                        ToolTipService.ToolTip="上へ" />
+                                        Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="下へ"
+                                        x:Uid="MoveDownButton"
                                         Click="MoveDown_Click"
-                                        Content="↓"
-                                        Style="{StaticResource SlimButtonStyle}"
-                                        ToolTipService.ToolTip="下へ" />
+                                        Style="{StaticResource SlimButtonStyle}" />
                                     <Button
-                                        AutomationProperties.Name="アクション削除"
+                                        x:Uid="RemoveActionButton"
                                         Click="RemoveAction_Click"
-                                        Content="削除"
                                         Style="{StaticResource SlimButtonStyle}" />
                                 </StackPanel>
                             </Grid>
@@ -443,16 +414,16 @@
                                         Text="#" />
                                     <TextBlock
                                         Grid.Column="1"
+                                        x:Uid="ColType"
                                         FontSize="11"
                                         FontWeight="SemiBold"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="種類" />
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock
                                         Grid.Column="2"
+                                        x:Uid="ColValue"
                                         FontSize="11"
                                         FontWeight="SemiBold"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="内容" />
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                 </Grid>
                             </Border>
 
@@ -464,9 +435,9 @@
                                 CornerRadius="0,0,8,8">
                                 <ListView
                                     x:Name="ActionList"
+                                    x:Uid="ActionList"
                                     Padding="6,4"
                                     AllowDrop="True"
-                                    AutomationProperties.Name="アクション一覧"
                                     CanDragItems="True"
                                     CanReorderItems="True"
                                     DragItemsCompleted="ActionList_DragItemsCompleted"
@@ -474,8 +445,7 @@
                                     ItemContainerStyle="{StaticResource CompactActionItemStyle}"
                                     ItemsSource="{Binding Actions}"
                                     SelectionChanged="ActionList_SelectionChanged"
-                                    SelectionMode="Extended"
-                                    ToolTipService.ToolTip="Ctrl / Shift で複数選択。ドラッグで手順を並べ替えできます">
+                                    SelectionMode="Extended">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Grid
@@ -536,18 +506,18 @@
                                                     </Border>
 
                                                     <ComboBox
+                                                        x:Uid="ActionTypeBox"
                                                         Grid.Column="3"
                                                         VerticalAlignment="Center"
-                                                        AutomationProperties.Name="アクション種別"
                                                         DisplayMemberPath="Label"
                                                         ItemsSource="{Binding TypeOptions}"
                                                         SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}" />
 
                                                     <!-- 特殊キー -->
                                                     <ComboBox
+                                                        x:Uid="SpecialKeyBox"
                                                         Grid.Column="4"
                                                         VerticalAlignment="Center"
-                                                        AutomationProperties.Name="特殊キー選択"
                                                         DisplayMemberPath="Label"
                                                         IsTextSearchEnabled="True"
                                                         ItemsSource="{Binding SpecialKeyOptions}"
@@ -557,9 +527,9 @@
 
                                                     <!-- マウスクリック -->
                                                     <ComboBox
+                                                        x:Uid="MouseActionBox"
                                                         Grid.Column="4"
                                                         VerticalAlignment="Center"
-                                                        AutomationProperties.Name="マウス操作選択"
                                                         DisplayMemberPath="Label"
                                                         ItemsSource="{Binding MouseActionOptions}"
                                                         SelectedItem="{Binding SelectedMouseAction, Mode=TwoWay}"
@@ -584,34 +554,30 @@
                                                                     <DataTemplate>
                                                                         <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
                                                                             <ComboBox
+                                                                                x:Uid="HotkeyPartBox"
                                                                                 MinWidth="100"
                                                                                 VerticalAlignment="Center"
-                                                                                AutomationProperties.Name="同時押しキー"
                                                                                 DisplayMemberPath="Label"
                                                                                 IsTextSearchEnabled="True"
                                                                                 ItemsSource="{Binding KeyOptions}"
                                                                                 MaxDropDownHeight="360"
                                                                                 SelectedItem="{Binding SelectedOption, Mode=TwoWay}" />
                                                                             <Button
+                                                                                x:Uid="RemoveHotkeyPartButton"
                                                                                 Padding="6,2"
                                                                                 VerticalAlignment="Center"
-                                                                                AutomationProperties.Name="キーを外す"
                                                                                 Command="{Binding RemoveCommand}"
-                                                                                Content="×"
-                                                                                FontSize="12"
-                                                                                ToolTipService.ToolTip="このキーを外す" />
+                                                                                FontSize="12" />
                                                                         </StackPanel>
                                                                     </DataTemplate>
                                                                 </ItemsControl.ItemTemplate>
                                                             </ItemsControl>
                                                             <Button
+                                                                x:Uid="AddHotkeyPartButton"
                                                                 Padding="8,2"
                                                                 VerticalAlignment="Center"
-                                                                AutomationProperties.Name="キーを追加"
                                                                 Command="{Binding AddHotkeyPartCommand}"
-                                                                Content="＋"
-                                                                FontSize="12"
-                                                                ToolTipService.ToolTip="同時押しするキーを追加" />
+                                                                FontSize="12" />
                                                         </StackPanel>
                                                     </ScrollViewer>
 
@@ -623,36 +589,35 @@
                                                         Spacing="8"
                                                         Visibility="{Binding IsRepeatType, Converter={StaticResource BoolToVis}}">
                                                         <NumberBox
+                                                            x:Uid="RepeatCountBox"
                                                             Width="110"
                                                             Minimum="1"
                                                             Maximum="9999"
                                                             SpinButtonPlacementMode="Compact"
-                                                            AutomationProperties.Name="繰り返し回数"
                                                             Value="{Binding RepeatCount, Mode=TwoWay}" />
                                                         <TextBlock
+                                                            x:Uid="RepeatTimesLabel"
                                                             VerticalAlignment="Center"
                                                             FontSize="13"
                                                             FontWeight="SemiBold"
-                                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                            Text="回くりかえす" />
+                                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                     </StackPanel>
 
                                                     <!-- ここまで -->
                                                     <TextBlock
+                                                        x:Uid="EndRepeatLabel"
                                                         Grid.Column="4"
                                                         VerticalAlignment="Center"
-                                                        AutomationProperties.Name="繰り返しここまで"
                                                         FontSize="13"
                                                         FontWeight="SemiBold"
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="──────── ここまで ────────"
                                                         Visibility="{Binding IsEndRepeatType, Converter={StaticResource BoolToVis}}" />
 
                                                     <!-- テキスト / 待機 / 確認 -->
                                                     <TextBox
+                                                        x:Uid="ActionValueBox"
                                                         Grid.Column="4"
                                                         VerticalAlignment="Center"
-                                                        AutomationProperties.Name="アクション設定値"
                                                         PlaceholderText="{Binding Placeholder}"
                                                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                         Visibility="{Binding IsFreeTextType, Converter={StaticResource BoolToVis}}" />
@@ -669,24 +634,21 @@
                                 Orientation="Horizontal"
                                 Spacing="8">
                                 <Button
+                                    x:Uid="SaveButton"
                                     AccessKey="S"
                                     AutomationProperties.AutomationId="SaveMacroButton"
-                                    AutomationProperties.Name="保存"
                                     Click="SaveButton_Click"
-                                    Content="保存"
                                     Style="{StaticResource AccentButtonStyle}" />
                                 <Button
-                                    AutomationProperties.Name="破棄"
+                                    x:Uid="DiscardButton"
                                     Click="CancelButton_Click"
-                                    Content="破棄"
                                     Style="{StaticResource SlimButtonStyle}" />
                                 <Button
                                     x:Name="TestButton"
-                                    AutomationProperties.Name="テスト実行または中断"
+                                    x:Uid="TestButton"
                                     Click="TestButton_Click"
                                     Content="{Binding TestButtonLabel}"
-                                    Style="{StaticResource SlimButtonStyle}"
-                                    ToolTipService.ToolTip="開始までの秒数のあいだに入力先ウィンドウへ切り替えてください。実行中は中断できます。" />
+                                    Style="{StaticResource SlimButtonStyle}" />
                             </StackPanel>
                         </Grid>
                     </ContentControl>
@@ -716,19 +678,14 @@
                         Text="{Binding StatusMessage}"
                         TextTrimming="CharacterEllipsis" />
                     <Button
-                        AutomationProperties.Name="設定フォルダを開く"
+                        x:Uid="OpenFolderButton"
                         Click="OpenDataFolder_Click"
-                        Content="設定フォルダ"
-                        Style="{StaticResource SlimButtonStyle}"
-                        ToolTipService.ToolTip="config.json や error.log があるフォルダをエクスプローラーで開きます" />
+                        Style="{StaticResource SlimButtonStyle}" />
                     <Button
+                        x:Uid="CopyLaunchPathButton"
                         AutomationProperties.AutomationId="CopyCliLaunchPathButton"
-                        AutomationProperties.Name="CLI起動用パスをコピー"
-                        AutomationProperties.HelpText="マクロを選んでいるときはパスと引数をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。"
                         Click="CopyCliLaunchPath_Click"
-                        Content="起動パスをコピー"
-                        Style="{StaticResource SlimButtonStyle}"
-                        ToolTipService.ToolTip="マクロを選んでいるときは「パス -alias 引数名」（引数名が空なら -id）をまとめてコピーします。未選択ならパスだけです。設定フォルダとは別です。MSIX / ストア版は WindowsApps のエイリアスです。" />
+                        Style="{StaticResource SlimButtonStyle}" />
                 </StackPanel>
                 <StackPanel
                     Grid.Column="1"
@@ -736,47 +693,60 @@
                     Spacing="10"
                     VerticalAlignment="Center">
                     <TextBlock
-                        VerticalAlignment="Center"
-                        Text="手順間隔" />
+                        x:Uid="ActionDelayLabel"
+                        VerticalAlignment="Center" />
                     <NumberBox
+                        x:Uid="ActionDelayBox"
                         Width="88"
                         VerticalAlignment="Center"
-                        AutomationProperties.Name="手順間隔秒"
                         AutomationProperties.AutomationId="ActionDelaySecBox"
                         Minimum="0"
                         Maximum="10"
                         SmallChange="0.05"
                         LargeChange="0.1"
                         SpinButtonPlacementMode="Compact"
-                        ToolTipService.ToolTip="各手順のあいだに自動で挟む待機秒数（0 で無効）"
                         Value="{Binding ActionDelaySec, Mode=TwoWay}" />
                     <TextBlock
+                        x:Uid="SecondsLabel"
                         VerticalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="秒" />
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <Border
                         Width="1"
                         Height="20"
                         Margin="4,0"
                         Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                     <TextBlock
-                        VerticalAlignment="Center"
-                        Text="削除前に確認" />
+                        x:Uid="ConfirmDeleteLabel"
+                        VerticalAlignment="Center" />
                     <ToggleSwitch
+                        x:Uid="ConfirmDeleteSwitch"
                         VerticalAlignment="Center"
-                        AutomationProperties.Name="削除前に確認"
                         IsOn="{Binding ConfirmBeforeDelete, Mode=TwoWay}"
                         OffContent="OFF"
-                        OnContent="ON"
-                        ToolTipService.ToolTip="オフにすると、マクロ／手順の削除確認を出さずに削除します" />
+                        OnContent="ON" />
                 </StackPanel>
 
-                <TextBlock
-                    x:Name="VersionText"
+                <StackPanel
                     Grid.Column="2"
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="v2.7.8" />
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        x:Uid="LanguageLabel"
+                        VerticalAlignment="Center" />
+                    <ComboBox
+                        x:Name="LanguageBox"
+                        x:Uid="LanguageBox"
+                        MinWidth="140"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="LanguageBox"
+                        SelectionChanged="LanguageBox_SelectionChanged" />
+                    <TextBlock
+                        x:Name="VersionText"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        Text="v2.8.6" />
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

@@ -1,0 +1,52 @@
+KeyAutomator — Getting started
+================================
+
+[1] Where to put it
+- Put the exe in a writable folder such as Documents\KeyAutomator
+- Do not put it in Program Files (settings would be saved somewhere else)
+- If you did put it in Program Files, use the Settings folder button at the bottom of the app
+
+[2] Launch
+- Double-click KeyAutomator.exe
+- The first launch can take a few seconds
+- The first run loads 3 sample macros (names follow the UI language)
+- Bundled `config.sample.json` is Japanese; `config.sample.en.json` is English. The app rewrites sample names to match the UI language
+- The UI follows Windows display language. Use Language at the bottom-right to lock Japanese or English
+- If Windows says "Windows protected your PC"
+  → More info → Run anyway (at your own risk)
+
+[3] Try a sample
+1. Select a macro in the list on the left
+2. Press Test run
+3. During the "Start after" countdown, click the window you want to type into and bring it to the front
+4. Typing starts (press Stop to cancel)
+- To send keys to an elevated app, run KeyAutomator elevated too
+
+[4] Make your own macro
+1. Press New
+2. Give it a name (Alias can stay empty; fill it in only for CLI)
+3. Add steps with Text, Key, Shortcut, and so on
+4. To repeat steps, select them and press Repeat
+   → they are wrapped in Repeat … End (edit the count on the row)
+5. Press Save
+
+[5] Command line (advanced)
+- Copy launch path at the bottom copies the KeyAutomator.exe location
+  (Settings folder is where config.json lives; that is different)
+- With a macro selected, the path and argument are copied together
+  With alias: "(path)" -alias login_ok
+  Without alias: "(path)" -id 1
+- Confirmation dialogs still appear in CLI (not fully unattended)
+
+[Data]
+- Macros and settings stay on this PC (nothing is sent to the internet)
+- If you put a password in a macro, it is stored as plain text in config.json
+- See PRIVACY.en.md (English) or PRIVACY.md (Japanese), bundled or in the repository
+
+[If something goes wrong]
+- The actual save path is shown in the status text at the bottom
+- Settings folder opens config.json / error.log
+- Copy launch path copies the exe location for CLI (plus the argument when a macro is selected)
+- See README.md / GitHub Releases
+
+https://github.com/Nakashun-mf/KeyAutomator/releases/latest

@@ -92,7 +92,8 @@ public class CliLaunchPathTests
     [TestMethod]
     public void QuoteCliPath_ContainsQuote_Throws()
     {
-        Assert.ThrowsException<ArgumentException>(() => AppPaths.QuoteCliPath("C:\\a\"b.exe"));
+        var ex = Assert.ThrowsException<ArgumentException>(() => AppPaths.QuoteCliPath("C:\\a\"b.exe"));
+        StringAssert.Contains(ex.Message, Loc.Get("Ex_PathContainsQuote"));
     }
 
     [TestMethod]

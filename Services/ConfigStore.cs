@@ -29,11 +29,12 @@ public static class ConfigStore
             return [];
 
         return JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions)
-               ?? throw new InvalidDataException("config.json の内容を解釈できませんでした");
+               ?? throw new InvalidDataException(Loc.Get("Ex_ConfigUnreadable"));
     }
 
     /// <summary>
-    /// exe 横 / データフォルダの config.sample.json、無ければ内蔵サンプル。
+    /// exe 横 / データフォルダの <c>config.sample.json</c> または <c>config.sample.en.json</c>。
+    /// 無ければ内蔵サンプル。表示名は UI 言語で上書きする。
     /// </summary>
     public static List<MacroItem> LoadSampleMacros()
     {
@@ -47,7 +48,10 @@ public static class ConfigStore
                 var json = File.ReadAllText(path, Encoding.UTF8);
                 var list = JsonSerializer.Deserialize<List<MacroItem>>(json, JsonOptions);
                 if (list is { Count: > 0 })
+                {
+                    BuiltInSamples.ApplyCurrentLanguage(list);
                     return list;
+                }
             }
             catch
             {
@@ -60,8 +64,15 @@ public static class ConfigStore
 
     private static IEnumerable<string> SampleCandidatePaths()
     {
-        yield return Path.Combine(AppPaths.ExeDirectory, "config.sample.json");
-        yield return Path.Combine(AppPaths.DataDirectory, "config.sample.json");
+        var names = Loc.CurrentLanguage == Loc.English
+            ? new[] { "config.sample.en.json", "config.sample.json" }
+            : new[] { "config.sample.json", "config.sample.en.json" };
+
+        foreach (var name in names)
+        {
+            yield return Path.Combine(AppPaths.ExeDirectory, name);
+            yield return Path.Combine(AppPaths.DataDirectory, name);
+        }
     }
 
     public static void Save(IEnumerable<MacroItem> macros)
@@ -72,11 +83,11 @@ public static class ConfigStore
 
         // 書き込み後に読み返して失敗を検知する
         if (!File.Exists(ConfigPath))
-            throw new IOException($"保存先にファイルが作成されませんでした: {ConfigPath}");
+            throw new IOException(Loc.Format("Ex_ConfigNotCreated", ConfigPath));
 
         var written = File.ReadAllText(ConfigPath, Encoding.UTF8);
         if (string.IsNullOrWhiteSpace(written))
-            throw new IOException($"保存後の config.json が空です: {ConfigPath}");
+            throw new IOException(Loc.Format("Ex_ConfigEmptyAfterSave", ConfigPath));
     }
 
     public static MacroItem? FindById(IEnumerable<MacroItem> macros, int id) =>

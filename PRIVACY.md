@@ -4,14 +4,15 @@ KeyAutomator は、インターネットへ個人情報やマクロ内容を送�
 保存・参照はすべてこの PC 上で行います。
 
 > Microsoft Store 提出時は、本ページの **公開 HTTPS URL** を Partner Center に登録してください。  
-> 例: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md`
+> 例: `https://github.com/Nakashun-mf/KeyAutomator/blob/main/PRIVACY.md`  
+> English: [PRIVACY.en.md](PRIVACY.en.md)
 
 ## このアプリが保存するもの
 
 | ファイル | 内容 |
 |---|---|
 | `config.json` | マクロ（名前・手順・入力する文字列など） |
-| `settings.json` | アプリ設定（手順間隔、削除前確認など） |
+| `settings.json` | アプリ設定（手順間隔、削除前確認、表示言語など） |
 | `error.log` | エラー時の技術情報（任意。書けない場合は一時フォルダ） |
 
 置き場所は次のいずれかです。

@@ -148,7 +148,8 @@ public class ConfigStorePersistenceTests : IsolatedDataTestBase
     {
         File.WriteAllText(ConfigStore.ConfigPath, "null");
 
-        Assert.ThrowsException<InvalidDataException>(() => ConfigStore.Load());
+        var ex = Assert.ThrowsException<InvalidDataException>(() => ConfigStore.Load());
+        StringAssert.Contains(ex.Message, Loc.Get("Ex_ConfigUnreadable"));
         Assert.AreEqual("null", File.ReadAllText(ConfigStore.ConfigPath));
     }
 }

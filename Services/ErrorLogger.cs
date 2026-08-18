@@ -10,7 +10,7 @@ public static class ErrorLogger
     public static void Write(Exception ex, string? context = null)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {context ?? "Error"}");
+        sb.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {context ?? Loc.Get("Log_Error")}");
         sb.AppendLine(ex.ToString());
         sb.AppendLine(new string('-', 60));
         WriteRaw(sb.ToString());

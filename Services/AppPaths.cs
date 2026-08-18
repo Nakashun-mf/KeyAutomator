@@ -106,7 +106,7 @@ public static class AppPaths
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         if (path.Contains('"'))
-            throw new ArgumentException("パスにダブルクォートは含められません。", nameof(path));
+            throw new ArgumentException(Loc.Get("Ex_PathContainsQuote"), nameof(path));
 
         return "\"" + path + "\"";
     }

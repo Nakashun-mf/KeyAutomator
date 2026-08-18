@@ -2,10 +2,13 @@
 
 キー入力シーケンスを登録し、指定秒数待機後にアクティブウィンドウへ自動入力する Windows デスクトップアプリです。
 
-**バージョン:** 2.8.5  
+**バージョン:** 2.8.6  
 **UI:** WinUI 3（Fluent / Mica）  
+**表示言語:** 日本語 / English（Windows の表示言語、または画面右下で切替）  
 **言語:** C# / .NET 8  
 **ライセンス:** [MIT](LICENSE)
+
+リリース内容の詳細は [docs/releases/v2.8.6.md](docs/releases/v2.8.6.md) を参照してください。
 
 ## ダウンロード（推奨）
 
@@ -21,7 +24,7 @@
 2. Assets にある `KeyAutomator-v*-win-x64-single.zip` をダウンロード  
    （`win-x64-single`＝64bit Windows 用・1ファイル版）
 3. 解凍し、`KeyAutomator.exe` を **書き込み可能なフォルダ**（例: `Documents\KeyAutomator`）へ置く  
-   ※ zip 内の `使い方.txt` も一緒に置いておくと安心です
+   ※ zip 内の `使い方.txt`（日本語）と `GettingStarted.txt`（English）も一緒に置いておくと安心です
 4. `KeyAutomator.exe` を起動する（初回はサンプルマクロが入ります）
 
 > **Program Files など保護フォルダへの配置は非推奨です。**  
@@ -103,8 +106,9 @@ CLI 用の exe 場所は隣の **「起動パスをコピー」** です（選�
 |---|---|---|
 | `confirm_before_delete` | マクロ／手順削除前の確認ダイアログ | `true` |
 | `action_delay_sec` | 各手順のあいだに自動で挟む待機（秒） | `0.2` |
+| `ui_language` | 表示言語。空＝Windows に合わせる。`ja-JP` / `en-US` | （空） |
 
-画面右下の「手順間隔」「削除前に確認」でも変更できます。手順間隔を `0` にすると従来どおり連続実行します。手順は **Delete キー**でも削除できます（テキスト入力中は除く）。
+画面右下の「手順間隔」「削除前に確認」「言語」でも変更できます。言語は **Windows の表示言語** に合わせるか、日本語 / English を固定できます（切替後にウィンドウを再読み込みします）。手順間隔を `0` にすると従来どおり連続実行します。手順は **Delete キー**でも削除できます（テキスト入力中は除く）。
 
 ショートカットは同時押しキーをプルダウンで何個でも追加できます（例: Ctrl + Shift + S）。  
 マウスクリック（左／右／中／左ダブル）は **現在のカーソル位置** に対して実行されます。  
@@ -134,7 +138,7 @@ dotnet publish -c Release -p:Platform=x64 -r win-x64 --self-contained true -o .\
 - パスワード等を `config.json` に入れると平文で残ります（取り扱いに注意）
 - 本ソフトウェアは現状有姿（AS IS）で提供され、利用は自己責任です
 
-保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（データの取り扱い）を参照してください。
+保存するファイルの詳細は [PRIVACY.md](PRIVACY.md)（日本語） / [PRIVACY.en.md](PRIVACY.en.md)（English）を参照してください。
 
 ## Microsoft Store
 

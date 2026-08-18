@@ -155,6 +155,9 @@ public class StoreTrustTests
         StringAssert.Contains(yml, "secrets.SELLER_ID");
         StringAssert.Contains(yml, "--noCommit は付けない");
         StringAssert.Contains(yml, "msstore publish -i \"$env:STORE_PACKAGE\"");
+        var storeScript = RepoFiles.Read("scripts", "ci", "Build-MsixStore.ps1");
+        StringAssert.Contains(storeScript, "KeyAutomator_*");
+        StringAssert.Contains(storeScript, ".msixupload / .msixbundle / .msix");
         Assert.IsFalse(
             Regex.IsMatch(yml, @"msstore publish[^\n]*MSIX_PATH"),
             "サイドロード成果物 MSIX_PATH を Store に提出してはいけない");

@@ -4,18 +4,18 @@ using KeyAutomator.Models;
 namespace KeyAutomator.Services;
 
 /// <summary>
-/// zip 同梱の config.sample.json と同じ内容の内蔵サンプル。
-/// exe だけコピーされた場合でも初回体験が空にならないようにする。
+/// zip 同梱の config.sample.json と同じ手順の内蔵サンプル。
+/// 表示名と確認ダイアログ文は現在の UI 言語に合わせる。
 /// </summary>
 public static class BuiltInSamples
 {
-    // config.sample.json と同期すること
+    // config.sample.en.json と構造を同期すること（名前は Loc で上書き）
     private const string SampleJson =
         """
         [
           {
             "id": 1,
-            "name": "ログイン&定型データ入力",
+            "name": "Login and type fixed data",
             "alias": "login_ok",
             "delay_sec": 3.0,
             "actions": [
@@ -23,14 +23,14 @@ public static class BuiltInSamples
               { "type": "key", "value": "TAB" },
               { "type": "text", "value": "dummy_secret_do_not_use" },
               { "type": "key", "value": "ENTER" },
-              { "type": "dialog", "value": "ログイン完了を確認したら OK を押してください" },
+              { "type": "dialog", "value": "Press OK after you confirm login succeeded" },
               { "type": "wait", "value": "1.0" },
               { "type": "hotkey", "value": "CTRL+S" }
             ]
           },
           {
             "id": 2,
-            "name": "全選択＆コピー",
+            "name": "Select all and copy",
             "alias": "select_copy",
             "delay_sec": 2.0,
             "actions": [
@@ -40,7 +40,7 @@ public static class BuiltInSamples
           },
           {
             "id": 3,
-            "name": "Enterを3回",
+            "name": "Enter 3 times",
             "alias": "enter_x3",
             "delay_sec": 2.0,
             "actions": [
@@ -63,6 +63,18 @@ public static class BuiltInSamples
         if (list is null)
             return [];
 
+        ApplyCurrentLanguage(list);
+        return list;
+    }
+
+    /// <summary>
+    /// 既知のサンプル（alias）の表示名と確認ダイアログを UI 言語に合わせる。
+    /// ユーザーが保存した独自マクロはそのまま。
+    /// </summary>
+    public static void ApplyCurrentLanguage(IList<MacroItem> list)
+    {
+        ArgumentNullException.ThrowIfNull(list);
+
         foreach (var item in list)
         {
             item.Name = item.Alias switch
@@ -73,13 +85,14 @@ public static class BuiltInSamples
                 _ => item.Name
             };
 
+            if (!string.Equals(item.Alias, "login_ok", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             foreach (var action in item.Actions)
             {
                 if (string.Equals(action.Type, "dialog", StringComparison.OrdinalIgnoreCase))
                     action.Value = Loc.Get("Sample_LoginDialog");
             }
         }
-
-        return list;
     }
 }

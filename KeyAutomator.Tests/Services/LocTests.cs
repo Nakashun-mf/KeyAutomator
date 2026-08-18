@@ -47,6 +47,8 @@ public class LocTests
             StringAssert.Contains(Loc.Format("Macro_ActionCount", 2), "2");
             StringAssert.Contains(Loc.Format("Macro_ActionCount", 2), "steps");
             Assert.AreEqual("Login and type fixed data", BuiltInSamples.Create()[0].Name);
+            StringAssert.Contains(Loc.Format("Log_UnknownActionType", "speech"), "Unknown action type");
+            StringAssert.Contains(Loc.Get("Ex_ConfigUnreadable"), "config.json");
         }
         finally
         {
@@ -118,6 +120,70 @@ public class LocTests
         var ja = Loc.LoadTableFor(Loc.Japanese);
         Assert.AreNotEqual(en["Status_Ready"], ja["Status_Ready"]);
         Assert.AreNotEqual(en["ActionType_dialog"], ja["ActionType_dialog"]);
+        Assert.AreNotEqual(en["Log_SaveFailed"], ja["Log_SaveFailed"]);
+        Assert.AreNotEqual(en["Ex_PathContainsQuote"], ja["Ex_PathContainsQuote"]);
+    }
+
+    [TestMethod]
+    public void ProductionCs_QuotedStrings_ContainNoJapanese()
+    {
+        var japanese = new Regex(@"[\u3040-\u30ff\u4e00-\u9fff]");
+        var quoted = new Regex("\"(?:\\\\.|[^\"\\\\])*\"");
+        var tests = Path.DirectorySeparatorChar + "KeyAutomator.Tests" + Path.DirectorySeparatorChar;
+        foreach (var file in Directory.GetFiles(RepoFiles.Root, "*.cs", SearchOption.AllDirectories))
+        {
+            if (file.Contains(tests, StringComparison.OrdinalIgnoreCase) ||
+                file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) ||
+                file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var lines = File.ReadAllLines(file);
+            var inBlock = false;
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i];
+                if (inBlock)
+                {
+                    var end = line.IndexOf("*/", StringComparison.Ordinal);
+                    if (end < 0)
+                        continue;
+                    line = line[(end + 2)..];
+                    inBlock = false;
+                }
+
+                var trimmed = line.TrimStart();
+                if (trimmed.StartsWith("//", StringComparison.Ordinal))
+                    continue;
+
+                var blockStart = line.IndexOf("/*", StringComparison.Ordinal);
+                if (blockStart >= 0)
+                {
+                    var blockEnd = line.IndexOf("*/", blockStart + 2, StringComparison.Ordinal);
+                    if (blockEnd < 0)
+                    {
+                        inBlock = true;
+                        line = line[..blockStart];
+                    }
+                    else
+                    {
+                        line = string.Concat(line.AsSpan(0, blockStart), line.AsSpan(blockEnd + 2));
+                    }
+                }
+
+                var slash = line.IndexOf("//", StringComparison.Ordinal);
+                if (slash >= 0)
+                    line = line[..slash];
+
+                foreach (Match match in quoted.Matches(line))
+                {
+                    Assert.IsFalse(
+                        japanese.IsMatch(match.Value),
+                        $"{Path.GetRelativePath(RepoFiles.Root, file)}:{i + 1} {match.Value}");
+                }
+            }
+        }
     }
 
     private static Dictionary<string, string> LoadNames(string language)

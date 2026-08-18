@@ -9,7 +9,8 @@ KeyAutomator — Getting started
 [2] Launch
 - Double-click KeyAutomator.exe
 - The first launch can take a few seconds
-- The first run loads 3 sample macros
+- The first run loads 3 sample macros (names follow the UI language)
+- Bundled `config.sample.json` is Japanese; `config.sample.en.json` is English. The app rewrites sample names to match the UI language
 - The UI follows Windows display language. Use Language at the bottom-right to lock Japanese or English
 - If Windows says "Windows protected your PC"
   → More info → Run anyway (at your own risk)

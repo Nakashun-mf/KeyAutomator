@@ -69,7 +69,7 @@ jobs:
           Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $distDir | Out-Null
           Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
-          foreach ($f in @("config.sample.json", "使い方.txt", "GettingStarted.txt", "README.md", "PRIVACY.md", "PRIVACY.en.md")) {
+          foreach ($f in @("config.sample.json", "config.sample.en.json", "使い方.txt", "GettingStarted.txt", "README.md", "PRIVACY.md", "PRIVACY.en.md")) {
             if (Test-Path $f) { Copy-Item -Force $f $distDir\ }
           }
           $zipPath = ".\dist\$distName.zip"

@@ -722,4 +722,85 @@
   <data name="Cli_MacroNotFound" xml:space="preserve">
     <value>指定マクロが見つかりません。-h で使い方を表示します。</value>
   </data>
+  <data name="Log_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Log_OpenFolder" xml:space="preserve">
+    <value>設定フォルダを開く</value>
+  </data>
+  <data name="Log_CopyLaunchPath" xml:space="preserve">
+    <value>起動パスをコピー</value>
+  </data>
+  <data name="Log_DeleteMacro" xml:space="preserve">
+    <value>マクロ削除</value>
+  </data>
+  <data name="Log_DeleteAction" xml:space="preserve">
+    <value>手順削除</value>
+  </data>
+  <data name="Log_TestRun" xml:space="preserve">
+    <value>テスト実行</value>
+  </data>
+  <data name="Log_GuiLoad" xml:space="preserve">
+    <value>GUI 読み込み</value>
+  </data>
+  <data name="Log_SaveFailed" xml:space="preserve">
+    <value>保存失敗</value>
+  </data>
+  <data name="Log_SettingsLoadFailed" xml:space="preserve">
+    <value>settings.json 読み込み失敗</value>
+  </data>
+  <data name="Log_SettingsSaveFailed" xml:space="preserve">
+    <value>settings.json 保存失敗</value>
+  </data>
+  <data name="Log_CliMacroNotFound" xml:space="preserve">
+    <value>指定マクロが見つかりません: {0}</value>
+  </data>
+  <data name="Log_CliCancelled" xml:space="preserve">
+    <value>CLI実行がキャンセルされました</value>
+  </data>
+  <data name="Log_CliError" xml:space="preserve">
+    <value>CLI実行エラー</value>
+  </data>
+  <data name="Log_ConfigLoadFailed" xml:space="preserve">
+    <value>config.json 読み込み失敗</value>
+  </data>
+  <data name="Log_InvalidRepeatCount" xml:space="preserve">
+    <value>repeat の回数が不正です: '{0}'</value>
+  </data>
+  <data name="Log_MissingEndRepeat" xml:space="preserve">
+    <value>repeat に対応する end_repeat がありません（手順 {0}）</value>
+  </data>
+  <data name="Log_OrphanEndRepeat" xml:space="preserve">
+    <value>対応する repeat のない end_repeat です（手順 {0}）</value>
+  </data>
+  <data name="Log_InvalidWait" xml:space="preserve">
+    <value>wait の値が不正です: '{0}'</value>
+  </data>
+  <data name="Log_UnknownActionType" xml:space="preserve">
+    <value>未知のアクション種別: {0}</value>
+  </data>
+  <data name="Log_UnknownKey" xml:space="preserve">
+    <value>未対応のキー名: {0}</value>
+  </data>
+  <data name="Log_InvalidHotkeyMain" xml:space="preserve">
+    <value>ホットキーのメインキーが不正: {0}</value>
+  </data>
+  <data name="Log_UnknownMouse" xml:space="preserve">
+    <value>未対応のマウス操作: {0}</value>
+  </data>
+  <data name="Log_SendInputFailed" xml:space="preserve">
+    <value>SendInput 失敗 (GetLastError={0})</value>
+  </data>
+  <data name="Ex_ConfigUnreadable" xml:space="preserve">
+    <value>config.json の内容を解釈できませんでした</value>
+  </data>
+  <data name="Ex_ConfigNotCreated" xml:space="preserve">
+    <value>保存先にファイルが作成されませんでした: {0}</value>
+  </data>
+  <data name="Ex_ConfigEmptyAfterSave" xml:space="preserve">
+    <value>保存後の config.json が空です: {0}</value>
+  </data>
+  <data name="Ex_PathContainsQuote" xml:space="preserve">
+    <value>パスにダブルクォートは含められません。</value>
+  </data>
 </root>

@@ -233,7 +233,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "GUI Load");
+            ErrorLogger.Write(ex, Loc.Get("Log_GuiLoad"));
             var backup = string.Empty;
             try { backup = AtomicFile.BackupIfExists(ConfigStore.ConfigPath); }
             catch { /* ignore */ }
@@ -656,7 +656,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "保存失敗");
+            ErrorLogger.Write(ex, Loc.Get("Log_SaveFailed"));
             StatusMessage = Loc.Format("Status_SaveFailed", ConfigStore.ConfigPath, FormatLogHint());
             return false;
         }

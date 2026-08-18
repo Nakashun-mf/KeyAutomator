@@ -175,7 +175,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "設定フォルダを開く");
+            ErrorLogger.Write(ex, Loc.Get("Log_OpenFolder"));
             _vm.StatusMessage = Loc.Format("Status_FolderOpenFailed", AppPaths.DataDirectory);
         }
     }
@@ -198,7 +198,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "起動パスをコピー");
+            ErrorLogger.Write(ex, Loc.Get("Log_CopyLaunchPath"));
             _vm.StatusMessage = Loc.Get("Status_CopyFailed");
         }
     }
@@ -234,7 +234,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "マクロ削除");
+            ErrorLogger.Write(ex, Loc.Get("Log_DeleteMacro"));
             _vm.StatusMessage = Loc.Get("Status_DeleteError");
         }
         finally
@@ -404,7 +404,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "手順削除");
+            ErrorLogger.Write(ex, Loc.Get("Log_DeleteAction"));
             _vm.StatusMessage = Loc.Get("Status_DeleteError");
         }
         finally
@@ -468,7 +468,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "テスト実行");
+            ErrorLogger.Write(ex, Loc.Get("Log_TestRun"));
             _vm.StatusMessage = ErrorLogger.LastWrittenPath is { Length: > 0 } path
                 ? Loc.Format("Status_RunErrorLog", path)
                 : Loc.Get("Status_RunErrorNoLog");

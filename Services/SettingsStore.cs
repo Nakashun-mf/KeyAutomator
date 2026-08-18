@@ -49,7 +49,7 @@ public static class SettingsStore
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "settings.json 読み込み失敗");
+            ErrorLogger.Write(ex, Loc.Get("Log_SettingsLoadFailed"));
             return new AppSettings();
         }
     }
@@ -63,7 +63,7 @@ public static class SettingsStore
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "settings.json 保存失敗");
+            ErrorLogger.Write(ex, Loc.Get("Log_SettingsSaveFailed"));
         }
     }
 }

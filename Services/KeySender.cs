@@ -157,7 +157,7 @@ public static class KeySender
             {
                 if (!RepeatBlock.TryParseCount(action.Value, out var count))
                 {
-                    ErrorLogger.Write($"repeat の回数が不正です: '{action.Value}'");
+                    ErrorLogger.Write(Loc.Format("Log_InvalidRepeatCount", action.Value));
                     i++;
                     continue;
                 }
@@ -165,7 +165,7 @@ public static class KeySender
                 var end = RepeatBlock.FindMatchingEnd(actions, i);
                 if (end < 0)
                 {
-                    ErrorLogger.Write($"repeat に対応する end_repeat がありません（手順 {i + 1}）");
+                    ErrorLogger.Write(Loc.Format("Log_MissingEndRepeat", i + 1));
                     return;
                 }
 
@@ -185,7 +185,7 @@ public static class KeySender
             {
                 if (stack.Count == 0)
                 {
-                    ErrorLogger.Write($"対応する repeat のない end_repeat です（手順 {i + 1}）");
+                    ErrorLogger.Write(Loc.Format("Log_OrphanEndRepeat", i + 1));
                     i++;
                     continue;
                 }
@@ -288,7 +288,7 @@ public static class KeySender
                 }
                 else
                 {
-                    ErrorLogger.Write($"wait の値が不正です: '{action.Value}'");
+                    ErrorLogger.Write(Loc.Format("Log_InvalidWait", action.Value));
                 }
                 break;
             case "dialog":
@@ -299,7 +299,7 @@ public static class KeySender
                 // ExecuteMacro 側で解釈する。単体呼び出し時は何もしない。
                 break;
             default:
-                ErrorLogger.Write($"未知のアクション種別: {action.Type}");
+                ErrorLogger.Write(Loc.Format("Log_UnknownActionType", action.Type));
                 break;
         }
     }
@@ -358,7 +358,7 @@ public static class KeySender
         var key = ResolveKey(keyName);
         if (key == VirtualKey.None)
         {
-            ErrorLogger.Write($"未対応のキー名: {keyName}");
+            ErrorLogger.Write(Loc.Format("Log_UnknownKey", keyName));
             return;
         }
 
@@ -405,7 +405,7 @@ public static class KeySender
 
         if (mainKey == VirtualKey.None)
         {
-            ErrorLogger.Write($"ホットキーのメインキーが不正: {hotkey}");
+            ErrorLogger.Write(Loc.Format("Log_InvalidHotkeyMain", hotkey));
             return;
         }
 
@@ -470,7 +470,7 @@ public static class KeySender
                 Click(NativeMethods.MOUSEEVENTF_LEFTDOWN, NativeMethods.MOUSEEVENTF_LEFTUP);
                 break;
             default:
-                ErrorLogger.Write($"未対応のマウス操作: {action}");
+                ErrorLogger.Write(Loc.Format("Log_UnknownMouse", action));
                 break;
         }
     }
@@ -555,6 +555,6 @@ public static class KeySender
             ? SendInputOverride(input)
             : NativeMethods.SendInput(1, [input], Marshal.SizeOf<NativeMethods.INPUT>());
         if (sent == 0)
-            ErrorLogger.Write($"SendInput 失敗 (GetLastError={Marshal.GetLastWin32Error()})");
+            ErrorLogger.Write(Loc.Format("Log_SendInputFailed", Marshal.GetLastWin32Error()));
     }
 }

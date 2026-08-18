@@ -38,7 +38,26 @@ public class ReleaseConsistencyTests
     [TestMethod]
     public void BuiltInSamples_MatchConfigSampleJson()
     {
-        var json = RepoFiles.Read("config.sample.json");
+        AssertSampleFileMatchesCreate("config.sample.json");
+    }
+
+    [TestMethod]
+    public void BuiltInSamples_MatchEnglishConfigSampleJson()
+    {
+        try
+        {
+            Loc.Initialize(Loc.English);
+            AssertSampleFileMatchesCreate("config.sample.en.json");
+        }
+        finally
+        {
+            Loc.Initialize(Loc.Japanese);
+        }
+    }
+
+    private static void AssertSampleFileMatchesCreate(string fileName)
+    {
+        var json = RepoFiles.Read(fileName);
         var fromFile = JsonSerializer.Deserialize<List<MacroItem>>(json);
         var fromCode = BuiltInSamples.Create();
 

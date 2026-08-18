@@ -40,7 +40,7 @@ public class KeySenderSafeExecuteTests : IsolatedDataTestBase
         KeySender.ExecuteAction(new ActionItem { Type = "speech", Value = "hi" });
 
         Assert.IsFalse(string.IsNullOrWhiteSpace(ErrorLogger.LastWrittenPath));
-        StringAssert.Contains(File.ReadAllText(ErrorLogger.LastWrittenPath!), "未知のアクション種別");
+        StringAssert.Contains(File.ReadAllText(ErrorLogger.LastWrittenPath!), Loc.Format("Log_UnknownActionType", "speech"));
     }
 
     [TestMethod]

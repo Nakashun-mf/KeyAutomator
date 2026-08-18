@@ -722,4 +722,85 @@ Notes:
   <data name="Cli_MacroNotFound" xml:space="preserve">
     <value>Macro not found. Use -h for usage.</value>
   </data>
+  <data name="Log_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Log_OpenFolder" xml:space="preserve">
+    <value>Open settings folder</value>
+  </data>
+  <data name="Log_CopyLaunchPath" xml:space="preserve">
+    <value>Copy launch path</value>
+  </data>
+  <data name="Log_DeleteMacro" xml:space="preserve">
+    <value>Delete macro</value>
+  </data>
+  <data name="Log_DeleteAction" xml:space="preserve">
+    <value>Delete step</value>
+  </data>
+  <data name="Log_TestRun" xml:space="preserve">
+    <value>Test run</value>
+  </data>
+  <data name="Log_GuiLoad" xml:space="preserve">
+    <value>GUI load</value>
+  </data>
+  <data name="Log_SaveFailed" xml:space="preserve">
+    <value>Save failed</value>
+  </data>
+  <data name="Log_SettingsLoadFailed" xml:space="preserve">
+    <value>Failed to load settings.json</value>
+  </data>
+  <data name="Log_SettingsSaveFailed" xml:space="preserve">
+    <value>Failed to save settings.json</value>
+  </data>
+  <data name="Log_CliMacroNotFound" xml:space="preserve">
+    <value>Macro not found: {0}</value>
+  </data>
+  <data name="Log_CliCancelled" xml:space="preserve">
+    <value>CLI run was cancelled</value>
+  </data>
+  <data name="Log_CliError" xml:space="preserve">
+    <value>CLI run error</value>
+  </data>
+  <data name="Log_ConfigLoadFailed" xml:space="preserve">
+    <value>Failed to load config.json</value>
+  </data>
+  <data name="Log_InvalidRepeatCount" xml:space="preserve">
+    <value>Invalid repeat count: '{0}'</value>
+  </data>
+  <data name="Log_MissingEndRepeat" xml:space="preserve">
+    <value>No matching end_repeat for repeat (step {0})</value>
+  </data>
+  <data name="Log_OrphanEndRepeat" xml:space="preserve">
+    <value>end_repeat without a matching repeat (step {0})</value>
+  </data>
+  <data name="Log_InvalidWait" xml:space="preserve">
+    <value>Invalid wait value: '{0}'</value>
+  </data>
+  <data name="Log_UnknownActionType" xml:space="preserve">
+    <value>Unknown action type: {0}</value>
+  </data>
+  <data name="Log_UnknownKey" xml:space="preserve">
+    <value>Unsupported key name: {0}</value>
+  </data>
+  <data name="Log_InvalidHotkeyMain" xml:space="preserve">
+    <value>Invalid hotkey main key: {0}</value>
+  </data>
+  <data name="Log_UnknownMouse" xml:space="preserve">
+    <value>Unsupported mouse action: {0}</value>
+  </data>
+  <data name="Log_SendInputFailed" xml:space="preserve">
+    <value>SendInput failed (GetLastError={0})</value>
+  </data>
+  <data name="Ex_ConfigUnreadable" xml:space="preserve">
+    <value>Could not parse config.json</value>
+  </data>
+  <data name="Ex_ConfigNotCreated" xml:space="preserve">
+    <value>File was not created at the save path: {0}</value>
+  </data>
+  <data name="Ex_ConfigEmptyAfterSave" xml:space="preserve">
+    <value>config.json was empty after save: {0}</value>
+  </data>
+  <data name="Ex_PathContainsQuote" xml:space="preserve">
+    <value>Paths cannot contain double quotes.</value>
+  </data>
 </root>

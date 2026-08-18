@@ -48,7 +48,7 @@ public static class CliRunner
             var macro = ResolveMacro(args);
             if (macro is null)
             {
-                ErrorLogger.Write($"指定マクロが見つかりません: {string.Join(' ', args)}");
+                ErrorLogger.Write(Loc.Format("Log_CliMacroNotFound", string.Join(' ', args)));
                 TryWriteToConsole(Loc.Get("Cli_MacroNotFound"));
                 return 1;
             }
@@ -58,12 +58,12 @@ public static class CliRunner
         }
         catch (OperationCanceledException)
         {
-            ErrorLogger.Write("CLI実行がキャンセルされました");
+            ErrorLogger.Write(Loc.Get("Log_CliCancelled"));
             return 1;
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "CLI実行エラー");
+            ErrorLogger.Write(ex, Loc.Get("Log_CliError"));
             return 1;
         }
     }
@@ -77,7 +77,7 @@ public static class CliRunner
         }
         catch (Exception ex)
         {
-            ErrorLogger.Write(ex, "config.json 読み込み失敗");
+            ErrorLogger.Write(ex, Loc.Get("Log_ConfigLoadFailed"));
             return null;
         }
 

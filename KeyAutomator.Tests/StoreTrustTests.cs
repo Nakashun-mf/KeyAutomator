@@ -105,6 +105,7 @@ public class StoreTrustTests
     {
         var yml = RepoFiles.Read(".github", "workflows", "release.yml");
         StringAssert.Contains(yml, "PRIVACY.en.md");
+        StringAssert.Contains(yml, "config.sample.en.json");
     }
 
     [TestMethod]

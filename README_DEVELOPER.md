@@ -29,6 +29,7 @@ vb_auto-key/
 ├── Assets/
 ├── SPEC.md
 ├── config.sample.json
+├── config.sample.en.json
 ├── README.md
 ├── PRIVACY.md
 ├── PRIVACY.en.md
@@ -42,6 +43,7 @@ vb_auto-key/
 - 既定は Windows の表示言語。日本語以外は English にフォールバックする。
 - 画面右下の「言語」で `Windows に合わせる` / `日本語` / `English` を固定できる（`settings.json` の `ui_language`）。
 - UI 文字列は `Strings/en-US/Resources.resw` と `Strings/ja-JP/Resources.resw`。XAML は `x:Uid`、C# / CLI は `Loc.Get` / `Loc.Format`。
+- 初回サンプル名・確認ダイアログ、`error.log`、例外メッセージも同じテーブル。`config.sample.json`（日本語）と `config.sample.en.json`（English）を同梱し、読み込み時に UI 言語で上書きする。
 - ユニットテストは `TestStartup` で `ja-JP` に固定する（既存の日本語アサートを維持）。英語は `LocTests` で別途確認。
 
 ## ビルド
@@ -166,6 +168,7 @@ Remove-Item -Recurse -Force .\dist -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 Copy-Item -Force .\publish-sf\KeyAutomator.exe $distDir\
 Copy-Item -Force .\config.sample.json $distDir\
+Copy-Item -Force .\config.sample.en.json $distDir\
 Copy-Item -Force .\使い方.txt $distDir\
 Copy-Item -Force .\GettingStarted.txt $distDir\
 Copy-Item -Force .\README.md $distDir\

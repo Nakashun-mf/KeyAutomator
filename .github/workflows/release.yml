@@ -185,7 +185,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.build-and-upload.outputs.tag }}
+          # 手動再実行は main 上の提出スクリプト修正を拾う。Release 公開時はタグそのもの。
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.build-and-upload.outputs.tag }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

@@ -174,12 +174,23 @@ if (-not $upload) {
         Select-Object -First 1
 }
 
+# 単一プロジェクト MSIX は StoreUpload でも .msix 単体になることがある（msstore は .msix を受け付ける）。
+if (-not $upload) {
+    $upload = Get-ChildItem -Path $outFull -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Extension -match '\.(msix|appx)$' -and
+            $_.Name -like 'KeyAutomator_*'
+        } |
+        Sort-Object Length -Descending |
+        Select-Object -First 1
+}
+
 if (-not $upload) {
     if (Test-Path -LiteralPath $logPath) {
         Write-Host "----- msbuild-store.log (tail) -----"
         Get-Content -LiteralPath $logPath -Tail 80 | ForEach-Object { Write-Host $_ }
     }
-    throw "Store 提出用パッケージ（.msixupload / .msixbundle）が見つかりません: $outFull"
+    throw "Store 提出用パッケージ（.msixupload / .msixbundle / .msix）が見つかりません: $outFull"
 }
 
 Set-Content -LiteralPath $pathFile -Value $upload.FullName -NoNewline -Encoding utf8

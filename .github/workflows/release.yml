@@ -256,12 +256,18 @@ jobs:
       - name: Publish package to Microsoft Store
         shell: pwsh
         run: |
-          if (-not $env:STORE_PACKAGE -or -not (Test-Path -LiteralPath $env:STORE_PACKAGE)) {
+          $pkg = $env:STORE_PACKAGE
+          if (-not $pkg -or -not (Test-Path -LiteralPath $pkg)) {
             throw "STORE_PACKAGE がありません"
           }
           if (-not $env:MS_STORE_PRODUCT_ID) { throw "MS_STORE_PRODUCT_ID が空です" }
+          # msstore -i はディレクトリ。ファイルパスなら親フォルダを渡す。
+          $inputDir = $pkg
+          if (Test-Path -LiteralPath $pkg -PathType Leaf) {
+            $inputDir = Split-Path -Parent $pkg
+          }
           # --noCommit は付けない。提出をコミットし、認定キューへ送る。
-          msstore publish -i "$env:STORE_PACKAGE" --appId "$env:MS_STORE_PRODUCT_ID"
+          msstore publish -i $inputDir --appId "$env:MS_STORE_PRODUCT_ID"
 
       - name: Reset Store CLI credentials
         if: always()

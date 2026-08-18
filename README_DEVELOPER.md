@@ -253,7 +253,7 @@ dotnet build .\KeyAutomator.csproj -c Release -p:Platform=$Platform -p:KeyAutoma
 4. 可能ならパッケージ CLI で `%LocalAppData%\KeyAutomator\config.json` 作成も確認  
    （AppExecutionAlias + WinExe は CI 上で終了コードや起動が不安定なため、未作成でもインストール通し成功扱い）
 5. 巨大 MSIX の Artifact アップロードは、スモーク CI では行わない（runner 切断防止）
-6. **GitHub Release**（`.github/workflows/release.yml`）では単一 exe zip に加え、MSIX zip（`.msix` + 署名用 `.cer` + 入れ方）も添付する
+6. **GitHub Release**（`.github/workflows/release.yml`）では単一 exe zip に加え、MSIX zip（`.msix` + 署名用 `.cer` + 入れ方）も添付する。`release: published` 時は続けて Store 用 `.msixupload` を `msstore publish` する（Secrets 必須。手動実行では `publish_store` をオンにしたときだけ）
 7. **Unit Tests**（`.github/workflows/unit-tests.yml`）が PR / main で `scripts/ci/Run-UnitTests.ps1` を実行する（MSIX スモークとは別ジョブ）
 
 手動実行:
@@ -294,6 +294,7 @@ $msix = .\scripts\ci\Build-MsixSideload.ps1
   - `KeyAutomator-v*-win-x64-single.zip`（単一 exe）
   - `KeyAutomator-v*-win-x64-msix.zip`（サイドロード用 MSIX + 署名証明書 + 入れ方）
   - zip には `PRIVACY.md` / `PRIVACY.en.md` / `GettingStarted.txt` も含む
+- 同じ Release 公開で Microsoft Store へも `.msixupload` を自動提出する（認定待ち。Secrets はリポジトリに書かない）
 - 手順の詳細: [docs/releases/README.md](docs/releases/README.md)
 - コミットメッセージは日本語（ファイル経由推奨）
 - `bin/`, `obj/`, `publish/`, `publish-sf/`, `dist/`, `config.json`, `settings.json`, `error.log` は `.gitignore` 対象

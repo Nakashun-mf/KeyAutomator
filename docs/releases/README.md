@@ -19,10 +19,9 @@ gh release create v2.8.6 `
   --notes-file .\docs\releases\v2.8.6.md
 ```
 
-3. Actions の **Release** ワークフローが zip をアップロードするまで待つ
+3. Actions の **Release** ワークフローが zip をアップロードし、Store 用 `.msixupload` も提出するまで待つ
 4. https://github.com/Nakashun-mf/KeyAutomator/releases/latest で Assets を確認する
-
-`gh release create` はこの Cloud Agent 環境では実行できません（GitHub CLI が読み取り専用のため）。マージと Release 公開はリポジトリ権限のある人が行います。
+5. Partner Center で提出が認定キューに入ったかを確認する（下書き提出が残っていると失敗する）
 
 ## バージョンを上げるとき
 

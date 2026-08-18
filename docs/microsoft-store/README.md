@@ -61,6 +61,40 @@ GitHub Actions の **Unit Tests** と **MSIX Sideload Smoke** がどちらも緑
 
 提出前にこの 2 ワークフローが落ちているパッケージは上げない。
 
+---
+
+## GitHub Release からの自動提出
+
+初回 listing が Store で live になったあと、GitHub の **Release 公開**（`release: published`）で `.github/workflows/release.yml` の `publish-store` ジョブが動きます。
+
+1. `scripts/ci/Build-MsixStore.ps1` で Store 用 `.msixupload` を作る（GitHub 添付のサイドロード MSIX は使わない）
+2. `microsoft/microsoft-store-apppublisher` と `msstore publish` で Partner Center に提出する（`--noCommit` なし＝認定キューへ送る）
+
+公式手順: [Publish app updates with GitHub Actions](https://learn.microsoft.com/en-us/windows/apps/publish/msstore-dev-cli/github-actions)
+
+### 必要な GitHub Secrets
+
+リポジトリ **Settings → Secrets and variables → Actions**（値は git に置かない）:
+
+| Secret | 中身 | この画面ではないもの |
+|---|---|---|
+| `AZURE_AD_TENANT_ID` | Entra の Tenant ID | — |
+| `AZURE_AD_APPLICATION_CLIENT_ID` | Entra アプリの Application (client) ID | — |
+| `AZURE_AD_APPLICATION_SECRET` | Entra アプリの Client secret | — |
+| `SELLER_ID` | Partner Center の **販売者 ID**（数字） | Windows パブリッシャー ID `CN=...` ではない |
+
+Store ID `9P814VCBNVGF` は秘密ではないのでワークフローに直書きしています。
+
+Entra アプリは Partner Center の **User management → Microsoft Entra applications** で **Manager** にしてください。
+
+### 制約
+
+- **無料アプリのみ**（有料は公式 CLI が未対応）
+- Partner Center に **下書き提出が残っていると失敗**する。認定待ち・下書きは完了または削除してから Release する
+- 提出ごとに `Version` を前回より大きくする
+- ジョブ成功＝提出完了であり、Store 反映は **認定後**
+- Actions の手動実行（`workflow_dispatch`）では、入力 `publish_store` をオンにしたときだけ Store へ出す（誤提出防止）
+
 > Linux 上の Cloud Agent では WinUI / MSIX の実ビルド・スクリーンショット撮影はできません。Store パッケージ生成と画面キャプチャは **Windows PC** で行ってください。  
 > **Visual Studio は必須ではありません。** Partner Center + マニフェスト編集 + `dotnet` / 既存の PowerShell スクリプトで提出できます。
 

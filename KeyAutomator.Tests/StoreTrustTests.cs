@@ -142,6 +142,31 @@ public class StoreTrustTests
     }
 
     [TestMethod]
+    public void ReleaseWorkflow_PublishesStoreUploadWithProductIdAndRepoSecrets()
+    {
+        var yml = RepoFiles.Read(".github", "workflows", "release.yml");
+        StringAssert.Contains(yml, "microsoft-store-apppublisher@");
+        StringAssert.Contains(yml, "Build-MsixStore.ps1");
+        StringAssert.Contains(yml, "9P814VCBNVGF");
+        StringAssert.Contains(yml, "msstore publish");
+        StringAssert.Contains(yml, "secrets.AZURE_AD_TENANT_ID");
+        StringAssert.Contains(yml, "secrets.AZURE_AD_APPLICATION_CLIENT_ID");
+        StringAssert.Contains(yml, "secrets.AZURE_AD_APPLICATION_SECRET");
+        StringAssert.Contains(yml, "secrets.SELLER_ID");
+        StringAssert.Contains(yml, "--noCommit は付けない");
+        StringAssert.Contains(yml, "msstore publish -i \"$env:STORE_PACKAGE\"");
+        Assert.IsFalse(
+            Regex.IsMatch(yml, @"msstore publish[^\n]*MSIX_PATH"),
+            "サイドロード成果物 MSIX_PATH を Store に提出してはいけない");
+        Assert.IsFalse(
+            yml.Contains("AZURE_AD_APPLICATION_SECRET: \"", StringComparison.Ordinal),
+            "Client secret をワークフローに直書きしてはいけない");
+        Assert.IsFalse(
+            yml.Contains("--clientSecret ${{ secrets", StringComparison.Ordinal),
+            "Client secret をコマンドライン引数に展開してはいけない");
+    }
+
+    [TestMethod]
     public void Gitignore_ExcludesSigningSecrets()
     {
         var gitignore = RepoFiles.Read(".gitignore");

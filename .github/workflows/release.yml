@@ -9,6 +9,11 @@ on:
         description: "Release tag (例: v2.5.0)。空なら最新の draft/published release を使用"
         required: false
         default: ""
+      publish_store:
+        description: "GitHub 資産に加えて Microsoft Store にも提出する"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -17,6 +22,8 @@ jobs:
   build-and-upload:
     runs-on: windows-latest
     timeout-minutes: 60
+    outputs:
+      tag: ${{ steps.tag.outputs.name }}
     steps:
       - name: Resolve tag
         id: tag
@@ -155,6 +162,114 @@ jobs:
           }
           upload "${{ steps.pack_single.outputs.zip }}"
           upload "${{ steps.pack_msix.outputs.zip }}"
+
+      - name: Cleanup cert files
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Force .\KeyAutomator_CI.pfx, .\KeyAutomator_CI.cer, .\KeyAutomator_CI.thumbprint -ErrorAction SilentlyContinue
+
+  # 初回 listing が live 済みの無料アプリ向け。サイドロード MSIX は使わず StoreUpload を提出する。
+  # 公式: https://learn.microsoft.com/en-us/windows/apps/publish/msstore-dev-cli/github-actions
+  publish-store:
+    name: Publish to Microsoft Store
+    needs: build-and-upload
+    if: github.event_name == 'release' || inputs.publish_store == true
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      MS_STORE_PRODUCT_ID: "9P814VCBNVGF"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-and-upload.outputs.tag }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Create signing certificate (Store)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path .\scripts\ci\New-CiSigningCertificate.ps1)) {
+            throw "scripts/ci/New-CiSigningCertificate.ps1 がありません"
+          }
+          .\scripts\ci\New-CiSigningCertificate.ps1 `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!"
+
+      - name: Build Store package
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "KeyAutomatorMsixStore"
+          .\scripts\ci\Build-MsixStore.ps1 `
+            -Configuration Release `
+            -Platform x64 `
+            -AppxBundlePlatforms "x64" `
+            -PfxPath .\KeyAutomator_CI.pfx `
+            -CerPath .\KeyAutomator_CI.cer `
+            -ThumbprintPath .\KeyAutomator_CI.thumbprint `
+            -Password "KeyAutomator-CI-Temp!" `
+            -OutDir $out
+          $pathFile = Join-Path $out "store-package-path.txt"
+          if (-not (Test-Path -LiteralPath $pathFile)) { throw "store-package-path.txt がありません" }
+          $pkg = (Get-Content -LiteralPath $pathFile -Raw).Trim()
+          if (-not $pkg -or -not (Test-Path -LiteralPath $pkg)) { throw "Store パッケージが見つかりません: $pkg" }
+          "STORE_PACKAGE=$pkg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Get-Item -LiteralPath $pkg | Format-List FullName, Length, LastWriteTime
+
+      - name: Setup Microsoft Store Developer CLI
+        uses: microsoft/microsoft-store-apppublisher@v1.3
+
+      - name: Configure Microsoft Store Developer CLI
+        shell: pwsh
+        env:
+          AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          AZURE_AD_APPLICATION_CLIENT_ID: ${{ secrets.AZURE_AD_APPLICATION_CLIENT_ID }}
+          AZURE_AD_APPLICATION_SECRET: ${{ secrets.AZURE_AD_APPLICATION_SECRET }}
+          SELLER_ID: ${{ secrets.SELLER_ID }}
+        run: |
+          $missing = @()
+          if (-not $env:AZURE_AD_TENANT_ID) { $missing += "AZURE_AD_TENANT_ID" }
+          if (-not $env:AZURE_AD_APPLICATION_CLIENT_ID) { $missing += "AZURE_AD_APPLICATION_CLIENT_ID" }
+          if (-not $env:AZURE_AD_APPLICATION_SECRET) { $missing += "AZURE_AD_APPLICATION_SECRET" }
+          if (-not $env:SELLER_ID) { $missing += "SELLER_ID" }
+          if ($missing.Count -gt 0) {
+            throw "GitHub Secrets が空です: $($missing -join ', ')。Settings > Secrets and variables > Actions を確認してください。"
+          }
+          msstore reconfigure `
+            --tenantId $env:AZURE_AD_TENANT_ID `
+            --sellerId $env:SELLER_ID `
+            --clientId $env:AZURE_AD_APPLICATION_CLIENT_ID `
+            --clientSecret $env:AZURE_AD_APPLICATION_SECRET
+
+      - name: Publish package to Microsoft Store
+        shell: pwsh
+        run: |
+          if (-not $env:STORE_PACKAGE -or -not (Test-Path -LiteralPath $env:STORE_PACKAGE)) {
+            throw "STORE_PACKAGE がありません"
+          }
+          if (-not $env:MS_STORE_PRODUCT_ID) { throw "MS_STORE_PRODUCT_ID が空です" }
+          # --noCommit は付けない。提出をコミットし、認定キューへ送る。
+          msstore publish -i "$env:STORE_PACKAGE" --appId "$env:MS_STORE_PRODUCT_ID"
+
+      - name: Reset Store CLI credentials
+        if: always()
+        shell: pwsh
+        run: |
+          if (Get-Command msstore -ErrorAction SilentlyContinue) {
+            msstore reconfigure --reset
+          }
+          exit 0
 
       - name: Cleanup cert files
         if: always()

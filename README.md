@@ -13,7 +13,7 @@
 
 → [最新リリース（ここからダウンロード）](https://github.com/Nakashun-mf/KeyAutomator/releases/latest)
 
-> **Microsoft Store 公開について:** 準備・申請手順は [docs/microsoft-store/README.md](docs/microsoft-store/README.md) を参照してください（Partner Center 操作が必要です）。
+> **Microsoft Store:** 初回公開済みです。GitHub Release を出すと Store 用パッケージも自動提出され、認定後に Store へ反映されます。手動手順は [docs/microsoft-store/README.md](docs/microsoft-store/README.md) を参照してください。
 
 ### A. 単一 exe（いちばん簡単・推奨）
 

@@ -2,7 +2,7 @@
 
 タグ `v*` の Release を **公開**すると、`.github/workflows/release.yml` が Windows 上で単一 exe zip と MSIX zip をビルドして Assets に添付します。
 
-## v2.8.7 を出す手順（main マージ後）
+## v2.8.8 を出す手順（main マージ後）
 
 **タグは main に付けてください。** feature ブランチには付けない。
 
@@ -12,11 +12,11 @@
 ```powershell
 git checkout main
 git pull origin main
-git tag v2.8.7
-git push origin v2.8.7
-gh release create v2.8.7 `
-  --title "KeyAutomator v2.8.7" `
-  --notes-file .\docs\releases\v2.8.7.md
+git tag v2.8.8
+git push origin v2.8.8
+gh release create v2.8.8 `
+  --title "KeyAutomator v2.8.8" `
+  --notes-file .\docs\releases\v2.8.8.md
 ```
 
 3. Actions の **Release** ワークフローが zip をアップロードし、Store 用パッケージも提出するまで待つ

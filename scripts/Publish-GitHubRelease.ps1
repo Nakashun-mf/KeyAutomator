@@ -3,7 +3,7 @@
 .SYNOPSIS
   main 上のタグから GitHub Release を作成する（zip 添付は release.yml が行う）。
 .EXAMPLE
-  .\scripts\Publish-GitHubRelease.ps1 -Tag v2.8.7
+  .\scripts\Publish-GitHubRelease.ps1 -Tag v2.8.8
 #>
 param(
     [Parameter(Mandatory = $true)]

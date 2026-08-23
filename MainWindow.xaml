@@ -757,7 +757,7 @@
                         x:Name="VersionText"
                         VerticalAlignment="Center"
                         Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                        Text="v2.8.7" />
+                        Text="v2.8.8" />
                 </StackPanel>
             </Grid>
         </Border>

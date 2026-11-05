@@ -1,0 +1,9 @@
+
+        <!-- インストール後に CLI（-h / -alias）で呼び出すためのエイリアス。
+             名前空間は electron-builder の既定テンプレートに無いので、要素側で宣言する。
+             exe は electron-builder の MSIX レイアウト（app\）の下に置かれる。 -->
+        <uap5:Extension xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5" Category="windows.appExecutionAlias" Executable="app\KeyAutomator.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap5:AppExecutionAlias>
+            <uap5:ExecutionAlias Alias="KeyAutomator.exe" />
+          </uap5:AppExecutionAlias>
+        </uap5:Extension>

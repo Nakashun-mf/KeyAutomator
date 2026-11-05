@@ -1,0 +1,114 @@
+name: Electron CI
+
+# Electron 版（app/）の検証。WinUI 版の既存ワークフローとは独立。
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", ".github/workflows/electron-ci.yml", "config.sample*.json"]
+  pull_request:
+    paths: ["app/**", ".github/workflows/electron-ci.yml", "config.sample*.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: electron-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  # 型・単体テスト・ビルド・UI の自動操作（Linux。SendInput は無いので実際のキー送信は行わない）
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run verify:build
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Renderer UI test (mock API)
+        run: npm run e2e:renderer
+
+      - name: Electron smoke (real main + preload + renderer, xvfb)
+        run: xvfb-run -a npm run e2e:electron
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots
+          path: app/out/e2e-shots
+          if-no-files-found: ignore
+
+  # Windows: 実 Electron の起動・CLI の終了コード・パッケージ生成（zip / MSIX）
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run verify:build
+
+      # 「テスト実行」は押さない（実際の SendInput が CI ランナーへ飛ぶため）。New / Save だけを操作する。
+      - name: Electron UI smoke (New / Save only)
+        run: npm run e2e:electron
+
+      - name: Package (unpacked) for CLI smoke
+        run: npx electron-builder --win dir --x64
+
+      - name: CLI smoke (never sends input)
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path ".\dist\win-unpacked\KeyAutomator.exe"
+          # 存在しないマクロ → 終了コード 1
+          $p = Start-Process -FilePath $exe -ArgumentList "-id", "99999" -Wait -PassThru
+          if ($p.ExitCode -ne 1) { throw "expected exit code 1 for missing macro, got $($p.ExitCode)" }
+          # ヘルプ → 終了コード 0
+          $p = Start-Process -FilePath $exe -ArgumentList "-h" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "expected exit code 0 for -h, got $($p.ExitCode)" }
+          # ログが書かれていること（データはポータブル運用で exe 横）
+          $log = Join-Path (Split-Path $exe) "error.log"
+          if (-not (Test-Path $log)) { throw "error.log was not written next to the exe" }
+          Get-Content $log
+
+      - name: Build zip and MSIX (unsigned, Store identity)
+        run: npx electron-builder --win zip appx --x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyAutomator-win-x64
+          path: |
+            app/dist/*.zip
+            app/dist/*.appx
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots-windows
+          path: app/out/e2e-shots
+          if-no-files-found: ignore

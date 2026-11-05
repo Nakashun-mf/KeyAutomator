@@ -1,0 +1,178 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg-editor);
+  font: 13px/1.5 var(--font-ui);
+  color: var(--text);
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.splash {
+  position: relative;
+  height: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  border: 1px solid var(--border-strong);
+  background: radial-gradient(120% 90% at 50% 0%, #25263a 0%, var(--bg-editor) 62%);
+  animation: enter 320ms var(--ease) both;
+}
+body.closing .splash {
+  animation: leave 220ms var(--ease) forwards;
+}
+
+.glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  width: 360px;
+  height: 200px;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(88, 101, 242, 0.35), transparent);
+  filter: blur(8px);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+.keys {
+  position: relative;
+  display: flex;
+  gap: 10px;
+}
+.key {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(#34353d, #2a2b31);
+  border: 1px solid #44454e;
+  box-shadow: 0 5px 0 #1b1c20, 0 8px 14px rgba(0, 0, 0, 0.4);
+  font: 700 20px var(--font-mono);
+  color: var(--text-strong);
+  animation: press 1.8s var(--ease) infinite;
+  animation-delay: calc(var(--i) * 140ms);
+}
+.key-wide {
+  width: 78px;
+  color: #b9c0ff;
+}
+
+.name {
+  position: relative;
+  margin: 6px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-strong);
+}
+
+.track {
+  position: relative;
+  width: 220px;
+  height: 3px;
+  border-radius: 3px;
+  background: #2f3038;
+  overflow: hidden;
+}
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-hover), transparent);
+  animation: slide 1.2s ease-in-out infinite;
+}
+
+.status {
+  position: relative;
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.status::after {
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes press {
+  0%,
+  45%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 5px 0 #1b1c20, 0 8px 14px rgba(0, 0, 0, 0.4);
+    border-color: #44454e;
+  }
+  18% {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #1b1c20, 0 2px 6px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent-hover);
+  }
+}
+@keyframes slide {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 260% 0;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes dots {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75%,
+  100% {
+    content: '...';
+  }
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+@keyframes leave {
+  to {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
+/* 視覚効果を減らす設定では、動きを止めてフェードだけにする */
+@media (prefers-reduced-motion: reduce) {
+  .key,
+  .bar,
+  .glow,
+  .status::after {
+    animation: none;
+  }
+  .bar {
+    width: 100%;
+    opacity: 0.6;
+  }
+  .status::after {
+    content: '…';
+  }
+  .splash,
+  body.closing .splash {
+    animation-duration: 120ms;
+  }
+}

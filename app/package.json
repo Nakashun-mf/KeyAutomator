@@ -1,0 +1,45 @@
+{
+  "name": "keyautomator",
+  "productName": "KeyAutomator",
+  "version": "3.0.0",
+  "description": "Register keyboard macros and send them to the active window after a delay.",
+  "private": true,
+  "main": "./out/main/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "preview": "electron-vite preview",
+    "verify:build": "node scripts/verify-build.mjs",
+    "pack:dir": "electron-vite build && electron-builder --dir",
+    "dist:win": "electron-vite build && electron-builder --win",
+    "e2e:renderer": "node e2e/renderer.e2e.cjs",
+    "e2e:electron": "node e2e/electron.e2e.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "playwright": "1.63.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "koffi": "^3.3.7"
+  },
+  "author": "pryzo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nakashun-mf/KeyAutomator.git"
+  }
+}

@@ -1,5 +1,7 @@
 # KeyAutomator — 開発者向け README
 
+> **移行中:** WinUI 3 から Electron へ移行しています。新しい実装は [`app/`](app/README.md) にあります（現行の WinUI 版は切り替え完了まで残しています）。
+
 ## 概要
 
 C# / .NET 8 / **WinUI 3**（Windows App SDK）製のキー入力自動化ツールです。  

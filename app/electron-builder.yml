@@ -1,0 +1,55 @@
+# 配布設定。MSIX の Identity / Publisher は Partner Center「製品の ID」と同じ値（旧 Package.appxmanifest から継承）。
+# 参照: docs/microsoft-store/product-identity.md
+appId: pryzo.KeyAutomator
+productName: KeyAutomator
+executableName: KeyAutomator
+copyright: Copyright (c) pryzo
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+
+# ネイティブ（koffi）は asar の外へ出して読み込む
+asar: true
+asarUnpack:
+  - '**/node_modules/koffi/**'
+
+# サンプル設定は exe の隣に置く（ConfigStore が exe 横の config.sample*.json を探す）
+extraFiles:
+  - from: ../config.sample.json
+    to: config.sample.json
+  - from: ../config.sample.en.json
+    to: config.sample.en.json
+
+# 言語は初回起動時に settings.json / OS から決める。Chromium の言語パックは日英だけにして小さくする
+electronLanguages:
+  - ja
+  - en-US
+
+win:
+  icon: build/icon.ico
+  # zip は展開してすぐ使える形（exe 横に config.json / settings.json を置くポータブル運用）
+  artifactName: KeyAutomator-v${version}-win-${arch}.${ext}
+  target:
+    - target: zip
+      arch: [x64]
+    - target: appx
+      arch: [x64]
+
+appx:
+  applicationId: App
+  identityName: pryzo.KeyAutomator
+  publisher: CN=4B1F058B-F39E-44DE-8373-4258152DED0F
+  publisherDisplayName: pryzo
+  displayName: KeyAutomator
+  backgroundColor: transparent
+  languages: [en-US, ja-JP]
+  minVersion: 10.0.17763.0
+  maxVersionTested: 10.0.26226.0
+  customExtensionsPath: build/appx-extensions.xml
+  artifactName: KeyAutomator-v${version}-${arch}.${ext}

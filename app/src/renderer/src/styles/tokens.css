@@ -1,0 +1,63 @@
+/*
+ * デザイントークン。色・余白・角丸・フォントはここだけで決める。
+ * Claude Design のデザインシステムへ差し替えるときは、この変数の値を置き換える。
+ */
+:root {
+  color-scheme: dark;
+
+  /* surface */
+  --bg-titlebar: #181818;
+  --bg-activity: #181818;
+  --bg-sidebar: #202022;
+  --bg-editor: #1e1e1e;
+  --bg-raised: #252526;
+  --bg-input: #2b2b2e;
+  --bg-hover: #2f2f33;
+  --bg-selected: #37373d;
+  --bg-overlay: rgba(10, 10, 12, 0.62);
+
+  /* line */
+  --border: #343437;
+  --border-strong: #46464a;
+
+  /* text */
+  --text: #d4d4d8;
+  --text-strong: #f4f4f5;
+  --text-dim: #9d9da3;
+  --text-faint: #6b6b72;
+
+  /* brand / state */
+  --accent: #5865f2;
+  --accent-hover: #6b77f5;
+  --accent-press: #4752c4;
+  --accent-soft: rgba(88, 101, 242, 0.16);
+  --accent-line: rgba(88, 101, 242, 0.55);
+  --ok: #23a559;
+  --warn: #e8a33d;
+  --danger: #da373c;
+  --danger-hover: #f04747;
+  --run: #d9822b;
+
+  /* shape */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  /* type */
+  --font-ui: 'Segoe UI Variable Text', 'Segoe UI', 'Yu Gothic UI', 'Meiryo UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Mono', 'Cascadia Code', Consolas, 'Yu Gothic UI', monospace;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs: 13px;
+  --fs-lg: 15px;
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+
+  --titlebar-h: 36px;
+  --statusbar-h: 24px;
+  --activity-w: 48px;
+  --sidebar-w: 300px;
+}

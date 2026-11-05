@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    />
+    <title>KeyAutomator</title>
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/styles/splash.css" />
+  </head>
+  <body>
+    <main class="splash" aria-busy="true">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="keys" aria-hidden="true">
+        <span class="key" style="--i: 0">K</span>
+        <span class="key" style="--i: 1">E</span>
+        <span class="key" style="--i: 2">Y</span>
+        <span class="key key-wide" style="--i: 3">↵</span>
+      </div>
+      <h1 class="name">KeyAutomator</h1>
+      <div class="track" aria-hidden="true"><span class="bar"></span></div>
+      <p class="status" id="status" role="status">Starting up…</p>
+    </main>
+    <script type="module" src="/src/splash.ts"></script>
+  </body>
+</html>
